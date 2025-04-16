@@ -69,6 +69,8 @@ class SymbolicBasis(Basis):
     ----------
     coordinate_system: ~coordinates.CoordinateSystem
         Coordinate system on which the basis is defined.
+    parameters: dict(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
 
     Attributes
     ----------
@@ -77,15 +79,29 @@ class SymbolicBasis(Basis):
         a `Sympy`_  expression and then the value to substitute.
     coordinate_system: ~coordinates.CoordinateSystem
         Coordinate system on which the basis is defined.
+    parameters: dict(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
 
     .. _Sympy: https://www.sympy.org/
 
     """
 
-    def __init__(self, coordinate_system):
+    def __init__(self, coordinate_system, parameters):
 
         Basis.__init__(self, coordinate_system)
         self.substitutions = list()
+        self.parameters = parameters
+
+    def set_parameters(self, parameters):
+        """Setter for the `parameters` attributes.
+        Must be redefined for subclasses.
+
+        Parameters
+        ----------
+        parameters: dict(~parameter.Parameter)
+            Dictionary holding the parameters appearing in the equations defining the basis.
+        """
+        self.parameters = parameters
 
     def subs_functions(self, extra_subs=None):
         """Return the basis functions with the substitutions stored in the object being applied.

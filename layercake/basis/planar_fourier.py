@@ -26,24 +26,36 @@ class PlanarChannelFourierBasis(SymbolicBasis):
 
     Parameters
     ----------
+    parameters: dict(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
     spectral_blocks: ~numpy.ndarray(int)
         Spectral blocks detailing the modes :math:`x`- and :math:`y`-wavenumber.
         Array of shape (nblocks, 2), where `nblocks` is the number of spectral blocks.
-    aspect_ratio: float
-        Spatial domain aspect ratio, :math:`n = 2 L_y/L_x` .
     length: float, optional
         Length of the domain along the :math:`x` coordinate: :math:`L_x` .
+
+    Attributes
+    ----------
+
+    length: float or None
+        Length of the domain along the :math:`x` coordinate: :math:`L_x` .
+        `None` for the default length of :math:`2 \\pi / n`.
     """
 
-    _n = symbols('n', positive=True)
+    def __init__(self, parameters, spectral_blocks, length=None):
 
-    def __init__(self, spectral_blocks, aspect_ratio, length=None):
+        if 'n' not in parameters:
+            raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
+
+        aspect_ratio = float(parameters['n'])
 
         if length is None:
             length = 2 * np.pi / aspect_ratio
 
+        self.length = length
         coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., aspect_ratio * length / 2), (0., length)))
-        SymbolicBasis.__init__(self, coordinate_system)
+        SymbolicBasis.__init__(self, coordinate_system, parameters)
+        self._n = self.parameters['n'].symbol
         self.substitutions.append((self._n, aspect_ratio))
 
         awavenum = channel_wavenumbers(spectral_blocks)
@@ -55,6 +67,23 @@ class PlanarChannelFourierBasis(SymbolicBasis):
             if mode_eq is not None:
                 self.functions.append(mode_eq)
 
+    def set_parameters(self, parameters):
+        if 'n' not in parameters:
+            raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
+
+        aspect_ratio = float(parameters['n'])
+
+        if self.length is None:
+            length = 2 * np.pi / aspect_ratio
+        else:
+            length = self.length
+
+        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., aspect_ratio * length / 2), (0., length)))
+        self.coordinate_system = coordinate_system
+        self._n = self.parameters['n'].symbol
+        self.substitutions = list()
+        self.substitutions.append((self._n, aspect_ratio))
+
 
 class PlanarBasinFourierBasis(SymbolicBasis):
     """Fourier basis defined on a closed basin, with no-flux boundary conditions in both the zonal and meridional
@@ -62,24 +91,36 @@ class PlanarBasinFourierBasis(SymbolicBasis):
 
     Parameters
     ----------
+    parameters: dict(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
     spectral_blocks: ~numpy.ndarray(int)
         Spectral blocks detailing the modes :math:`x`- and :math:`y`-wavenumber.
         Array of shape (nblocks, 2), where `nblocks` is the number of spectral blocks.
-    aspect_ratio: float
-        Spatial domain aspect ratio, :math:`n = 2 L_y/L_x` .
     length: float, optional
         Length of the domain along the :math:`x` coordinate: :math:`L_x` .
+
+    Attributes
+    ----------
+
+    length: float or None
+        Length of the domain along the :math:`x` coordinate: :math:`L_x` .
+        `None` for the default length of :math:`2 \\pi / n`.
     """
 
-    _n = symbols('n', positive=True)
+    def __init__(self, parameters, spectral_blocks, length=None):
 
-    def __init__(self, spectral_blocks, aspect_ratio, length=None):
+        if 'n' not in parameters:
+            raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
+
+        aspect_ratio = float(parameters['n'])
 
         if length is None:
             length = 2 * np.pi / aspect_ratio
 
+        self.length = length
         coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., aspect_ratio * length / 2), (0., length)))
-        SymbolicBasis.__init__(self, coordinate_system)
+        SymbolicBasis.__init__(self, coordinate_system, parameters)
+        self._n = self.parameters['n'].symbol
         self.substitutions.append((self._n, aspect_ratio))
 
         owavenum = basin_wavenumbers(spectral_blocks)
@@ -91,8 +132,25 @@ class PlanarBasinFourierBasis(SymbolicBasis):
             if mode_eq is not None:
                 self.functions.append(mode_eq)
 
+    def set_parameters(self, parameters):
+        if 'n' not in parameters:
+            raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
 
-def contiguous_basin_basis(nxmax, nymax, aspect_ratio, length=None):
+        aspect_ratio = float(parameters['n'])
+
+        if self.length is None:
+            length = 2 * np.pi / aspect_ratio
+        else:
+            length = self.length
+
+        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., aspect_ratio * length / 2), (0., length)))
+        self.coordinate_system = coordinate_system
+        self._n = self.parameters['n'].symbol
+        self.substitutions = list()
+        self.substitutions.append((self._n, aspect_ratio))
+
+
+def contiguous_basin_basis(nxmax, nymax, parameters, length=None):
     """Function that returns the basis for contiguous spectral blocks of modes on a closed basin.
 
     Parameters
@@ -101,10 +159,8 @@ def contiguous_basin_basis(nxmax, nymax, aspect_ratio, length=None):
         Maximum x-wavenumber to fill the spectral block up to.
     nymax: int
         Maximum :math:`y`-wavenumber to fill the spectral block up to.
-    aspect_ratio: float
-        Spatial domain aspect ratio, :math:`n = 2 L_y/L_x` .
-    length: float, optional
-        Length of the domain along the :math:`x` coordinate: :math:`L_x` .
+    parameters: dict(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
 
     Returns
     -------
@@ -120,10 +176,10 @@ def contiguous_basin_basis(nxmax, nymax, aspect_ratio, length=None):
             spectral_blocks[i, 1] = ny
             i += 1
 
-    return PlanarBasinFourierBasis(spectral_blocks, aspect_ratio, length)
+    return PlanarBasinFourierBasis(parameters, spectral_blocks, length)
 
 
-def contiguous_channel_basis(nxmax, nymax, aspect_ratio, length=None):
+def contiguous_channel_basis(nxmax, nymax, parameters, length=None):
     """Function that returns the basis for contiguous spectral blocks of modes on a channel.
 
     Parameters
@@ -132,8 +188,8 @@ def contiguous_channel_basis(nxmax, nymax, aspect_ratio, length=None):
         Maximum x-wavenumber to fill the spectral block up to.
     nymax: int
         Maximum :math:`y`-wavenumber to fill the spectral block up to.
-    aspect_ratio: float
-        Spatial domain aspect ratio, :math:`n = 2 L_y/L_x` .
+    parameters: dict(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
     length: float, optional
         Length of the domain along the :math:`x` coordinate: :math:`L_x` .
 
@@ -151,20 +207,24 @@ def contiguous_channel_basis(nxmax, nymax, aspect_ratio, length=None):
             spectral_blocks[i, 1] = ny
             i += 1
 
-    return PlanarChannelFourierBasis(spectral_blocks, aspect_ratio, length)
+    return PlanarChannelFourierBasis(parameters, spectral_blocks, length)
 
 
 def fourier_functions(wave_number, n, coordinate_system):
     """Function that return Fourier modes expressions:
 
-    * `'A'` for a function of the form :math:`F^A_{P} (x, y) =  \sqrt{2}\, \cos(P y) = \sqrt{2}\, \cos(n_y\, y)`
-    * `'K'` for a function of the form :math:`F^K_{M,P} (x, y) =  2\cos(M nx)\, \sin(P y) = 2\cos(n_x\,  n\, x)\, \sin(n_y\, y)`
-    * `'L'` for a function of the form :math:`F^L_{H,P} (x, y) = 2\sin(H nx)\, \sin(P y) = 2\sin(n_x\, n \,x)\, \sin(n_y\, y)`
+    * `'A'` for a function of the form :math:`F^A_{P} (x, y) =  \\sqrt{2}\\, \\cos(P y) = \\sqrt{2}\\, \\cos(n_y\\, y)`
+    * `'K'` for a function of the form :math:`F^K_{M,P} (x, y) =  2\\cos(M nx)\\, \\sin(P y) = 2\\cos(n_x\\,  n\\, x)\\, \\sin(n_y\\, y)`
+    * `'L'` for a function of the form :math:`F^L_{H,P} (x, y) = 2\\sin(H nx)\\, \\sin(P y) = 2\\sin(n_x\\, n \\,x)\\, \\sin(n_y\\, y)`
 
     Parameters
     ----------
     wave_number: WaveNumber
         The wavenumber and type information of the mode to be returned.
+    n: ~sympy.core.symbol.Symbol
+        The aspect ratio symbol.
+    coordinate_system: ~coordinates.CoordinateSystem
+        Coordinate system on which the basis is defined.
 
     Returns
     -------
@@ -189,9 +249,9 @@ def fourier_functions(wave_number, n, coordinate_system):
 class WaveNumber(object):
     """Class to define model base functions wavenumber. The basis function available are:
 
-    * `'A'` for a function of the form :math:`F^A_{P} (x, y) =  \sqrt{2}\, \cos(P y) = \sqrt{2}\, \cos(n_y\, y)`
-    * `'K'` for a function of the form :math:`F^K_{M,P} (x, y) =  2\cos(M nx)\, \sin(P y) = 2\cos(n_x\,  n\, x)\, \sin(n_y\, y)`
-    * `'L'` for a function of the form :math:`F^L_{H,P} (x, y) = 2\sin(H nx)\, \sin(P y) = 2\sin(n_x\, n \,x)\, \sin(n_y\, y)`
+    * `'A'` for a function of the form :math:`F^A_{P} (x, y) =  \\sqrt{2}\\, \\cos(P y) = \\sqrt{2}\\, \\cos(n_y\\, y)`
+    * `'K'` for a function of the form :math:`F^K_{M,P} (x, y) =  2\\cos(M nx)\\, \\sin(P y) = 2\\cos(n_x\\,  n\\, x)\\, \\sin(n_y\\, y)`
+    * `'L'` for a function of the form :math:`F^L_{H,P} (x, y) = 2\\sin(H nx)\\, \\sin(P y) = 2\\sin(n_x\\, n \\,x)\\, \\sin(n_y\\, y)`
 
     where :math:`x` and :math:`y` are the nondimensional model's domain coordinates (see :ref:`files/model/oro_model:Projecting the equations on a set of basis functions`).
 
