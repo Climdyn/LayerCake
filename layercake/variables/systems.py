@@ -19,6 +19,10 @@ class CoordinateSystem(object):
 
     @property
     def coordinates_symbol(self):
+        return {coo.name: coo.symbol for coo in self.coordinates}
+
+    @property
+    def coordinates_symbol_as_list(self):
         return [coo.symbol for coo in self.coordinates]
 
     @property

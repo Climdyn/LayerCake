@@ -235,7 +235,8 @@ def fourier_functions(wave_number, n, coordinate_system):
 
     """
     mode_eq = None
-    x, y = coordinate_system.coordinates_symbol
+    x = coordinate_system.coordinates_symbol('x')
+    y = coordinate_system.coordinates_symbol('x')
     if wave_number.type == 'A':
         mode_eq = sqrt(2) * cos(wave_number.ny * y)
     elif wave_number.type == 'K':

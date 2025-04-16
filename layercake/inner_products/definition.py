@@ -10,39 +10,68 @@
 """
 
 from abc import ABC, abstractmethod
+from sympy.simplify.fu import TR8, TR10
+from sympy import Symbol, diff, integrate, symbols, pi, Integral
 
 
 class InnerProductDefinition(ABC):
     """Base class to define the model's basis inner products.
+    """
+
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def inner_product(self, S, G):
+        """Definition of the inner product :math:`(S, G)`.
+
+        Parameters
+        ----------
+        S:
+            Left-hand side function of the product.
+        G:
+            Right-hand side function of the product.
+
+        Returns
+        -------
+        res
+            The result of the inner product.
+        """
+        pass
+
+
+class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
+    """Standard class to define symbolic inner products using `Sympy`_.
 
     Parameters
     ----------
-    variables: list(~variable.Coordinate)
-        List of variables used as coordinates.
+    coordinate_system: ~coordinates.CoordinateSystem
+        Coordinate system on which the basis is defined.
     optimizer: None or callable, optional
         A function to optimize the computation of the integrals or the integrand.
         If `None`, does not optimize.
 
     Attributes
     ----------
-    variables: list(~variable.Coordinate)
-        List of variables used as coordinates.
+    coordinate_system: ~coordinates.CoordinateSystem
+        Coordinate system on which the basis is defined.
     optimizer: None or callable
         A function to optimize the computation of the integrals or the integrand.
         If `None`, does not optimize the computation.
+
+    .. _Sympy: https://www.sympy.org/
+
     """
 
-    def __init__(self, variables=None, optimizer=None):
+    def __init__(self, coordinate_system, optimizer=None):
 
-        # must warn user if None
-        self.variables = variables
+        InnerProductDefinition.__init__(self)
+        self.coordinate_system = coordinate_system
 
-        self.optimizer = None
-
-        if optimizer is not None:
-            self.set_optimizer(optimizer)
+        if optimizer is None:
+            self.optimizer = self._trig_optimizer
         else:
-            self.set_optimizer(self._no_optimizer)
+            self.optimizer = optimizer
 
     def set_optimizer(self, optimizer):
         """Function to set the optimizer.
@@ -58,9 +87,38 @@ class InnerProductDefinition(ABC):
     def _no_optimizer(expr):
         return expr
 
-    @abstractmethod
+    @staticmethod
+    def _trig_optimizer(expr):
+        return TR10(TR8(expr))
+
+    def integrate_over_domain(self, expr, symbolic_expr=False):
+        """Definition of the normalized integrals over the spatial domain used by the inner products:
+        :math:`\\frac{n}{2\\pi^2}\\int_0^\\pi\\int_0^{2\\pi/n} \\, \\mathrm{expr}(x, y) \\, \\mathrm{d} x \\, \\mathrm{d} y`.
+
+        Parameters
+        ----------
+        expr: Sympy expression
+            The expression to integrate.
+        symbolic_expr: bool, optional
+            If `True`, return the integral as a symbolic expression object. Else, return the integral performed symbolically.
+
+        Returns
+        -------
+        Sympy expression
+            The result of the symbolic integration.
+        """
+        _x = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
+        _y = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
+        _extent_x = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
+        _extent_y = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
+        if symbolic_expr:
+            return Integral(expr, (_x, *_extent_x), (_y, *_extent_y))
+        else:
+            return integrate(expr, (_x, *_extent_x), (_y, *_extent_y))
+
     def inner_product(self, S, G, symbolic_expr=False, integrand=False):
-        """Symbolic definition of the inner product :math:`(S, G)`.
+        """Function defining the inner product to be computed symbolically:
+        :math:`(S, G) = \\frac{n}{2\\pi^2}\\int_0^\\pi\\int_0^{2\\pi/n} S(x,y)\\, G(x,y)\\, \\mathrm{d} x \\, \\mathrm{d} y`.
 
         Parameters
         ----------
@@ -76,6 +134,14 @@ class InnerProductDefinition(ABC):
         Returns
         -------
         Sympy expression
-            The symbolic result of the inner product.
+            The result of the symbolic integration
         """
-        pass
+        _x = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
+        _y = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
+        _extent_x = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
+        _extent_y = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
+        expr = ((_extent_x[1] - _extent_x[0]) * (_extent_x[1] - _extent_x[0])) * S * G
+        if integrand:
+            return expr,  (_x, *_extent_x), (_y, *_extent_y)
+        else:
+            return self.integrate_over_domain(self.optimizer(expr), symbolic_expr=symbolic_expr)
