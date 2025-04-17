@@ -14,6 +14,7 @@
 
 """
 import numpy as np
+import sympy
 
 from layercake.basis.base import SymbolicBasis
 from layercake.variables.systems import PlanarCartesianCoordinateSystem
@@ -50,10 +51,12 @@ class PlanarChannelFourierBasis(SymbolicBasis):
         aspect_ratio = float(parameters['n'])
 
         if length is None:
-            length = 2 * np.pi / aspect_ratio
+            length = 2 * sympy.pi / parameters['n'].symbol
+            # length = 2 * np.pi / aspect_ratio
 
         self.length = length
-        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., aspect_ratio * length / 2), (0., length)))
+        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., sympy.pi)))
+        # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
         SymbolicBasis.__init__(self, coordinate_system, parameters)
         self._n = self.parameters['n'].symbol
         self.substitutions.append((self._n, aspect_ratio))
@@ -115,10 +118,12 @@ class PlanarBasinFourierBasis(SymbolicBasis):
         aspect_ratio = float(parameters['n'])
 
         if length is None:
-            length = 2 * np.pi / aspect_ratio
+            length = 2 * sympy.pi / parameters['n'].symbol
+            # length = 2 * np.pi / aspect_ratio
 
         self.length = length
-        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., aspect_ratio * length / 2), (0., length)))
+        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., sympy.pi)))
+        # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
         SymbolicBasis.__init__(self, coordinate_system, parameters)
         self._n = self.parameters['n'].symbol
         self.substitutions.append((self._n, aspect_ratio))
@@ -235,8 +240,8 @@ def fourier_functions(wave_number, n, coordinate_system):
 
     """
     mode_eq = None
-    x = coordinate_system.coordinates_symbol('x')
-    y = coordinate_system.coordinates_symbol('x')
+    x = coordinate_system.coordinates_symbol['x']
+    y = coordinate_system.coordinates_symbol['y']
     if wave_number.type == 'A':
         mode_eq = sqrt(2) * cos(wave_number.ny * y)
     elif wave_number.type == 'K':

@@ -140,7 +140,8 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         _y = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
         _extent_x = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
         _extent_y = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
-        expr = ((_extent_x[1] - _extent_x[0]) * (_extent_x[1] - _extent_x[0])) * S * G
+        norm = ((_extent_x[1] - _extent_x[0]) * (_extent_y[1] - _extent_y[0]))
+        expr = (S * G) / norm
         if integrand:
             return expr,  (_x, *_extent_x), (_y, *_extent_y)
         else:
