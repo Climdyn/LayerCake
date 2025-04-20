@@ -224,7 +224,7 @@ class NumericBasis(Basis):
 if __name__ == "__main__":
     import numpy as np
     from sympy import symbols, sin, exp
-    from layercake.variables.coordinates import Coordinate
+    from layercake.variables.coordinate import Coordinate
     from layercake.variables.systems import CoordinateSystem
 
     xs, ys = symbols('x y')  # x and y coordinates on the model's spatial domain
