@@ -1,5 +1,5 @@
 
-from layercake.variables.coordinates import Coordinate
+from layercake.variables.coordinate import Coordinate
 from sympy import symbols
 
 

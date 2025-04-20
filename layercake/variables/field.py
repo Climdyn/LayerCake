@@ -1,13 +1,17 @@
 
-from abc import ABC
+from layercake.variables.variable import Variable
+from sympy import Symbol, Function
 
 
-class Variable(ABC):
+class Field(Variable):
 
-    def __init__(self, name, symbol, units=None, latex=None):
+    def __init__(self, name, symbol, coordinate_system, units=None, latex=None):
+
+        t = Symbol('t')
 
         self.name = name
-        self.symbol = symbol
+        self.coordinate_system = coordinate_system
+        self.symbol = Function(symbol)(t, *self.coordinate_system.coordinates_symbol_as_list)
         if units is None:
             self.units = ""
         else:
