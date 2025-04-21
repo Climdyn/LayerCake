@@ -18,17 +18,31 @@ class Equation(object):
         self.terms.append(term)
 
     @property
-    def expression(self):
+    def symbolic_expression(self):
         rterm = S.Zero
-        for term  in self.terms:
-            rterm += term.expression
-        return Eq(self.field.symbol.diff(self._t), rterm)
+        for term in self.terms:
+            rterm += term.symbolic_expression
+        return Eq(self.field.function.diff(self._t), rterm)
 
     @property
-    def rhs(self):
+    def numerical_expression(self):
         rterm = S.Zero
-        for term  in self.terms:
-            rterm += term.expression
+        for term in self.terms:
+            rterm += term.numerical_expression
+        return Eq(self.field.function.diff(self._t), rterm)
+
+    @property
+    def symbolic_rhs(self):
+        rterm = S.Zero
+        for term in self.terms:
+            rterm += term.symbolic_expression
+        return rterm
+
+    @property
+    def numerical_rhs(self):
+        rterm = S.Zero
+        for term in self.terms:
+            rterm += term.numerical_expression
         return rterm
 
     @property

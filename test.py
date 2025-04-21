@@ -21,7 +21,10 @@ p = u'ψ'
 
 psi = Field("psi", p, units="[m^2][s^-2]", latex=r'\psi', coordinate_system=b.coordinate_system)
 
-l = LinearTerm(psi, -2)
+aa = symbols('a')
+a = ScalingParameter(- 2, symbol=aa)
+
+l = LinearTerm(psi, s, a)
 
 e = Equation(psi)
 e.add_term(l)
