@@ -1,8 +1,9 @@
 
-import sympy
 from sympy.core.decorators import call_highest_priority
 from sympy import Expr, Matrix, Mul, Add, diff
 from sympy.core.numbers import Zero
+
+from layercake.utils.commutativity import enable_commutativity
 
 # courtesy of https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy
 
@@ -61,7 +62,7 @@ def _diff(expr, *variables):
     return diff(expr, *variables)
 
 
-def _evaluateMul(expr):
+def _evaluate_mul(expr):
     end = 0
     if expr.args:
         if isinstance(expr.args[-1], D):
@@ -72,48 +73,42 @@ def _evaluateMul(expr):
     for i in range(len(expr.args)-1+end, -1, -1):
         arg = expr.args[i]
         if isinstance(arg, Add):
-            arg = _evaluateAdd(arg)
+            arg = _evaluate_add(arg)
         if isinstance(arg, Mul):
-            arg = _evaluateMul(arg)
+            arg = _evaluate_mul(arg)
         if isinstance(arg, D):
             left = Mul(*expr.args[:i])
             right = Mul(*expr.args[i+1:])
             right = _diff(right, *arg.variables)
             ans = left * right
-            return _evaluateMul(ans)
+            return _evaluate_mul(ans)
     return expr
 
 
-def _evaluateAdd(expr):
+def _evaluate_add(expr):
     newargs = []
     for arg in expr.args:
         if isinstance(arg, Mul):
-            arg = _evaluateMul(arg)
+            arg = _evaluate_mul(arg)
         if isinstance(arg, Add):
-            arg = _evaluateAdd(arg)
+            arg = _evaluate_add(arg)
         if isinstance(arg, D):
             arg = Zero()
         newargs.append(arg)
     return Add(*newargs)
 
 
-#courtesy: https://stackoverflow.com/a/48291478/1429450
-def disableNonCommutivity(expr):
-    replacements = {s: sympy.Dummy(s.name) for s in expr.free_symbols}
-    return expr.xreplace(replacements)
-
-
-def evaluateExpr(expr):
+def evaluate_expr(expr):
     if isinstance(expr, Matrix):
         for i, elem in enumerate(expr):
             elem = elem.expand()
-            expr[i] = evaluateExpr(elem)
-        return disableNonCommutivity(expr)
+            expr[i] = evaluate_expr(elem)
+        return enable_commutativity(expr)
     expr = expr.expand()
     if isinstance(expr, Mul):
-        expr = _evaluateMul(expr)
+        expr = _evaluate_mul(expr)
     elif isinstance(expr, Add):
-        expr = _evaluateAdd(expr)
+        expr = _evaluate_add(expr)
     elif isinstance(expr, D):
         expr = Zero()
     return expr

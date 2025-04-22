@@ -227,12 +227,12 @@ if __name__ == "__main__":
     from layercake.variables.coordinate import Coordinate
     from layercake.variables.systems import CoordinateSystem
 
-    xs, ys = symbols('x y', commutative=False)  # x and y coordinates on the model's spatial domain
+    xs, ys = symbols('x y')  # x and y coordinates on the model's spatial domain
     x = Coordinate("x", xs, extent=[0., 2 * np.pi])
     y = Coordinate("y", ys, extent=[0., np.pi])
     coord_sys = CoordinateSystem([x, y])
     basis = SymbolicBasis(coord_sys)
-    al = symbols('al', commutative=False)  # aspect ratio and alpha coefficients
+    al = symbols('al')  # aspect ratio and alpha coefficients
     n = Symbol('n', positive=True)
     for i in range(1, 3):
         for j in range(1, 3):

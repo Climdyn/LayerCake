@@ -11,7 +11,7 @@ class Field(Variable):
 
         self.name = name
         self.coordinate_system = coordinate_system
-        self.symbol = Symbol(symbol, commutative=False)
+        self.symbol = Symbol(symbol)
         self.function = Function(symbol)(t, *self.coordinate_system.coordinates_symbol_as_list)
         if units is None:
             self.units = ""

@@ -38,7 +38,7 @@ class PlanarCartesianCoordinateSystem(CoordinateSystem):
 
     def __init__(self, extent):
 
-        xs, ys = symbols('x y', commutative=False)
+        xs, ys = symbols('x y')
         x = Coordinate("x", xs, extent=extent[0])
         y = Coordinate("y", ys, extent=extent[1])
         CoordinateSystem.__init__(self, coordinates=[x, y], name="Planar Cartesian Coordinate System")
