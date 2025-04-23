@@ -1,19 +1,31 @@
 
 from layercake.arithmetic.terms.base import ArithmeticTerm
-from layercake.utils.d import D, evaluate_expr
+from layercake.utils.operators import D, evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
-from sympy import Lambda, Mul
+from layercake.variables.coordinate import Coordinate
+from sympy import Lambda, Mul, S
 
 
 class DirectionalDerivativeTerm(ArithmeticTerm):
 
-    def __init__(self, field, inner_product_definition, direction, parameter):
+    def __init__(self, field, inner_product_definition, direction, parameter, infinitesimal_length=None):
 
         ArithmeticTerm.__init__(self, field, inner_product_definition)
         self.name = 'Directional derivative term'
         self.parameter = parameter
         self.direction = direction
-        self._operator = D(direction)
+        if infinitesimal_length is not None:
+            self._ds = 1 / infinitesimal_length
+        elif isinstance(direction, Coordinate):
+            self._ds = 1 / direction.infinitesimal_length
+        else:
+            self._ds = 1 / S.One
+
+        try:
+            self._operator = Mul(self._ds, D(direction.symbol), evaluate=False)
+        except AttributeError:
+            self._operator = Mul(self._ds, D(direction), evaluate=False)
+
 
     @property
     def symbolic_expression(self):

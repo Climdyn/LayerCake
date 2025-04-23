@@ -1,6 +1,6 @@
 
 from layercake.arithmetic.terms.base import ArithmeticTerm
-from layercake.utils.d import evaluate_expr
+from layercake.utils.operators import evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 from sympy import Lambda, Mul
 
