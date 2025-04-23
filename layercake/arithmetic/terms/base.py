@@ -7,15 +7,16 @@ from multiprocessing import cpu_count
 from sympy.utilities.iterables import multiset_permutations
 
 from scipy.integrate import dblquad
-from sympy import symbols
-from sympy import ImmutableSparseMatrix, ImmutableSparseNDimArray, lambdify
+from sympy import ImmutableSparseMatrix, ImmutableSparseNDimArray, lambdify, Lambda
+from layercake.utils.operators import evaluate_expr
+from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 
 
 class ArithmeticTerm(ABC):
     """Base class for arithmetic terms"""
-    def __init__(self, field, inner_product_definition):
+    def __init__(self, field, inner_product_definition, name=''):
 
-        self.name = ''
+        self.name = name
         self.inner_products = None
         self.field = field
         self.inner_product_definition = inner_product_definition
@@ -29,6 +30,22 @@ class ArithmeticTerm(ABC):
     @abstractmethod
     def numerical_expression(self):
         pass
+
+    @property
+    def symbolic_function(self):
+        foo = disable_commutativity(self.symbolic_expression)
+        ss = foo.args[-1]
+        return Lambda(ss, foo)
+
+    @property
+    def numerical_function(self):
+        foo = disable_commutativity(self.numerical_expression)
+        ss = foo.args[-1]
+        return Lambda(ss, foo)
+
+    @staticmethod
+    def _evaluate(func):
+        return enable_commutativity(evaluate_expr(func))
 
     @abstractmethod
     def _integrations(self, basis, numerical=False):

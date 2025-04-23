@@ -1,17 +1,16 @@
 
 from layercake.arithmetic.terms.base import ArithmeticTerm
-from layercake.utils.operators import D, evaluate_expr
-from layercake.utils.commutativity import enable_commutativity, disable_commutativity
+from layercake.utils.operators import D
+from layercake.utils.commutativity import disable_commutativity
 from layercake.variables.coordinate import Coordinate
-from sympy import Lambda, Mul, S
+from sympy import Mul, S
 
 
 class DirectionalDerivativeTerm(ArithmeticTerm):
 
-    def __init__(self, field, inner_product_definition, direction, parameter, infinitesimal_length=None):
+    def __init__(self, field, inner_product_definition, direction, parameter, name='', infinitesimal_length=None):
 
-        ArithmeticTerm.__init__(self, field, inner_product_definition)
-        self.name = 'Directional derivative term'
+        ArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self.parameter = parameter
         self.direction = direction
         if infinitesimal_length is not None:
@@ -34,22 +33,6 @@ class DirectionalDerivativeTerm(ArithmeticTerm):
     @property
     def numerical_expression(self):
         return Mul(self.parameter, Mul(self._operator, self.field.symbol, evaluate=False), evaluate=False)
-
-    @property
-    def symbolic_function(self):
-        foo = disable_commutativity(self.symbolic_expression)
-        ss = foo.args[-1]
-        return Lambda(ss, foo)
-
-    @property
-    def numerical_function(self):
-        foo = disable_commutativity(self.numerical_expression)
-        ss = foo.args[-1]
-        return Lambda(ss, foo)
-
-    @staticmethod
-    def _evaluate(func):
-        return enable_commutativity(evaluate_expr(func))
 
     def _integrations(self, basis, numerical=False):
         nmod = len(basis)
