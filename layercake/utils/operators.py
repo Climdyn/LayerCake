@@ -1,6 +1,6 @@
 
 from sympy.core.decorators import call_highest_priority
-from sympy import Expr, Matrix, Mul, Add, diff
+from sympy import Expr, Matrix, Mul, Add, diff, zeros
 from sympy.core.numbers import Zero
 
 from layercake.utils.commutativity import enable_commutativity
@@ -117,15 +117,34 @@ def evaluate_expr(expr):
 
 def Nabla(coordinates_system):
     if not isinstance(coordinates_system, CoordinateSystem):
-        raise ValueError('Laplacian only take coordinates systems as input.')
+        raise ValueError('Nabla only take coordinates systems as input.')
 
     derivative_list = list()
     for coord in coordinates_system.coordinates:
-        derivative_list.append(Mul((1 / coord.infinitesimal_length), D(coord.symbol), evaluate=False))
+        derivative_list.append(Mul(coord.infinitesimal_length**(-1), D(coord.symbol), evaluate=False))
+    return Matrix([derivative_list])
+
+
+def Divergence(coordinates_system):
+
+    if not isinstance(coordinates_system, CoordinateSystem):
+        raise ValueError('Divergence only take coordinates systems as input.')
+
+    derivative_list = list()
+    volume = coordinates_system.infinitesimal_volume
+    for coord in coordinates_system.coordinates:
+        derivative_list.append(Mul(volume**(-1), Mul(D(coord.symbol), volume, evaluate=False), evaluate=False))
+
     return Matrix([derivative_list])
 
 
 def Laplacian(coordinates_system):
+    if not isinstance(coordinates_system, CoordinateSystem):
+        raise ValueError('Laplacian only take coordinates systems as input.')
     nabla = Nabla(coordinates_system)
-    return nabla.dot(nabla)
+    divergence = Divergence(coordinates_system)
+    laplacian = zeros(*nabla.shape)
+    for i in range(len(nabla)):
+        laplacian[i] = Mul(divergence[i] * nabla[i], evaluate=False)
+    return laplacian
 

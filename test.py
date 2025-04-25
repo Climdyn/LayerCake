@@ -6,6 +6,8 @@ from layercake.variables.field import Field
 from layercake.arithmetic.terms.linear import LinearTerm
 from layercake.arithmetic.terms.directional_derivative import DirectionalDerivativeTerm
 from layercake.arithmetic.equation import Equation
+from layercake.variables.systems import SphericalCoordinateSystem
+from layercake.utils.operators import Nabla, Laplacian, Divergence
 
 _n = symbols('n')
 
@@ -32,4 +34,12 @@ d = DirectionalDerivativeTerm(psi, s, b.coordinate_system.coordinates_symbol_as_
 e = Equation(psi)
 e.add_term(l)
 
+R = symbols('R')
+r = ScalingParameter(1., symbol=R)
+
+scs = SphericalCoordinateSystem(r)
+
+nab = Nabla(scs)
+lap = Laplacian(scs)
+div = Divergence(scs)
 
