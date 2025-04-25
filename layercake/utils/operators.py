@@ -4,6 +4,7 @@ from sympy import Expr, Matrix, Mul, Add, diff
 from sympy.core.numbers import Zero
 
 from layercake.utils.commutativity import enable_commutativity
+from layercake.variables.systems import CoordinateSystem
 
 # courtesy of https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy
 
@@ -112,3 +113,19 @@ def evaluate_expr(expr):
     elif isinstance(expr, D):
         expr = Zero()
     return expr
+
+
+def Nabla(coordinates_system):
+    if not isinstance(coordinates_system, CoordinateSystem):
+        raise ValueError('Laplacian only take coordinates systems as input.')
+
+    derivative_list = list()
+    for coord in coordinates_system.coordinates:
+        derivative_list.append(Mul((1 / coord.infinitesimal_length), D(coord.symbol), evaluate=False))
+    return Matrix([derivative_list])
+
+
+def Laplacian(coordinates_system):
+    nabla = Nabla(coordinates_system)
+    return nabla.dot(nabla)
+
