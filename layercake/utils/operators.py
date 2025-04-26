@@ -1,6 +1,6 @@
 
 from sympy.core.decorators import call_highest_priority
-from sympy import Expr, Matrix, Mul, Add, diff, zeros
+from sympy import Expr, Matrix, Mul, Add, diff
 from sympy.core.numbers import Zero
 
 from layercake.utils.commutativity import enable_commutativity
@@ -143,8 +143,10 @@ def Laplacian(coordinates_system):
         raise ValueError('Laplacian only take coordinates systems as input.')
     nabla = Nabla(coordinates_system)
     divergence = Divergence(coordinates_system)
-    laplacian = zeros(*nabla.shape)
     for i in range(len(nabla)):
-        laplacian[i] = Mul(divergence[i] * nabla[i], evaluate=False)
+        if i == 0:
+            laplacian = Mul(divergence[i] * nabla[i], evaluate=False)
+        else:
+            laplacian = laplacian + Mul(divergence[i] * nabla[i], evaluate=False)
     return laplacian
 
