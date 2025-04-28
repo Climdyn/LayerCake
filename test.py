@@ -33,8 +33,8 @@ x = symbols('x')
 l = LinearTerm(psi, s) #, a)
 d = DirectionalDerivativeTerm(psi, s, b.coordinate_system.coordinates_symbol_as_list[0]) #, a)
 
-e = Equation(psi)
-e.add_term(l)
+e = Equation(psi, lhs_term=LinearTerm, inner_product_definition=s)
+e.add_rhs_term(l)
 
 R = symbols('R')
 r = ScalingParameter(1., symbol=R)
@@ -46,4 +46,4 @@ lap = Laplacian(scs)
 div = Divergence(scs)
 
 lapo = LaplacianTerm(psi, s) #, a)
-e.add_terms([lapo, d])
+e.add_rhs_terms([lapo, d])

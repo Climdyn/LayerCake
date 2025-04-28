@@ -10,7 +10,7 @@ class LinearTerm(ArithmeticTerm):
 
         ArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self.parameter = parameter
-        self._rank = 2
+        self._rank = 1
 
     @property
     def symbolic_expression(self):

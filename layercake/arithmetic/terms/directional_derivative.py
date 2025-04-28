@@ -20,7 +20,7 @@ class DirectionalDerivativeTerm(ArithmeticTerm):
         ArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self.parameter = parameter
         self.direction = direction
-        self._rank = 2
+        self._rank = 1
         if infinitesimal_length is not None:
             self._ds = 1 / infinitesimal_length
         elif isinstance(direction, Coordinate):

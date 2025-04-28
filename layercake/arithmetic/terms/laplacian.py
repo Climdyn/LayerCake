@@ -10,7 +10,7 @@ class LaplacianTerm(ArithmeticTerm):
     def __init__(self, field, inner_product_definition, parameter=None, name=''):
 
         ArithmeticTerm.__init__(self, field, inner_product_definition, name)
-        self._rank = 2
+        self._rank = 1
         self.parameter = parameter
         self._operator = Laplacian(field.coordinate_system)
 

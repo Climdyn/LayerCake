@@ -7,12 +7,15 @@ class Field(Variable):
 
     def __init__(self, name, symbol, coordinate_system, units=None, latex=None):
 
-        t = Symbol('t')
+        _t = Symbol('t')
 
         self.name = name
         self.coordinate_system = coordinate_system
-        self.symbol = Symbol(symbol)
-        self.function = Function(symbol)(t, *self.coordinate_system.coordinates_symbol_as_list)
+        if isinstance(symbol, str):
+            self.symbol = Symbol(symbol)
+        else:
+            self.symbol = symbol
+        self.function = Function(symbol)(_t, *self.coordinate_system.coordinates_symbol_as_list)
         if units is None:
             self.units = ""
         else:

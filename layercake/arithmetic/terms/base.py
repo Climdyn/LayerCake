@@ -25,7 +25,7 @@ class ArithmeticTerm(ABC):
     @property
     def rank(self):
         if self.inner_products is not None:
-            return self.inner_products.shape.__len__()
+            return self.inner_products.shape.__len__() - 1
         else:
             return self._rank
 
@@ -42,13 +42,13 @@ class ArithmeticTerm(ABC):
     @property
     def symbolic_function(self):
         foo = disable_commutativity(self.symbolic_expression)
-        ss = foo.args[-1]
+        ss = disable_commutativity(self.field.symbol)
         return Lambda(ss, foo)
 
     @property
     def numerical_function(self):
         foo = disable_commutativity(self.numerical_expression)
-        ss = foo.args[-1]
+        ss = disable_commutativity(self.field.symbol)
         return Lambda(ss, foo)
 
     @staticmethod
