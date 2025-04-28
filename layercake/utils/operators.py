@@ -115,34 +115,34 @@ def evaluate_expr(expr):
     return expr
 
 
-def Nabla(coordinates_system):
-    if not isinstance(coordinates_system, CoordinateSystem):
+def Nabla(coordinate_system):
+    if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Nabla only take coordinates systems as input.')
 
     derivative_list = list()
-    for coord in coordinates_system.coordinates:
+    for coord in coordinate_system.coordinates:
         derivative_list.append(Mul(coord.infinitesimal_length**(-1), D(coord.symbol), evaluate=False))
     return Matrix([derivative_list])
 
 
-def Divergence(coordinates_system):
+def Divergence(coordinate_system):
 
-    if not isinstance(coordinates_system, CoordinateSystem):
+    if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Divergence only take coordinates systems as input.')
 
     derivative_list = list()
-    volume = coordinates_system.infinitesimal_volume
-    for coord in coordinates_system.coordinates:
+    volume = coordinate_system.infinitesimal_volume
+    for coord in coordinate_system.coordinates:
         derivative_list.append(Mul(volume**(-1), Mul(D(coord.symbol), volume, evaluate=False), evaluate=False))
 
     return Matrix([derivative_list])
 
 
-def Laplacian(coordinates_system):
-    if not isinstance(coordinates_system, CoordinateSystem):
+def Laplacian(coordinate_system):
+    if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Laplacian only take coordinates systems as input.')
-    nabla = Nabla(coordinates_system)
-    divergence = Divergence(coordinates_system)
+    nabla = Nabla(coordinate_system)
+    divergence = Divergence(coordinate_system)
     for i in range(len(nabla)):
         if i == 0:
             laplacian = Mul(divergence[i] * nabla[i], evaluate=False)

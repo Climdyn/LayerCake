@@ -20,6 +20,14 @@ class ArithmeticTerm(ABC):
         self.inner_products = None
         self.field = field
         self.inner_product_definition = inner_product_definition
+        self._rank = None
+
+    @property
+    def rank(self):
+        if self.inner_products is not None:
+            return self.inner_products.shape.__len__()
+        else:
+            return self._rank
 
     @property
     @abstractmethod

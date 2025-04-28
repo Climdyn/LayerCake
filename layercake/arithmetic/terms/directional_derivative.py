@@ -8,11 +8,19 @@ from sympy import Mul, S
 
 class DirectionalDerivativeTerm(ArithmeticTerm):
 
-    def __init__(self, field, inner_product_definition, direction, parameter, name='', infinitesimal_length=None):
+    def __init__(self, field, inner_product_definition, direction, parameter=None, name='', infinitesimal_length=None):
+
+        if hasattr(direction, 'symbol'):
+            if direction.symbol not in field.coordinate_system.coordinates_symbol_as_list:
+                raise ValueError('Provided direction does not match any coordinate of the coordinates system.')
+        else:
+            if direction not in field.coordinate_system.coordinates_symbol_as_list:
+                raise ValueError('Provided direction does not match any coordinate of the coordinates system.')
 
         ArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self.parameter = parameter
         self.direction = direction
+        self._rank = 2
         if infinitesimal_length is not None:
             self._ds = 1 / infinitesimal_length
         elif isinstance(direction, Coordinate):
@@ -25,14 +33,19 @@ class DirectionalDerivativeTerm(ArithmeticTerm):
         except AttributeError:
             self._operator = Mul(self._ds, D(direction), evaluate=False)
 
-
     @property
     def symbolic_expression(self):
-        return Mul(self.parameter.symbol, Mul(self._operator, self.field.symbol, evaluate=False), evaluate=False)
+        if self.parameter is None:
+            return Mul(self._operator, self.field.symbol, evaluate=False)
+        else:
+            return Mul(self.parameter.symbol, Mul(self._operator, self.field.symbol, evaluate=False), evaluate=False)
 
     @property
     def numerical_expression(self):
-        return Mul(self.parameter, Mul(self._operator, self.field.symbol, evaluate=False), evaluate=False)
+        if self.parameter is None:
+            return Mul(self._operator, self.field.symbol, evaluate=False)
+        else:
+            return Mul(self.parameter, Mul(self._operator, self.field.symbol, evaluate=False), evaluate=False)
 
     def _integrations(self, basis, numerical=False):
         nmod = len(basis)

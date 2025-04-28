@@ -5,6 +5,7 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 from layercake.variables.field import Field
 from layercake.arithmetic.terms.linear import LinearTerm
 from layercake.arithmetic.terms.directional_derivative import DirectionalDerivativeTerm
+from layercake.arithmetic.terms.laplacian import LaplacianTerm
 from layercake.arithmetic.equation import Equation
 from layercake.variables.systems import SphericalCoordinateSystem
 from layercake.utils.operators import Nabla, Laplacian, Divergence
@@ -15,7 +16,8 @@ n = ScalingParameter(1.3, symbol=_n)
 
 parameters = {'n': n}
 
-b = contiguous_basin_basis(2, 2, parameters)
+# b = contiguous_basin_basis(2, 2, parameters)
+b = contiguous_channel_basis(2, 2, parameters)
 
 s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
 
@@ -28,8 +30,8 @@ aa = symbols('a')
 a = ScalingParameter(- 2, symbol=aa)
 x = symbols('x')
 
-l = LinearTerm(psi, s, a)
-d = DirectionalDerivativeTerm(psi, s, b.coordinate_system.coordinates_symbol_as_list[0], a)
+l = LinearTerm(psi, s) #, a)
+d = DirectionalDerivativeTerm(psi, s, b.coordinate_system.coordinates_symbol_as_list[0]) #, a)
 
 e = Equation(psi)
 e.add_term(l)
@@ -43,3 +45,5 @@ nab = Nabla(scs)
 lap = Laplacian(scs)
 div = Divergence(scs)
 
+lapo = LaplacianTerm(psi, s) #, a)
+e.add_terms([lapo, d])

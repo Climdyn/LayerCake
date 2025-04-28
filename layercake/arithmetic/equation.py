@@ -1,6 +1,7 @@
 
 
 from sympy import Symbol, S, Eq
+from layercake.arithmetic.terms.base import ArithmeticTerm
 
 
 class Equation(object):
@@ -14,8 +15,13 @@ class Equation(object):
         self.terms = list()
 
     def add_term(self, term):
-
+        if not issubclass(term.__class__, ArithmeticTerm):
+            raise ValueError('Provided term must be a valid ArithmeticTerm object.')
         self.terms.append(term)
+
+    def add_terms(self, terms):
+        for t in terms:
+            self.add_term(t)
 
     @property
     def symbolic_expression(self):

@@ -1,30 +1,32 @@
 
 from layercake.arithmetic.terms.base import ArithmeticTerm
 from layercake.utils.commutativity import disable_commutativity
+from layercake.utils.operators import Laplacian
 from sympy import Mul
 
 
-class LinearTerm(ArithmeticTerm):
+class LaplacianTerm(ArithmeticTerm):
 
     def __init__(self, field, inner_product_definition, parameter=None, name=''):
 
         ArithmeticTerm.__init__(self, field, inner_product_definition, name)
-        self.parameter = parameter
         self._rank = 2
+        self.parameter = parameter
+        self._operator = Laplacian(field.coordinate_system)
 
     @property
     def symbolic_expression(self):
         if self.parameter is None:
-            return self.field.symbol
+            return Mul(self._operator, self.field.symbol, evaluate=False)
         else:
-            return Mul(self.parameter.symbol, self.field.symbol, evaluate=False)
+            return Mul(self.parameter.symbol, Mul(self._operator, self.field.symbol, evaluate=False), evaluate=False)
 
     @property
     def numerical_expression(self):
         if self.parameter is None:
-            return self.field.symbol
+            return Mul(self._operator, self.field.symbol, evaluate=False)
         else:
-            return Mul(self.parameter, self.field.symbol, evaluate=False)
+            return Mul(self.parameter, Mul(self._operator, self.field.symbol, evaluate=False), evaluate=False)
 
     def _integrations(self, basis, numerical=False):
         nmod = len(basis)
