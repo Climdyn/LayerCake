@@ -1,18 +1,21 @@
 
 from layercake.arithmetic.terms.base import ArithmeticTerm
 from layercake.utils.commutativity import disable_commutativity
-from layercake.utils.operators import Laplacian
 from sympy import Mul
 
 
-class LaplacianTerm(ArithmeticTerm):
+class OperatorTerm(ArithmeticTerm):
 
-    def __init__(self, field, inner_product_definition, parameter=None, name=''):
+    def __init__(self, field, inner_product_definition, operator, operator_args, parameter=None, name=''):
 
         ArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self._rank = 1
         self.parameter = parameter
-        self._operator = Laplacian(field.coordinate_system)
+        if isinstance(operator_args, list):
+            operator_args = tuple(operator_args)
+        elif not isinstance(operator_args, tuple):
+            operator_args = tuple([operator_args])
+        self._operator = operator(*operator_args)
 
     @property
     def symbolic_expression(self):
