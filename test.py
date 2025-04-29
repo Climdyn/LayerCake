@@ -4,7 +4,7 @@ from layercake.variables.parameter import ScalingParameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field
 from layercake.arithmetic.terms.linear import LinearTerm
-from layercake.arithmetic.terms.operators import OperatorTerm
+from layercake.arithmetic.terms.operators import OperatorTerm, ComposedOperatorsTerm
 from layercake.arithmetic.equation import Equation
 from layercake.variables.systems import SphericalCoordinateSystem
 from layercake.utils.operators import Nabla, Laplacian, Divergence, D
@@ -46,3 +46,7 @@ div = Divergence(scs)
 
 lapo = OperatorTerm(psi, s, Laplacian, b.coordinate_system)
 e.add_rhs_terms([lapo, d])
+
+c = ComposedOperatorsTerm(psi, s, D, b.coordinate_system.coordinates_symbol_as_list[0], Laplacian, b.coordinate_system)
+
+e.add_rhs_term(c)
