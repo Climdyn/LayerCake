@@ -29,7 +29,7 @@ class ArithmeticTerm(ABC):
     @property
     def rank(self):
         if self.inner_products is not None:
-            return self.inner_products.shape.__len__() - 1
+            return self.inner_products.shape.__len__()
         else:
             return self._rank
 
@@ -80,9 +80,9 @@ class ArithmeticTerm(ABC):
     def _integrations(self, *basis, inner_product=None, numerical=False):
         if len(basis) == 1:
             nmod = len(basis[0])
-            nmodr = (range(nmod),) * (self._rank + 1)
+            nmodr = (range(nmod),) * self._rank
         else:
-            if len(basis) != self._rank + 1:
+            if len(basis) != self._rank:
                 raise ValueError('The number of basis provided should match the rank of the term.')
             nmod = tuple(map(lambda x: len(x), basis))
             nmodr = list()
@@ -108,11 +108,11 @@ class ArithmeticTerm(ABC):
         if len(basis) == 1:
             basis = basis[0]
             nmod = len(basis)
-            rank = len(args_list[0][0]) - 1
-            matrix_shape = (nmod,) * (rank + 1)
+            rank = len(args_list[0][0])
+            matrix_shape = (nmod,) * rank
             substitutions = basis.substitutions
         else:
-            if len(basis) != self._rank + 1:
+            if len(basis) != self._rank:
                 raise ValueError('The number of basis provided should match the rank of the term.')
             matrix_shape = tuple(map(lambda x: len(x), basis))
             substitutions = list()
@@ -127,10 +127,12 @@ class ArithmeticTerm(ABC):
             output = _parallel_compute(pool, args_list, substitutions, res, timeout,
                                        symbolic_int=not numerical, permute=permute)
         if not numerical:
-            if self._rank == 1:
+            if self._rank > 2:
+                self.inner_products = ImmutableSparseNDimArray(output, matrix_shape)
+            elif self._rank == 2:
                 self.inner_products = ImmutableSparseMatrix(*matrix_shape, output)
             else:
-                self.inner_products = ImmutableSparseNDimArray(output, matrix_shape)
+                raise ValueError('Rank of the arithmetic term is wrong, something odd is happening.')
         else:
             self.inner_products = res.to_coo()
 
@@ -140,7 +142,7 @@ class SingleArithmeticTerm(ArithmeticTerm):
     def __init__(self, field, inner_product_definition, name=''):
 
         ArithmeticTerm.__init__(self, name)
-        self._rank = 1
+        self._rank = 2
         self.field = field
         self.inner_product_definition = inner_product_definition
 
@@ -209,9 +211,9 @@ class OperationOnTerms(ArithmeticTerm):
             if rank is not None:
                 self._rank = rank
             else:
-                self._rank = len(terms)
+                self._rank = len(terms) + 1
         else:
-            self._rank = len(terms)
+            self._rank = len(terms) + 1
         self._terms = terms
         self.inner_products = None
         self.inner_product_definition = terms[0].inner_product_definition

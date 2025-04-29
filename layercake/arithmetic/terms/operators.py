@@ -9,7 +9,6 @@ class OperatorTerm(SingleArithmeticTerm):
     def __init__(self, field, inner_product_definition, operator, operator_args, parameter=None, name=''):
 
         SingleArithmeticTerm.__init__(self, field, inner_product_definition, name)
-        self._rank = 1
         self.parameter = parameter
         if not isinstance(operator_args, (tuple, list)):
             operator_args = tuple([operator_args])
