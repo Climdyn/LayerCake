@@ -4,6 +4,7 @@ from layercake.variables.parameter import ScalingParameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field
 from layercake.arithmetic.terms.linear import LinearTerm
+from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.arithmetic.terms.operators import OperatorTerm, ComposedOperatorsTerm
 from layercake.arithmetic.equation import Equation
 from layercake.variables.systems import SphericalCoordinateSystem
