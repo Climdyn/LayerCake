@@ -11,9 +11,7 @@ class OperatorTerm(ArithmeticTerm):
         ArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self._rank = 1
         self.parameter = parameter
-        if isinstance(operator_args, list):
-            operator_args = tuple(operator_args)
-        elif not isinstance(operator_args, tuple):
+        if not isinstance(operator_args, (tuple, list)):
             operator_args = tuple([operator_args])
         self._operator = operator(*operator_args)
 
@@ -55,16 +53,12 @@ class ComposedOperatorsTerm(ArithmeticTerm):
         ArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self._rank = 1
         self.parameter = parameter
-        if isinstance(operator_args1, list):
-            operator_args1 = tuple(operator_args1)
-        elif not isinstance(operator_args1, tuple):
+        if not isinstance(operator_args1, (tuple, list)):
             operator_args1 = tuple([operator_args1])
         self._operator1 = operator1(*operator_args1)
-        if isinstance(operator_args2, list):
-            operator_args2 = tuple(operator_args2)
-        elif not isinstance(operator_args2, tuple):
+        if not isinstance(operator_args2, (tuple, list)):
             operator_args2 = tuple([operator_args2])
-        self._operator2 = operator1(*operator_args2)
+        self._operator2 = operator2(*operator_args2)
 
     @property
     def symbolic_expression(self):
