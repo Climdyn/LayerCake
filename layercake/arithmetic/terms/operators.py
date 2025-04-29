@@ -1,14 +1,14 @@
 
-from layercake.arithmetic.terms.base import ArithmeticTerm
+from layercake.arithmetic.terms.base import SingleArithmeticTerm
 from layercake.utils.commutativity import disable_commutativity
 from sympy import Mul
 
 
-class OperatorTerm(ArithmeticTerm):
+class OperatorTerm(SingleArithmeticTerm):
 
     def __init__(self, field, inner_product_definition, operator, operator_args, parameter=None, name=''):
 
-        ArithmeticTerm.__init__(self, field, inner_product_definition, name)
+        SingleArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self._rank = 1
         self.parameter = parameter
         if not isinstance(operator_args, (tuple, list)):
@@ -29,28 +29,13 @@ class OperatorTerm(ArithmeticTerm):
         else:
             return Mul(self.parameter, Mul(self._operator, self.field.symbol, evaluate=False), evaluate=False)
 
-    def _integrations(self, basis, numerical=False):
-        nmod = len(basis)
-        if numerical:
-            args_list = [[(i, j), self.inner_product_definition.inner_product,
-                          (basis[i], self._evaluate(self.numerical_function(disable_commutativity(basis[j]))))]
-                         for i in range(nmod)
-                         for j in range(nmod)]
-        else:
-            args_list = [[(i, j), self.inner_product_definition.inner_product,
-                          (basis[i], self._evaluate(self.symbolic_function(disable_commutativity(basis[j]))))]
-                         for i in range(nmod)
-                         for j in range(nmod)]
 
-        return args_list
-
-
-class ComposedOperatorsTerm(ArithmeticTerm):
+class ComposedOperatorsTerm(SingleArithmeticTerm):
 
     def __init__(self, field, inner_product_definition, operator1, operator_args1,
                  operator2, operator_args2, parameter=None, name=''):
 
-        ArithmeticTerm.__init__(self, field, inner_product_definition, name)
+        SingleArithmeticTerm.__init__(self, field, inner_product_definition, name)
         self._rank = 1
         self.parameter = parameter
         if not isinstance(operator_args1, (tuple, list)):
@@ -82,17 +67,3 @@ class ComposedOperatorsTerm(ArithmeticTerm):
                            Mul(self._operator2, self.field.symbol, evaluate=False), evaluate=False),
                        evaluate=False)
 
-    def _integrations(self, basis, numerical=False):
-        nmod = len(basis)
-        if numerical:
-            args_list = [[(i, j), self.inner_product_definition.inner_product,
-                          (basis[i], self._evaluate(self.numerical_function(disable_commutativity(basis[j]))))]
-                         for i in range(nmod)
-                         for j in range(nmod)]
-        else:
-            args_list = [[(i, j), self.inner_product_definition.inner_product,
-                          (basis[i], self._evaluate(self.symbolic_function(disable_commutativity(basis[j]))))]
-                         for i in range(nmod)
-                         for j in range(nmod)]
-
-        return args_list

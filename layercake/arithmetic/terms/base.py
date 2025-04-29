@@ -13,15 +13,18 @@ from layercake.utils.operators import evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 
 
+# remarks:
+#   - multiple inner products may have to be considered in a given term in the future
+#   - Parameters may also have to be expanded on basis function in the future
+
 class ArithmeticTerm(ABC):
     """Base class for arithmetic terms"""
-    def __init__(self, field, inner_product_definition, name=''):
+    def __init__(self, name=''):
 
         self.name = name
         self.inner_products = None
-        self.field = field
-        self.inner_product_definition = inner_product_definition
         self._rank = None
+        self.inner_product_definition = None
 
     @property
     def rank(self):
@@ -32,6 +35,26 @@ class ArithmeticTerm(ABC):
 
     @property
     @abstractmethod
+    def _symbolic_expressions_list(self):
+        pass
+
+    @property
+    @abstractmethod
+    def _numerical_expressions_list(self):
+        pass
+
+    @property
+    @abstractmethod
+    def _symbolic_functions_list(self):
+        pass
+
+    @property
+    @abstractmethod
+    def _numerical_functions_list(self):
+        pass
+
+    @property
+    @abstractmethod
     def symbolic_expression(self):
         pass
 
@@ -39,6 +62,103 @@ class ArithmeticTerm(ABC):
     @abstractmethod
     def numerical_expression(self):
         pass
+
+    @property
+    @abstractmethod
+    def symbolic_function(self):
+        pass
+
+    @property
+    @abstractmethod
+    def numerical_function(self):
+        pass
+
+    @staticmethod
+    def _evaluate(func):
+        return enable_commutativity(evaluate_expr(func))
+
+    def _integrations(self, *basis, inner_product=None, numerical=False):
+        if len(basis) == 1:
+            nmod = len(basis[0])
+            nmodr = (range(nmod),) * (self._rank + 1)
+        else:
+            if len(basis) != self._rank + 1:
+                raise ValueError('The number of basis provided should match the rank of the term.')
+            nmod = tuple(map(lambda x: len(x), basis))
+            nmodr = list()
+            for n in nmod:
+                nmodr.append(range(n))
+        args_list = [(indices, inner_product, self._inner_product_arguments(basis, indices, numerical=numerical))
+                     for indices in product(*nmodr)]
+
+        return args_list
+
+    @abstractmethod
+    def _inner_product_arguments(self, basis, indices, numerical=False):
+        pass
+
+    def compute_inner_products(self, *basis, numerical=False, timeout=None, num_threads=None, permute=False):
+
+        if num_threads is None:
+            num_threads = cpu_count()
+
+        args_list = self._integrations(*basis,
+                                       inner_product=self.inner_product_definition.inner_product,
+                                       numerical=numerical)
+        if len(basis) == 1:
+            basis = basis[0]
+            nmod = len(basis)
+            rank = len(args_list[0][0]) - 1
+            matrix_shape = (nmod,) * (rank + 1)
+            substitutions = basis.substitutions
+        else:
+            if len(basis) != self._rank + 1:
+                raise ValueError('The number of basis provided should match the rank of the term.')
+            matrix_shape = tuple(map(lambda x: len(x), basis))
+            substitutions = list()
+            for b in basis:
+                substitutions = substitutions + b.substitutions
+
+        if numerical:
+            res = sp.zeros(matrix_shape, dtype=float, format='dok')
+        else:
+            res = None
+        with Pool(max_workers=num_threads) as pool:
+            output = _parallel_compute(pool, args_list, substitutions, res, timeout,
+                                       symbolic_int=not numerical, permute=permute)
+        if not numerical:
+            if self._rank == 1:
+                self.inner_products = ImmutableSparseMatrix(*matrix_shape, output)
+            else:
+                self.inner_products = ImmutableSparseNDimArray(output, matrix_shape)
+        else:
+            self.inner_products = res.to_coo()
+
+
+class SingleArithmeticTerm(ArithmeticTerm):
+    """Base class for arithmetic terms"""
+    def __init__(self, field, inner_product_definition, name=''):
+
+        ArithmeticTerm.__init__(self, name)
+        self._rank = 1
+        self.field = field
+        self.inner_product_definition = inner_product_definition
+
+    @property
+    def _symbolic_expressions_list(self):
+        return [self.symbolic_expression]
+
+    @property
+    def _numerical_expressions_list(self):
+        return [self.numerical_expression]
+
+    @property
+    def _symbolic_functions_list(self):
+        return [self.symbolic_function]
+
+    @property
+    def _numerical_functions_list(self):
+        return [self.numerical_function]
 
     @property
     def symbolic_function(self):
@@ -56,40 +176,32 @@ class ArithmeticTerm(ABC):
     def _evaluate(func):
         return enable_commutativity(evaluate_expr(func))
 
-    @abstractmethod
-    def _integrations(self, basis, numerical=False):
-        pass
-
-    def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
-
-        if num_threads is None:
-            num_threads = cpu_count()
-
-        args_list = self._integrations(basis, numerical)
-        nmod = len(basis)
-        rank = len(args_list[0][0]) - 1
-        matrix_shape = (nmod,) * (rank + 1)
-
+    def _inner_product_arguments(self, basis, indices, numerical=False):
         if numerical:
-            res = sp.zeros(matrix_shape, dtype=float, format='dok')
+            funcs_list = self._numerical_functions_list
         else:
-            res = None
-        with Pool(max_workers=num_threads) as pool:
-            output = _parallel_compute(pool, args_list, basis.substitutions, res, timeout,
-                                       symbolic_int=not numerical, permute=permute)
-        if not numerical:
-            if self._rank == 1:
-                self.inner_products = ImmutableSparseMatrix(*matrix_shape, output)
+            funcs_list = self._symbolic_functions_list
+        res = [None, None]
+        for i, k in enumerate(indices):
+            if i == 0:
+                if len(basis) > 1:
+                    res[0] = basis[i][k]
+                else:
+                    res[0] = basis[0][k]
             else:
-                self.inner_products = ImmutableSparseNDimArray(output, matrix_shape)
-        else:
-            self.inner_products = res.to_coo()
+                if len(basis) > 1:
+                    res[1] = self._evaluate(funcs_list[i-1](disable_commutativity(basis[i][k])))
+                else:
+                    res[1] = self._evaluate(funcs_list[i-1](disable_commutativity(basis[0][k])))
+
+        return tuple(res)
 
 
-class OperationOnTerms(ABC):
+class OperationOnTerms(ArithmeticTerm):
     """Base class for arithmetic terms"""
     def __init__(self, *terms, **kwargs):
 
+        ArithmeticTerm.__init__(self)
         if 'name' in kwargs:
             self.name = kwargs['name']
         if 'rank' in kwargs:
@@ -102,6 +214,7 @@ class OperationOnTerms(ABC):
             self._rank = len(terms)
         self._terms = terms
         self.inner_products = None
+        self.inner_product_definition = terms[0].inner_product_definition
 
     @property
     def number_of_terms(self):
@@ -173,7 +286,6 @@ class OperationOnTerms(ABC):
                 foo = self.operation(foo, dcexpr)
         return Lambda(tuple(ssdc), foo)
 
-
     @property
     def numerical_function_dummy(self):
         ss = symbols(" ".join(['x'+str(i) for i in range(self.number_of_terms)]))
@@ -204,25 +316,7 @@ class OperationOnTerms(ABC):
                 foo = self.operation(foo, dcexpr)
         return Lambda(tuple(ssdc), foo)
 
-    def _integrations(self, *basis, numerical=False):
-        if len(basis) == 1:
-            nmod = len(basis[0])
-            nmodr = (range(nmod),) * (self._rank + 1)
-        else:
-            if len(basis) != self._rank + 1:
-                raise ValueError('The number of basis provided should match the rank of the term.')
-            nmod = tuple(map(lambda x: len(x), basis))
-            nmodr = list()
-            for n in nmod:
-                nmodr.append(range(n))
-        inner_product = self._terms[0].inner_product_definition.inner_product
-        args_list = [(indices, inner_product, self._inner_product_arguments(basis, indices, numerical=numerical))
-                     for indices in product(*nmodr)]
-
-        return args_list
-
     def _inner_product_arguments(self, basis, indices, numerical=False):
-        res = list()
         if numerical:
             funcs_list = self._numerical_functions_list
         else:
@@ -247,41 +341,6 @@ class OperationOnTerms(ABC):
                         res[1] = self.operation(res[1], self._evaluate(funcs_list[i-1](disable_commutativity(basis[0][k]))))
 
         return tuple(res)
-
-    def compute_inner_products(self, *basis, numerical=False, timeout=None, num_threads=None, permute=False):
-
-        if num_threads is None:
-            num_threads = cpu_count()
-
-        args_list = self._integrations(*basis, numerical=numerical)
-        if len(basis) == 1:
-            basis = basis[0]
-            nmod = len(basis)
-            rank = len(args_list[0][0]) - 1
-            matrix_shape = (nmod,) * (rank + 1)
-            substitutions = basis.substitutions
-        else:
-            if len(basis) != self._rank + 1:
-                raise ValueError('The number of basis provided should match the rank of the term.')
-            matrix_shape = tuple(map(lambda x: len(x), basis))
-            substitutions = list()
-            for b in basis:
-                substitutions = substitutions + b.substitutions
-
-        if numerical:
-            res = sp.zeros(matrix_shape, dtype=float, format='dok')
-        else:
-            res = None
-        with Pool(max_workers=num_threads) as pool:
-            output = _parallel_compute(pool, args_list, substitutions, res, timeout,
-                                       symbolic_int=not numerical, permute=permute)
-        if not numerical:
-            if self._rank == 1:
-                self.inner_products = ImmutableSparseMatrix(*matrix_shape, output)
-            else:
-                self.inner_products = ImmutableSparseNDimArray(output, matrix_shape)
-        else:
-            self.inner_products = res.to_coo()
 
 
 def _apply(ls):
