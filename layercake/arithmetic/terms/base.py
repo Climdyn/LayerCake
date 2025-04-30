@@ -16,7 +16,7 @@ from layercake.utils.commutativity import enable_commutativity, disable_commutat
 # remarks:
 #   - multiple inner products may have to be considered in a given term in the future -> inner_product definition attached to fields with option to specify which one to use in term or be user-specified
 #   - basis attached to fields
-#   - Parameters may also have to be expanded on basis function in the future
+#   - Parameters may also have to be expanded on basis function in the future -> New ParameterField class with ParametersArray inside. Could also be used to defined constant terms.
 
 class ArithmeticTerm(ABC):
     """Base class for arithmetic terms"""
