@@ -48,6 +48,11 @@ div = Divergence(scs)
 lapo = OperatorTerm(psi, s, Laplacian, b.coordinate_system)
 e.add_rhs_terms([lapo, d])
 
-c = ComposedOperatorsTerm(psi, s, D, b.coordinate_system.coordinates_symbol_as_list[0], Laplacian, b.coordinate_system)
+cc = ComposedOperatorsTerm(psi, s, (D, D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[1],
+                                                      b.coordinate_system.coordinates_symbol_as_list[0],
+                                                      b.coordinate_system))
+#
+c = ComposedOperatorsTerm(psi, s, (D, Laplacian),(b.coordinate_system.coordinates_symbol_as_list[0],
+                                                      b.coordinate_system))
 
 e.add_rhs_term(c)
