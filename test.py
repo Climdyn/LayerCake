@@ -24,14 +24,14 @@ s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system
 
 p = u'ψ'
 
-psi = Field("psi", p, units="[m^2][s^-2]", latex=r'\psi', coordinate_system=b.coordinate_system)
+psi = Field("psi", p, b, s, units="[m^2][s^-2]", latex=r'\psi')
 
 aa = symbols('a')
 a = ScalingParameter(- 2, symbol=aa)
 x = symbols('x')
 
-l = LinearTerm(psi, s) #, a)
-d = OperatorTerm(psi, s, D, b.coordinate_system.coordinates_symbol_as_list[0]) #, a)
+l = LinearTerm(psi) #, prefactor=a)
+d = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0]) #, prefactor=a)
 
 e = Equation(psi, lhs_term=LinearTerm, inner_product_definition=s)
 e.add_rhs_term(l)
@@ -45,14 +45,18 @@ nab = Nabla(scs)
 lap = Laplacian(scs)
 div = Divergence(scs)
 
-lapo = OperatorTerm(psi, s, Laplacian, b.coordinate_system)
+lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
 e.add_rhs_terms([lapo, d])
 
-cc = ComposedOperatorsTerm(psi, s, (D, D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[1],
+cc = ComposedOperatorsTerm(psi, (D, D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[1],
                                                       b.coordinate_system.coordinates_symbol_as_list[0],
                                                       b.coordinate_system))
 #
-c = ComposedOperatorsTerm(psi, s, (D, Laplacian),(b.coordinate_system.coordinates_symbol_as_list[0],
+c = ComposedOperatorsTerm(psi, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[0],
                                                       b.coordinate_system))
 
 e.add_rhs_term(c)
+
+pp = ProductOfTerms(l, d)
+
+e.add_rhs_term(pp)

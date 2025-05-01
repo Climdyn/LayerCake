@@ -8,7 +8,7 @@ class Equation(object):
 
     _t = Symbol('t')
 
-    def __init__(self, field, lhs_term,  inner_product_definition, other_fields=None, lhs_prefactor=None):
+    def __init__(self, field, lhs_term,  inner_product_definition=None, other_fields=None, lhs_prefactor=None):
 
         self.field = field
         self.other_fields = other_fields

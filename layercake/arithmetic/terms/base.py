@@ -11,11 +11,10 @@ from scipy.integrate import dblquad
 from sympy import ImmutableSparseMatrix, ImmutableSparseNDimArray, lambdify, Lambda, symbols
 from layercake.utils.operators import evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
+from layercake.inner_products.definition import InnerProductDefinition
 
 
 # remarks:
-#   - multiple inner products may have to be considered in a given term in the future -> inner_product definition attached to fields with option to specify which one to use in term or be user-specified
-#   - basis attached to fields
 #   - Parameters may also have to be expanded on basis function in the future -> New ParameterField class with ParametersArray inside. Could also be used to defined constant terms.
 
 class ArithmeticTerm(ABC):
@@ -98,7 +97,11 @@ class ArithmeticTerm(ABC):
     def _inner_product_arguments(self, basis, indices, numerical=False):
         pass
 
-    def compute_inner_products(self, *basis, numerical=False, timeout=None, num_threads=None, permute=False):
+    @abstractmethod
+    def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        pass
+
+    def _compute_inner_products(self, *basis, numerical=False, timeout=None, num_threads=None, permute=False):
 
         if num_threads is None:
             num_threads = cpu_count()
@@ -139,13 +142,17 @@ class ArithmeticTerm(ABC):
 
 
 class SingleArithmeticTerm(ArithmeticTerm):
-    """Base class for arithmetic terms"""
-    def __init__(self, field, inner_product_definition, name=''):
+    """Base class for single arithmetic terms"""
+    def __init__(self, field, inner_product_definition=None, prefactor=None, name=''):
 
         ArithmeticTerm.__init__(self, name)
         self._rank = 2
         self.field = field
-        self.inner_product_definition = inner_product_definition
+        self.prefactor = prefactor
+        if inner_product_definition is not None:
+            self.inner_product_definition = inner_product_definition
+        else:
+            self.inner_product_definition = field.inner_product_definition
 
     @property
     def _symbolic_expressions_list(self):
@@ -199,9 +206,13 @@ class SingleArithmeticTerm(ArithmeticTerm):
 
         return tuple(res)
 
+    def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        basis_list = (basis, self.field.basis)
+        self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
+
 
 class OperationOnTerms(ArithmeticTerm):
-    """Base class for arithmetic terms"""
+    """Base class for operations on arithmetic terms"""
     def __init__(self, *terms, **kwargs):
 
         ArithmeticTerm.__init__(self)
@@ -217,7 +228,16 @@ class OperationOnTerms(ArithmeticTerm):
             self._rank = len(terms) + 1
         self._terms = terms
         self.inner_products = None
-        self.inner_product_definition = terms[0].inner_product_definition
+        if 'inner_product_definition' in kwargs:
+            ipdef = kwargs['inner_product_definition']
+            if issubclass(ipdef.__class__, InnerProductDefinition):
+                self.inner_product_definition = ipdef
+            elif isinstance(ipdef, int):
+                self.inner_product_definition = terms[ipdef].inner_product_definition
+            else:
+                self.inner_product_definition = terms[0].inner_product_definition
+        else:
+            self.inner_product_definition = terms[0].inner_product_definition
 
     @property
     def number_of_terms(self):
@@ -344,6 +364,12 @@ class OperationOnTerms(ArithmeticTerm):
                         res[1] = self.operation(res[1], self._evaluate(funcs_list[i-1](disable_commutativity(basis[0][k]))))
 
         return tuple(res)
+
+    def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        basis_list = [basis]
+        for term in self._terms:
+            basis_list.append(term.field.basis)
+        self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
 
 
 def _apply(ls):
