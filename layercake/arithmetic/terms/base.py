@@ -218,14 +218,21 @@ class OperationOnTerms(ArithmeticTerm):
         ArithmeticTerm.__init__(self)
         if 'name' in kwargs:
             self.name = kwargs['name']
+        compute_rank = False
         if 'rank' in kwargs:
             rank = kwargs['rank']
             if rank is not None:
                 self._rank = rank
             else:
-                self._rank = len(terms) + 1
+                compute_rank = True
         else:
-            self._rank = len(terms) + 1
+            compute_rank = True
+
+        if compute_rank:
+            self._rank = 1
+            for term in terms:
+                self._rank += term.rank - 1
+
         self._terms = terms
         self.inner_products = None
         if 'inner_product_definition' in kwargs:
