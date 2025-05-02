@@ -14,9 +14,6 @@ from layercake.utils.commutativity import enable_commutativity, disable_commutat
 from layercake.inner_products.definition import InnerProductDefinition
 
 
-# remarks:
-#   - Parameters may also have to be expanded on basis function in the future -> New ParameterField class with ParametersArray inside. Could also be used to defined constant terms.
-
 class ArithmeticTerm(ABC):
     """Base class for arithmetic terms"""
     def __init__(self, name=''):

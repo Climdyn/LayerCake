@@ -1,5 +1,6 @@
 
 from abc import ABC
+from sympy import Symbol, Function
 
 
 class Variable(ABC):
@@ -7,7 +8,10 @@ class Variable(ABC):
     def __init__(self, name, symbol, units=None, latex=None):
 
         self.name = name
-        self.symbol = symbol
+        if isinstance(symbol, str):
+            self.symbol = Symbol(symbol)
+        else:
+            self.symbol = symbol
         if units is None:
             self.units = ""
         else:

@@ -8,7 +8,7 @@
     Examples
     --------
 
-    >>> from layercake.variables import Parameter, ParametersArray
+    >>> from layercake.variables.parameter import Parameter, ParametersArray
     >>> import numpy as np
     >>> # defining a scale object to help Parameter compute the nondimensionalization
     >>> sc = ScaleParams()
