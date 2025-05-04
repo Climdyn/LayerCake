@@ -61,6 +61,8 @@ import warnings
 import numpy as np
 from fractions import Fraction
 
+from layercake.variables.utils import combine_units
+
 
 # TODO: Automatize warnings and errors
 # TODO: Implement operations for arrays
@@ -263,7 +265,7 @@ class ScalingParameter(float):
 
         res = float(self) * other
         if isinstance(other, (Parameter, ScalingParameter)):
-            units = _combine_units(self.units, other.units, '+')
+            units = combine_units(self.units, other.units, '+')
 
             if self.symbolic_expression is None:
                 if other.symbolic_expression is None:
@@ -320,7 +322,7 @@ class ScalingParameter(float):
 
         res = float(self) / other
         if isinstance(other, (ScalingParameter, Parameter)):
-            units = _combine_units(self.units, other.units, '-')
+            units = combine_units(self.units, other.units, '-')
             if self.symbolic_expression is None:
                 if other.symbolic_expression is None:
                     if self.symbol is not None and other.symbol is not None:
@@ -768,7 +770,7 @@ class Parameter(float):
         res = float(self) * other
         if isinstance(other, (Parameter, ScalingParameter)):
             if hasattr(other, "units"):
-                units = _combine_units(self.units, other.units, '+')
+                units = combine_units(self.units, other.units, '+')
             else:
                 units = ""
 
@@ -825,7 +827,7 @@ class Parameter(float):
 
         res = float(self) / other
         if isinstance(other, (ScalingParameter, Parameter)):
-            units = _combine_units(self.units, other.units, '-')
+            units = combine_units(self.units, other.units, '-')
             if self.symbolic_expression is None:
                 if other.symbolic_expression is None:
                     if self.symbol is not None and other.symbol is not None:
@@ -1288,60 +1290,3 @@ class ParametersArray(np.ndarray):
             return other / self
 
 
-def _combine_units(units1, units2, operation):
-    ul = units1.split('][')
-    ul[0] = ul[0][1:]
-    ul[-1] = ul[-1][:-1]
-    ol = units2.split('][')
-    ol[0] = ol[0][1:]
-    ol[-1] = ol[-1][:-1]
-
-    usl = list()
-    for us in ul:
-        up = us.split('^')
-        if len(up) == 1:
-            up.append("1")
-
-        if up[0]:
-            usl.append(tuple(up))
-
-    osl = list()
-    for os in ol:
-        op = os.split('^')
-        if len(op) == 1:
-            op.append("1")
-
-        if op[0]:
-            osl.append(tuple(op))
-
-    units_elements = list()
-    for us in usl:
-        new_us = [us[0]]
-        i = 0
-        for os in osl:
-            if os[0] == us[0]:
-                if operation == '-':
-                    power = int(os[1]) - int(us[1])
-                else:
-                    power = int(os[1]) + int(us[1])
-                del osl[i]
-                break
-            i += 1
-        else:
-            power = int(us[1])
-
-        if power != 0:
-            new_us.append(str(power))
-            units_elements.append(new_us)
-
-    if len(osl) != 0:
-        units_elements += osl
-
-    units = list()
-    for us in units_elements:
-        if us is not None:
-            if int(us[1]) != 1:
-                units.append("[" + us[0] + "^" + us[1] + "]")
-            else:
-                units.append("[" + us[0] + "]")
-    return "".join(units)
