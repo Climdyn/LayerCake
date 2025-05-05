@@ -1,12 +1,12 @@
 import numpy as np
 from sympy import Symbol, Function
-from layercake.variables.variable import Variable
+from layercake.variables.variable import Variable, VariablesArray
 from layercake.variables.parameter import ParametersArray
 
 
 class Field(Variable):
 
-    def __init__(self, name, symbol, basis, inner_product_definition=None, units=None, latex=None):
+    def __init__(self, name, symbol, basis, inner_product_definition=None, units=None, latex=None, state=None, **state_kwargs):
 
         _t = Symbol('t')
 
@@ -16,9 +16,15 @@ class Field(Variable):
         self.coordinate_system = basis.coordinate_system
         self.inner_product_definition = inner_product_definition
         self.function = Function(symbol)(_t, *self.coordinate_system.coordinates_symbol_as_list)
+        if state is None:
+            self.state = VariablesArray(np.zeros(len(self.basis)), name, symbol, latex=latex, **state_kwargs)
+        elif isinstance(state, VariablesArray):
+            self.state = state
+        else:
+            self.state = VariablesArray(state, name, symbol, latex=latex, **state_kwargs)
 
     def __str__(self):
-        return self.name + ' (symbol: ' + str(self.symbol) + ',  units: ' + self.units + ')'
+        return self.name + ' (symbol: ' + str(self.symbol) + ',  units: ' + self.units + ', state: ' + str(self.state) + ' )'
 
     def __repr__(self):
         return self.__str__()
