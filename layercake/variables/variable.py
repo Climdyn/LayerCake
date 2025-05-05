@@ -31,25 +31,30 @@ class Variable(ABC):
 
 
 class VariablesArray(np.ndarray):
-    """Base class of model's array of parameters.
+    """Base class of model's array of variables values.
 
     Parameters
     ----------
-    values: list(float) or ~numpy.ndarray(float) or list(Parameter) or ~numpy.ndarray(Parameter) or list(ScalingParameter) or ~numpy.ndarray(ScalingParameter)
-        Values of the parameter array.
-    input_dimensional: bool, optional
-        Specify whether the value provided is dimensional or not. Default to `True`.
+    values: list(float) or ~numpy.ndarray(float)
+        Values of the variables array.
+    name: str
+        General name of the variables.
+    symbol: str or ~sympy.core.symbol.Symbol
+        A `Sympy`_ symbol to represent the variables in symbolic expressions.
     units: str, optional
         The units of the provided value. Used to compute the conversion between dimensional and nondimensional
         value. Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
         Empty by default.
+    latex: str, optional
+        A latex string representing the variables. Used in plots.
+        Empty by default.
     scale_object: ScaleParams, optional
         A scale parameters object to compute the conversion between dimensional and nondimensional value.
         `None` by default. If `None`, cannot transform between dimensional and nondimentional value.
-    symbol: ~sympy.core.symbol.Symbol
-        A `Sympy`_ symbol to represent the variables in symbolic expressions.
+    input_dimensional: bool, optional
+        Specify whether the value provided is dimensional or not. Default to `True`.
     return_dimensional: bool, optional
-        Defined if the value returned by the parameter is dimensional or not. Default to `False`.
+        Defined if the value returned by the variables is dimensional or not. Default to `False`.
 
     Warnings
     --------
@@ -121,9 +126,34 @@ class VariablesArray(np.ndarray):
             return self
 
     @property
+    def symbol(self):
+        """~sympy.core.symbol.Symbol: Returns the general symbol of the variables in the array."""
+        return self._symbol
+
+    @property
     def symbols(self):
-        """~numpy.ndarray(~sympy.core.symbol.Symbol): Returns the symbol of the parameters in the array."""
+        """~numpy.ndarray(~sympy.core.symbol.Symbol): Returns the symbols of the variables in the array."""
         return self._symbols
+
+    @property
+    def latex(self):
+        """str: Returns the general latex expression of the variables in the array."""
+        return self._latex
+
+    @property
+    def latexes(self):
+        """str: Returns the latex expressions of the variables in the array."""
+        return self._latexes
+
+    @property
+    def name(self):
+        """str: Returns the general name of the variables in the array."""
+        return self._name
+
+    @property
+    def names(self):
+        """str: Returns the names of the variables in the array."""
+        return self._names
 
     @property
     def input_dimensional(self):
@@ -159,7 +189,7 @@ class VariablesArray(np.ndarray):
 
     @property
     def units(self):
-        """str: The units of the dimensional value."""
+        """str: The units of the dimensional values."""
         return self._units
 
     @property
