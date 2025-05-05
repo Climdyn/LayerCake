@@ -11,6 +11,7 @@ from layercake.arithmetic.terms.operators import OperatorTerm, ComposedOperators
 from layercake.arithmetic.equation import Equation
 from layercake.variables.systems import SphericalCoordinateSystem
 from layercake.utils.operators import Nabla, Laplacian, Divergence, D
+from layercake.bakery.layers import Layer
 
 _n = symbols('n')
 
@@ -69,3 +70,6 @@ pf = ParameterField('R', u'R', rr, b, s)
 lpf = LinearTerm(pf)
 
 e.add_rhs_term(lpf)
+
+layer = Layer()
+layer.add_equation(e)

@@ -22,6 +22,9 @@ class Field(Variable):
             self.state = state
         else:
             self.state = VariablesArray(state, name, symbol, latex=latex, **state_kwargs)
+        # self._layer = None
+        # self._cake = None
+        # self._equation = None
 
     def __str__(self):
         return self.name + ' (symbol: ' + str(self.symbol) + ',  units: ' + self.units + ', state: ' + str(self.state) + ' )'
