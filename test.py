@@ -11,7 +11,7 @@ from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.arithmetic.terms.operators import OperatorTerm, ComposedOperatorsTerm
 from layercake.arithmetic.equation import Equation
 from layercake.variables.systems import SphericalCoordinateSystem
-from layercake.utils.operators import Nabla, Laplacian, Divergence, D
+from layercake.arithmetic.symbolic.operators import Nabla, Laplacian, Divergence, D
 from layercake.bakery.layers import Layer
 from layercake.bakery.cake import Cake
 

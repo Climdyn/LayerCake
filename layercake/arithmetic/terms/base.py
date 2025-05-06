@@ -9,7 +9,7 @@ from itertools import product
 
 from scipy.integrate import dblquad
 from sympy import ImmutableSparseMatrix, ImmutableSparseNDimArray, lambdify, Lambda, symbols
-from layercake.utils.operators import evaluate_expr
+from layercake.arithmetic.symbolic.operators import evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 from layercake.inner_products.definition import InnerProductDefinition
 

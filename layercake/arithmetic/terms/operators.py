@@ -1,6 +1,5 @@
 
 from layercake.arithmetic.terms.base import SingleArithmeticTerm
-from layercake.utils.commutativity import disable_commutativity
 from sympy import Mul
 
 
