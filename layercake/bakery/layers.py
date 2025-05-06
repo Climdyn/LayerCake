@@ -1,6 +1,8 @@
 
 import numpy as np
 import sparse as sp
+from layercake.variables.field import ParameterField
+from layercake.arithmetic.terms.constant import ConstantTerm
 
 
 class Layer(object):
@@ -55,7 +57,7 @@ class Layer(object):
         if numerical:
             if self._cake is not None:
                 # self._order = ...
-                shape = tuple([self._cake.ndim + 1] + [self.ndim + 1] * (self.maximum_rank - 1))
+                shape = tuple([self.ndim] + [self._cake.ndim + 1] * (self.maximum_rank - 1))
             else:
                 self._order = 0
                 shape = tuple([self.ndim] + [self.ndim + 1] * (self.maximum_rank - 1))
@@ -66,15 +68,19 @@ class Layer(object):
             order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
-                lhs_mat[orderf:orderf+ndim, orderf:orderf+ndim] = eq.lhs_term.inner_products.todense()
+                lhs_mat[orderf:orderf+ndim, orderf:orderf+ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
                 for term in eq.terms:
                     slices = [slice(orderf, orderf+ndim)] + [slice(order, order+ndim) for _ in range(term.rank-1)]
                     zeros = [0 for _ in range(term.rank, len(self.tensor.shape))]
                     args = tuple(slices+zeros)
-                    self.tensor[args] = self.tensor[args] + term.inner_products.todense()
+                    if isinstance(term, ConstantTerm):
+                        increment = term.field.parameters.astype(float)
+                    else:
+                        increment = term.inner_products.todense()
+                    self.tensor[args] = self.tensor[args] + increment
                 order += ndim
                 orderf += ndim
-            self.tensor = sp.DOK(np.tensordot(np.linalg.inv(lhs_mat), self.tensor.to_coo(), 1))
+            self.tensor = sp.DOK(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
 
         else:
             pass
