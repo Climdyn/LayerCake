@@ -6,6 +6,7 @@ from layercake.variables.parameter import ScalingParameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
 from layercake.arithmetic.terms.linear import LinearTerm
+from layercake.arithmetic.terms.constant import ConstantTerm
 from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.arithmetic.terms.operators import OperatorTerm, ComposedOperatorsTerm
 from layercake.arithmetic.equation import Equation
@@ -67,7 +68,7 @@ e.add_rhs_term(pp)
 rr = np.zeros(len(b))
 rr[0] = 0.1
 pf = ParameterField('R', u'R', rr, b, s)
-lpf = LinearTerm(pf)
+lpf = ConstantTerm(pf)
 
 e.add_rhs_term(lpf)
 

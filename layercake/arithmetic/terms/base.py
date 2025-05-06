@@ -130,12 +130,18 @@ class ArithmeticTerm(ABC):
         if not numerical:
             if self._rank > 2:
                 self.inner_products = ImmutableSparseNDimArray(output, matrix_shape)
-            elif self._rank == 2:
+            elif self._rank in [1, 2]:
                 self.inner_products = ImmutableSparseMatrix(*matrix_shape, output)
             else:
                 raise ValueError('Rank of the arithmetic term is wrong, something odd is happening.')
         else:
             self.inner_products = res.to_coo()
+
+    def __repr__(self):
+        return self.symbolic_expression.__str__()
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class SingleArithmeticTerm(ArithmeticTerm):
@@ -211,6 +217,10 @@ class SingleArithmeticTerm(ArithmeticTerm):
 class OperationOnTerms(ArithmeticTerm):
     """Base class for operations on arithmetic terms"""
     def __init__(self, *terms, **kwargs):
+
+        for term in terms:
+            if term.rank == 1:
+                raise ValueError(f'The term {term} is of rank 1, which is not accepted in OperationOnTerms input.')
 
         ArithmeticTerm.__init__(self)
         if 'name' in kwargs:

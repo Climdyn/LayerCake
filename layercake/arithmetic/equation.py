@@ -76,3 +76,8 @@ class Equation(object):
     def compute_lhs_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
         self.lhs_term.compute_inner_products(basis, numerical, timeout, num_threads, permute)
 
+    def __repr__(self):
+        return self.symbolic_expression.__str__()
+
+    def __str__(self):
+        return self.__repr__()
