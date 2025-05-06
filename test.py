@@ -13,6 +13,7 @@ from layercake.arithmetic.equation import Equation
 from layercake.variables.systems import SphericalCoordinateSystem
 from layercake.utils.operators import Nabla, Laplacian, Divergence, D
 from layercake.bakery.layers import Layer
+from layercake.bakery.cake import Cake
 
 _n = symbols('n')
 
@@ -67,6 +68,7 @@ e.add_rhs_term(pp)
 
 rr = np.zeros(len(b))
 rr[0] = 0.1
+rr[1] = 0.2
 pf = ParameterField('R', u'R', rr, b, s)
 lpf = ConstantTerm(pf)
 
@@ -74,3 +76,6 @@ e.add_rhs_term(lpf)
 
 layer = Layer()
 layer.add_equation(e)
+
+cake = Cake()
+cake.add_layer(layer)

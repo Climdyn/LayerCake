@@ -80,7 +80,7 @@ class Layer(object):
                     self.tensor[args] = self.tensor[args] + increment
                 order += ndim
                 orderf += ndim
-            self.tensor = sp.DOK(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
+            self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
 
         else:
             pass
