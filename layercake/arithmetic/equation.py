@@ -8,12 +8,13 @@ class Equation(object):
 
     _t = Symbol('t')
 
-    def __init__(self, field, lhs_term,  inner_product_definition=None, other_fields=None, lhs_prefactor=None):
+    def __init__(self, field, lhs_term, inner_product_definition=None, other_fields=None):
 
         self.field = field
         self.other_fields = other_fields
         self.terms = list()
-        self.lhs_term = lhs_term(field, inner_product_definition, lhs_prefactor, 'Left Hand Side')
+        self.lhs_term = lhs_term
+        self.lhs_term.field = self.field
         self._layer = None
         self._cake = None
 

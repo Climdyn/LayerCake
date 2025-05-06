@@ -1,7 +1,6 @@
 
 import numpy as np
 import sparse as sp
-from layercake.variables.field import ParameterField
 from layercake.arithmetic.terms.constant import ConstantTerm
 
 
@@ -12,7 +11,21 @@ class Layer(object):
         self.equations = list()
         self.tensor = None
         self._cake = None
-        self._order = 0
+        self._cake_order = 0
+
+    @property
+    def _cake_first_index(self):
+        if self._cake is not None:
+            return self._cake._layers_first_index[self._cake_order]
+        else:
+            return None
+
+    @property
+    def _cake_last_index(self):
+        if self._cake is not None:
+            return self._cake._layers_last_index[self._cake_order]
+        else:
+            return None
 
     def add_equation(self, equation):
         self.equations.append(equation)
@@ -56,21 +69,18 @@ class Layer(object):
 
         if numerical:
             if self._cake is not None:
-                # self._order = ...
-                shape = tuple([self.ndim] + [self._cake.ndim + 1] * (self.maximum_rank - 1))
+                shape = tuple([self.ndim + 1] + [self._cake.ndim + 1] * (self.maximum_rank - 1))
             else:
-                self._order = 0
-                shape = tuple([self.ndim] + [self.ndim + 1] * (self.maximum_rank - 1))
+                shape = tuple([self.ndim + 1] * self.maximum_rank)
 
             self.tensor = sp.zeros(shape, dtype=np.float64, format='dok')
-            lhs_mat = np.zeros((self.ndim, self.ndim))
-            orderf = 0
+            lhs_mat = np.zeros((self.ndim+1, self.ndim+1))
             order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
-                lhs_mat[orderf:orderf+ndim, orderf:orderf+ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
+                lhs_mat[order:order+ndim, order:order+ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
                 for term in eq.terms:
-                    slices = [slice(orderf, orderf+ndim)] + [slice(order, order+ndim) for _ in range(term.rank-1)]
+                    slices = [slice(order, order+ndim)] + [slice(order, order+ndim) for _ in range(term.rank-1)]
                     zeros = [0 for _ in range(term.rank, len(self.tensor.shape))]
                     args = tuple(slices+zeros)
                     if isinstance(term, ConstantTerm):
@@ -79,7 +89,6 @@ class Layer(object):
                         increment = term.inner_products.todense()
                     self.tensor[args] = self.tensor[args] + increment
                 order += ndim
-                orderf += ndim
             self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
 
         else:

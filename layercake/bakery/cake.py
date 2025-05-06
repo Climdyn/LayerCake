@@ -12,6 +12,7 @@ class Cake(object):
         self.layers = list()
 
     def add_layer(self, layer):
+        layer._cake_order = len(self.layers)
         self.layers.append(layer)
         layer._cake = self
 
@@ -39,37 +40,37 @@ class Cake(object):
         return max_rank
 
     @property
-    def layers_first_index(self):
-        idx = [0]
+    def _layers_first_index(self):
+        idx = [1]
         for layer in self.layers[:-1]:
             idx.append(idx[-1] + layer.ndim)
         return idx
 
     @property
-    def layers_last_index(self):
+    def _layers_last_index(self):
         idx = list()
         for i, layer in enumerate(self.layers):
             if i == 0:
-                idx.append(layer.ndim - 1)
+                idx.append(layer.ndim)
             else:
-                idx.append(idx[-1] + layer.ndim)
+                idx.append(idx[-1] + layer.ndim + 1)
         return idx
 
     @property
     def tensor(self):
         if isinstance(self.layers[0].tensor, sp.COO):
-            shape = tuple([self.ndim] + [self.ndim + 1] * (self.maximum_rank - 1))
+            shape = tuple([self.ndim + 1] * self.maximum_rank)
             tensor = sp.zeros(shape, dtype=np.float64, format='dok')
             for i, layer in enumerate(self.layers):
                 lmax = layer.maximum_rank
                 if i < self.number_of_layers - 1:
-                    slices = [slice(self.layers_first_index[i], self.layers_first_index[i+1])] + [slice(0, None) for _ in range(lmax - 1)]
+                    slices = [slice(self._layers_first_index[i], self._layers_first_index[i + 1])] + [slice(0, None) for _ in range(lmax - 1)]
                     zeros = [0 for _ in range(lmax, len(layer.tensor.shape))]
                 else:
-                    slices = [slice(self.layers_first_index[i], None)] + [slice(0, None) for _ in range(lmax - 1)]
+                    slices = [slice(self._layers_first_index[i], None)] + [slice(0, None) for _ in range(lmax - 1)]
                     zeros = [0 for _ in range(lmax, len(layer.tensor.shape))]
                 args = tuple(slices + zeros)
-                tensor[args] = tensor[args] + layer.tensor.todense()
+                tensor[args] = tensor[args] + layer.tensor.todense()[1:]
                 tensor = tensor.to_coo()
         else:
             tensor = None
@@ -83,7 +84,6 @@ class Cake(object):
             return self._jacobian_from_tensor(tensor)
         else:
             return None
-
 
     @staticmethod
     def _jacobian_from_tensor(tensor):
@@ -120,7 +120,7 @@ class Cake(object):
                 def f(t, x):
                     xx = np.concatenate((np.full((1,), 1.), x))
                     xr = sparse_mul(xx, coo, val)
-                    return xr[:-1]
+                    return xr[1:]
 
                 jcoo = self.jacobian_tensor.coords.T
                 jval = self.jacobian_tensor.data
