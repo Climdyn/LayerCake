@@ -98,7 +98,7 @@ class Layer(object):
                             if contract:
                                 for i in sorted(list(contract.keys()), reverse=True):
                                     params = contract[i]
-                                    increment = np.tensordot(increment, params, ((i,), (0,)))
+                                    increment = np.tensordot(increment, params, ((i+1,), (0,)))
                                     args[i] = 0
                         elif hasattr(term, 'field'):
                             if isinstance(term.field, ParameterField):

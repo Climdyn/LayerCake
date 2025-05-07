@@ -25,7 +25,7 @@ a = ScalingParameter(- 1, symbol=aa)
 _n = symbols('n')
 n = ScalingParameter(1.3, symbol=_n)
 parameters = {'n': n}
-b = contiguous_channel_basis(1, 2, parameters)
+b = contiguous_channel_basis(2, 2, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
 
 # Defining the field
@@ -52,6 +52,31 @@ jacobian2 = ProductOfTerms(dypsi, dxlapopsi)
 
 e.add_rhs_terms([jacobian1, jacobian2])
 
+# adding an orographic term
+g = 0.2
+gamma = symbols(u'γ')
+gammap = ScalingParameter(g, symbol=gamma)
+mgamma = symbols(u'g')
+mgammap = ScalingParameter(-g, symbol=mgamma)
+hh = np.zeros(len(b))
+hh[1] = np.sqrt(2.)
+h = ParameterField('h', u'h', hh, b, s)
+
+hdxpsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=mgammap)
+hdypsi = OperatorTerm(h, D, b.coordinate_system.coordinates_symbol_as_list[1], prefactor=gammap)
+
+hdxlapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[0],
+                                                        b.coordinate_system))
+
+hdylapopsi = ComposedOperatorsTerm(h, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[1],
+                                                        b.coordinate_system))
+
+hjacobian1 = ProductOfTerms(hdxpsi, hdylapopsi)
+hjacobian2 = ProductOfTerms(hdypsi, hdxlapopsi)
+
+e.add_rhs_terms([hjacobian1, hjacobian2])
+
+
 # adding the beta term
 betaa = symbols(u'β')
 beta = ScalingParameter(-1.25, symbol=betaa)
@@ -65,12 +90,14 @@ kd = ScalingParameter(-0.1, symbol=kdd)
 friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd)
 e.add_rhs_term(friction)
 
-# adding a constant term
+# adding an interaction with a background streamfunction
+Cdd = symbols('C')
+Cd = ScalingParameter(0.1, symbol=Cdd)
 rr = np.zeros(len(b))
-rr[0] = - 0.1 * 0.95
-rr[3] = + 0.1 * 4 * 0.76095
-C = ParameterField('R', u'R', rr, b, s)
-CT = ConstantTerm(C)
+rr[0] = 0.95
+rr[3] = - 0.76095
+C = ParameterField('eta', u'η', rr, b, s)
+CT = OperatorTerm(C, Laplacian, b.coordinate_system, prefactor=Cd)
 
 e.add_rhs_term(CT)
 
