@@ -2,6 +2,8 @@
 import numpy as np
 import sparse as sp
 from layercake.arithmetic.terms.constant import ConstantTerm
+from layercake.arithmetic.terms.operations import ProductOfTerms
+from layercake.variables.field import ParameterField
 
 
 class Layer(object):
@@ -82,11 +84,28 @@ class Layer(object):
                 for term in eq.terms:
                     slices = [slice(order, order+ndim)] + [slice(order, order+ndim) for _ in range(term.rank-1)]
                     zeros = [0 for _ in range(term.rank, len(self.tensor.shape))]
-                    args = tuple(slices+zeros)
+                    args = slices+zeros
                     if isinstance(term, ConstantTerm):
                         increment = term.field.parameters.astype(float)
                     else:
                         increment = term.inner_products.todense()
+                        if isinstance(term, ProductOfTerms):
+                            contract = dict()
+                            for i, t in enumerate(term._terms):
+                                if isinstance(t.field, ParameterField):
+                                    params = t.field.parameters.astype(float)
+                                    contract[i] = params
+                            if contract:
+                                for i in sorted(list(contract.keys()), reverse=True):
+                                    params = contract[i]
+                                    increment = np.tensordot(increment, params, ((i,), (0,)))
+                                    args[i] = 0
+                        elif hasattr(term, 'field'):
+                            if isinstance(term.field, ParameterField):
+                                params = term.field.parameters.astype(float)
+                                increment = np.tensordot(increment, params, ((1,), (0,)))
+                                args[1] = 0
+                    args = tuple(args)
                     self.tensor[args] = self.tensor[args] + increment
                 order += ndim
             self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
