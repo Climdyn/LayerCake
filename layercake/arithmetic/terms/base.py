@@ -6,18 +6,21 @@ from concurrent.futures import TimeoutError
 from multiprocessing import cpu_count
 from sympy.utilities.iterables import multiset_permutations
 from itertools import product
+from copy import deepcopy
 
 from scipy.integrate import dblquad
 from sympy import ImmutableSparseMatrix, ImmutableSparseNDimArray, lambdify, Lambda, symbols
 from layercake.arithmetic.symbolic.operators import evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 from layercake.inner_products.definition import InnerProductDefinition
+from layercake.arithmetic.utils import sproduct
 
 
 class ArithmeticTerm(ABC):
     """Base class for arithmetic terms"""
-    def __init__(self, name=''):
+    def __init__(self, name='', sign=1):
 
+        self.sign = sign
         self.name = name
         self.inner_products = None
         self._rank = None
@@ -143,12 +146,20 @@ class ArithmeticTerm(ABC):
     def __str__(self):
         return self.__repr__()
 
+    def copy(self):
+        return deepcopy(self)
+
+    def __neg__(self):
+        neg = self.copy()
+        neg.sign *= -1
+        return neg
+
 
 class SingleArithmeticTerm(ArithmeticTerm):
     """Base class for single arithmetic terms"""
-    def __init__(self, field, inner_product_definition=None, prefactor=None, name=''):
+    def __init__(self, field, inner_product_definition=None, prefactor=None, name='', sign=1):
 
-        ArithmeticTerm.__init__(self, name)
+        ArithmeticTerm.__init__(self, name, sign)
         self._rank = 2
         self.field = field
         self.prefactor = prefactor
@@ -218,11 +229,16 @@ class OperationOnTerms(ArithmeticTerm):
     """Base class for operations on arithmetic terms"""
     def __init__(self, *terms, **kwargs):
 
+        if 'sign' in kwargs:
+            sign = kwargs['sign']
+        else:
+            sign = 1
+
         for term in terms:
             if term.rank == 1:
                 raise ValueError(f'The term {term} is of rank 1, which is not accepted in OperationOnTerms input.')
 
-        ArithmeticTerm.__init__(self)
+        ArithmeticTerm.__init__(self, sign=sign)
         if 'name' in kwargs:
             self.name = kwargs['name']
         compute_rank = False
@@ -263,11 +279,11 @@ class OperationOnTerms(ArithmeticTerm):
 
     @property
     def symbolic_expression(self):
-        return self.operation(*self._symbolic_expressions_list, evaluate=False)
+        return sproduct(self.sign, self.operation(*self._symbolic_expressions_list))
 
     @property
     def numerical_expression(self):
-        return self.operation(*self._numerical_expressions_list, evaluate=False)
+        return sproduct(self.sign, self.operation(*self._numerical_expressions_list))
 
     @property
     def _symbolic_expressions_list(self):
@@ -305,7 +321,7 @@ class OperationOnTerms(ArithmeticTerm):
                 foo = dcexpr
             else:
                 foo = self.operation(foo, dcexpr)
-        return Lambda(tuple(ssdc), foo)
+        return Lambda(tuple(ssdc), sproduct(self.sign, foo))
 
     @property
     def symbolic_function(self):
@@ -321,7 +337,7 @@ class OperationOnTerms(ArithmeticTerm):
                 foo = dcexpr
             else:
                 foo = self.operation(foo, dcexpr)
-        return Lambda(tuple(ssdc), foo)
+        return Lambda(tuple(ssdc), sproduct(self.sign, foo))
 
     @property
     def numerical_function_dummy(self):
@@ -335,7 +351,7 @@ class OperationOnTerms(ArithmeticTerm):
                 foo = dcexpr
             else:
                 foo = self.operation(foo, dcexpr)
-        return Lambda(tuple(ssdc), foo)
+        return Lambda(tuple(ssdc),  sproduct(self.sign, foo))
 
     @property
     def numerical_function(self):
@@ -351,7 +367,7 @@ class OperationOnTerms(ArithmeticTerm):
                 foo = dcexpr
             else:
                 foo = self.operation(foo, dcexpr)
-        return Lambda(tuple(ssdc), foo)
+        return Lambda(tuple(ssdc), sproduct(self.sign, foo))
 
     def _inner_product_arguments(self, basis, indices, numerical=False):
         if numerical:
@@ -384,6 +400,7 @@ class OperationOnTerms(ArithmeticTerm):
         for term in self._terms:
             basis_list.append(term.field.basis)
         self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
+        self.inner_products = self.sign * self.inner_products
 
 
 def _apply(ls):

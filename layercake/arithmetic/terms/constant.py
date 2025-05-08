@@ -3,17 +3,18 @@ from layercake.arithmetic.terms.base import ArithmeticTerm
 from layercake.variables.field import ParameterField
 
 from layercake.utils.commutativity import disable_commutativity
+from layercake.arithmetic.utils import sproduct
 from sympy import Lambda
 
 
 class ConstantTerm(ArithmeticTerm):
 
-    def __init__(self, parameters_field, name=''):
+    def __init__(self, parameters_field, name='', sign=1):
 
         if not isinstance(parameters_field, ParameterField):
             raise ValueError('Input field for constant field must be a ParameterField object.')
 
-        ArithmeticTerm.__init__(self, name)
+        ArithmeticTerm.__init__(self, name, sign=sign)
 
         self._rank = 1
         self.field = parameters_field
@@ -48,11 +49,11 @@ class ConstantTerm(ArithmeticTerm):
 
     @property
     def symbolic_expression(self):
-        return self.field.symbol
+        return sproduct(self.sign, self.field.symbol)
 
     @property
     def numerical_expression(self):
-        return self.symbolic_expression
+        return sproduct(self.sign, self.symbolic_expression)
 
     def _inner_product_arguments(self, basis, indices, numerical=False):
         pass

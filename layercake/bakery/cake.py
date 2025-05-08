@@ -173,7 +173,7 @@ class Cake(object):
             Specify the name to print beside the values of the tensor. Default to `QgsTensor`.
         """
         if not tensor_name:
-            tensor_name = 'QgsTensor'
+            tensor_name = 'Tensor'
         for coo, val in zip(self.tensor.coords.T, self.tensor.data):
             self._string_format(print, tensor_name, coo, val)
 
@@ -200,7 +200,7 @@ class Cake(object):
             Specify the name to print beside the values of the tensor. Default to `QgsTensorJacobian`.
         """
         if not tensor_name:
-            tensor_name = 'QgsTensorJacobian'
+            tensor_name = 'TensorJacobian'
         for coo, val in zip(self.jacobian_tensor.coords.T, self.jacobian_tensor.data):
             self._string_format(print, tensor_name, coo, val)
 

@@ -15,11 +15,6 @@ from layercake.bakery.layers import Layer
 from layercake.bakery.cake import Cake
 
 
-# Defining a parameter equal to -1
-
-aa = symbols('a')
-a = ScalingParameter(- 1, symbol=aa)
-
 # Defining the domain
 _n = symbols('n')
 n = ScalingParameter(1.3, symbol=_n)
@@ -37,8 +32,8 @@ lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
 e = Equation(psi, lhs_term=lapo, inner_product_definition=s)
 
 # Defining the Jacobian
-dxpsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=a)
-dypsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[1]) #, prefactor=a)
+dxpsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0])
+dypsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[1])
 
 dxlapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[0],
                                                         b.coordinate_system))
@@ -46,7 +41,7 @@ dxlapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (b.coordinate_system.coor
 dylapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[1],
                                                         b.coordinate_system))
 
-jacobian1 = ProductOfTerms(dxpsi, dylapopsi)
+jacobian1 = ProductOfTerms(dxpsi, dylapopsi, sign=-1)
 jacobian2 = ProductOfTerms(dypsi, dxlapopsi)
 
 e.add_rhs_terms([jacobian1, jacobian2])
@@ -55,19 +50,17 @@ e.add_rhs_terms([jacobian1, jacobian2])
 g = 0.1
 gamma = symbols(u'γ')
 gammap = ScalingParameter(g, symbol=gamma)
-mgamma = symbols(u'g')
-mgammap = ScalingParameter(-g, symbol=mgamma)
 hh = np.zeros(len(b))
 hh[1] = 1.
 h = ParameterField('h', u'h', hh, b, s)
 
-hdxpsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=mgammap)
+hdxpsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=gammap)
 hdyh = OperatorTerm(h, D, b.coordinate_system.coordinates_symbol_as_list[1])
 
 hdypsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[1], prefactor=gammap)
 hdxh = OperatorTerm(h, D, b.coordinate_system.coordinates_symbol_as_list[0])
 
-hjacobian1 = ProductOfTerms(hdxpsi, hdyh)
+hjacobian1 = ProductOfTerms(hdxpsi, hdyh, sign=-1)
 hjacobian2 = ProductOfTerms(hdypsi, hdxh)
 
 e.add_rhs_terms([hjacobian1, hjacobian2])
@@ -75,15 +68,15 @@ e.add_rhs_terms([hjacobian1, hjacobian2])
 
 # adding the beta term
 betaa = symbols(u'β')
-beta = ScalingParameter(-0.20964969238375256, symbol=betaa)
-betaterm = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=beta)
+beta = ScalingParameter(0.20964969238375256, symbol=betaa)
+betaterm = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=beta, sign=-1)
 
 e.add_rhs_term(betaterm)
 
 # adding a friction
 kdd = symbols('k_d')
-kd = ScalingParameter(-0.05, symbol=kdd)
-friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd)
+kd = ScalingParameter(0.05, symbol=kdd)
+friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd, sign=-1)
 e.add_rhs_term(friction)
 
 # adding an interaction with a background streamfunction

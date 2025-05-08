@@ -1,23 +1,17 @@
 
 from layercake.arithmetic.terms.base import OperationOnTerms
-from layercake.utils.commutativity import disable_commutativity
-from sympy import Mul
+from layercake.arithmetic.utils import sproduct
 
 
 class ProductOfTerms(OperationOnTerms):
 
-    def __init__(self, *terms, name='', rank=None):
+    def __init__(self, *terms, name='', rank=None, sign=1):
 
         if len(terms) < 2:
             raise ValueError('More than one term must be provided to this class.')
 
-        OperationOnTerms.__init__(self, *terms, name=name, rank=rank)
+        OperationOnTerms.__init__(self, *terms, name=name, rank=rank, sign=sign)
 
     def operation(self, *terms, evaluate=False):
-        for i, t in enumerate(terms):
-            if i == 0:
-                res = t
-            else:
-                res = Mul(res, t, evaluate=evaluate)
-        return res
+        return sproduct(*terms, evaluate=evaluate)
 
