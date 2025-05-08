@@ -63,16 +63,13 @@ hh[1] = np.sqrt(2.)
 h = ParameterField('h', u'h', hh, b, s)
 
 hdxpsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=mgammap)
-hdypsi = OperatorTerm(h, D, b.coordinate_system.coordinates_symbol_as_list[1], prefactor=gammap)
+hdyh = OperatorTerm(h, D, b.coordinate_system.coordinates_symbol_as_list[1], prefactor=gammap)
 
-hdxlapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[0],
-                                                        b.coordinate_system))
+hdypsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[1], prefactor=gammap)
+hdxh = OperatorTerm(h, D, b.coordinate_system.coordinates_symbol_as_list[1], prefactor=gammap)
 
-hdylapopsi = ComposedOperatorsTerm(h, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[1],
-                                                        b.coordinate_system))
-
-hjacobian1 = ProductOfTerms(hdxpsi, hdylapopsi)
-hjacobian2 = ProductOfTerms(hdypsi, hdxlapopsi)
+hjacobian1 = ProductOfTerms(hdxpsi, hdyh)
+hjacobian2 = ProductOfTerms(hdypsi, hdxh)
 
 e.add_rhs_terms([hjacobian1, hjacobian2])
 
@@ -117,7 +114,7 @@ f, Df = cake.compute_tendencies()
 
 # integrating
 from scipy.integrate import solve_ivp
-ic= np.zeros(6)+0.1
+ic= np.zeros(cake.ndim)+0.1
 res = solve_ivp(f,(0.,1000.), ic)
 
 # plotting
