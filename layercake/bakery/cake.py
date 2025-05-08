@@ -1,9 +1,11 @@
 
+from contextlib import redirect_stdout
 import numpy as np
 import sparse as sp
 from numba import njit
 from layercake.utils.tensor import sparse_mul, jsparse_mul
 
+real_eps = np.finfo(np.float64).eps
 
 class Cake(object):
 
@@ -72,6 +74,7 @@ class Cake(object):
                 args = tuple(slices + zeros)
                 tensor[args] = tensor[args] + layer.tensor.todense()[1:]
                 tensor = tensor.to_coo()
+                tensor = self.simplify_tensor(tensor)
         else:
             tensor = None
 
@@ -136,3 +139,90 @@ class Cake(object):
                 return None, None
         else:
             return None, None
+
+    @staticmethod
+    def simplify_tensor(tensor):
+        """Routine that simplifies the component of a tensor :math:`\\mathcal{T}`.
+        For each index :math:`i`, it upper-triangularizes the
+        tensor :math:`\\mathcal{T}_{i,\\ldots}` for all the subsequent indices.
+
+        Parameters
+        ----------
+        tensor: sparse.COO
+            The tensor to simplify.
+
+        Returns
+        -------
+        sparse.COO
+            The upper-triangularized tensor.
+        """
+        coords = tensor.coords.copy()
+        sorted_indices = np.sort(coords[1:, :], axis=0)
+        coords[1:, :] = sorted_indices
+
+        upp_tensor = sp.COO(coords, tensor.data.copy(), shape=tensor.shape, prune=True)
+
+        return upp_tensor
+
+    def print_tensor(self, tensor_name=""):
+        """Routine to print the tensor.
+
+        Parameters
+        ----------
+        tensor_name: str, optional
+            Specify the name to print beside the values of the tensor. Default to `QgsTensor`.
+        """
+        if not tensor_name:
+            tensor_name = 'QgsTensor'
+        for coo, val in zip(self.tensor.coords.T, self.tensor.data):
+            self._string_format(print, tensor_name, coo, val)
+
+    def print_tensor_to_file(self, filename, tensor_name=""):
+        """Routine to print the tensor to a file.
+
+        Parameters
+        ----------
+        filename: str
+            The filename where to print the tensor.
+        tensor_name: str, optional
+            Specify the name to print beside the values of the tensor. Default to `QgsTensor`.
+        """
+        with open(filename, 'w') as f:
+            with redirect_stdout(f):
+                self.print_tensor(tensor_name)
+
+    def print_jacobian_tensor(self, tensor_name=""):
+        """Routine to print the Jacobian tensor.
+
+        Parameters
+        ----------
+        tensor_name: str, optional
+            Specify the name to print beside the values of the tensor. Default to `QgsTensorJacobian`.
+        """
+        if not tensor_name:
+            tensor_name = 'QgsTensorJacobian'
+        for coo, val in zip(self.jacobian_tensor.coords.T, self.jacobian_tensor.data):
+            self._string_format(print, tensor_name, coo, val)
+
+    def print_jacobian_tensor_to_file(self, filename, tensor_name=""):
+        """Routine to print the Jacobian tensor to a file.
+
+        Parameters
+        ----------
+        filename: str
+            The filename where to print the tensor.
+        tensor_name: str, optional
+            Specify the name to print beside the values of the tensor. Default to `QgsTensorJacobian`.
+        """
+        with open(filename, 'w') as f:
+            with redirect_stdout(f):
+                self.print_jacobian_tensor(tensor_name)
+
+    @staticmethod
+    def _string_format(func, symbol, indices, value):
+        if abs(value) >= real_eps:
+            s = symbol
+            for i in indices:
+                s += "["+str(i)+"]"
+            s += " = % .5E" % value
+            func(s)
