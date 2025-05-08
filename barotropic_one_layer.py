@@ -21,6 +21,9 @@ n = ScalingParameter(1.3, symbol=_n)
 parameters = {'n': n}
 b = contiguous_channel_basis(2, 2, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
+# coordinates
+x = b.coordinate_system.coordinates_symbol_as_list[0]
+y = b.coordinate_system.coordinates_symbol_as_list[1]
 
 # Defining the field
 p = u'ψ'
@@ -32,14 +35,12 @@ lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
 e = Equation(psi, lhs_term=lapo, inner_product_definition=s)
 
 # Defining the Jacobian
-dxpsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0])
-dypsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[1])
+dxpsi = OperatorTerm(psi, D, x)
+dypsi = OperatorTerm(psi, D, y)
 
-dxlapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[0],
-                                                        b.coordinate_system))
+dxlapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (x, b.coordinate_system))
 
-dylapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (b.coordinate_system.coordinates_symbol_as_list[1],
-                                                        b.coordinate_system))
+dylapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (y, b.coordinate_system))
 
 jacobian1 = ProductOfTerms(dxpsi, dylapopsi, sign=-1)
 jacobian2 = ProductOfTerms(dypsi, dxlapopsi)
@@ -54,22 +55,21 @@ hh = np.zeros(len(b))
 hh[1] = 1.
 h = ParameterField('h', u'h', hh, b, s)
 
-hdxpsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=gammap)
-hdyh = OperatorTerm(h, D, b.coordinate_system.coordinates_symbol_as_list[1])
+hdxpsi = OperatorTerm(psi, D, x, prefactor=gammap)
+hdyh = OperatorTerm(h, D, y)
 
-hdypsi = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[1], prefactor=gammap)
-hdxh = OperatorTerm(h, D, b.coordinate_system.coordinates_symbol_as_list[0])
+hdypsi = OperatorTerm(psi, D, y, prefactor=gammap)
+hdxh = OperatorTerm(h, D, x)
 
 hjacobian1 = ProductOfTerms(hdxpsi, hdyh, sign=-1)
 hjacobian2 = ProductOfTerms(hdypsi, hdxh)
 
 e.add_rhs_terms([hjacobian1, hjacobian2])
 
-
 # adding the beta term
 betaa = symbols(u'β')
 beta = ScalingParameter(0.20964969238375256, symbol=betaa)
-betaterm = OperatorTerm(psi, D, b.coordinate_system.coordinates_symbol_as_list[0], prefactor=beta, sign=-1)
+betaterm = OperatorTerm(psi, D, x, prefactor=beta, sign=-1)
 
 e.add_rhs_term(betaterm)
 
