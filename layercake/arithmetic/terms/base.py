@@ -255,9 +255,7 @@ class OperationOnTerms(ArithmeticTerm):
             compute_rank = True
 
         if compute_rank:
-            self._rank = 1
-            for term in terms:
-                self._rank += term.rank - 1
+            self._compute_rank()
 
         self._terms = terms
         self.inner_products = None
@@ -271,6 +269,10 @@ class OperationOnTerms(ArithmeticTerm):
                 self.inner_product_definition = terms[0].inner_product_definition
         else:
             self.inner_product_definition = terms[0].inner_product_definition
+
+    @abstractmethod
+    def _compute_rank(self):
+        pass
 
     @property
     def number_of_terms(self):
