@@ -254,10 +254,10 @@ class OperationOnTerms(ArithmeticTerm):
         else:
             compute_rank = True
 
+        self._terms = terms
         if compute_rank:
             self._compute_rank()
 
-        self._terms = terms
         self.inner_products = None
         if 'inner_product_definition' in kwargs:
             ipdef = kwargs['inner_product_definition']
@@ -400,10 +400,12 @@ class OperationOnTerms(ArithmeticTerm):
 
         return tuple(res)
 
+    @abstractmethod
+    def _create_inner_products_basis_list(self, basis):
+        pass
+
     def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
-        basis_list = [basis]
-        for term in self._terms:
-            basis_list.append(term.field.basis)
+        basis_list = self._create_inner_products_basis_list(basis)
         self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
         self.inner_products = self.sign * self.inner_products
 
