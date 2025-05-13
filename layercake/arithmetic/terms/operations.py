@@ -7,9 +7,6 @@ class ProductOfTerms(OperationOnTerms):
 
     def __init__(self, *terms, name='', rank=None, sign=1):
 
-        if len(terms) < 2:
-            raise ValueError('More than one term must be provided to this class.')
-
         OperationOnTerms.__init__(self, *terms, name=name, rank=rank, sign=sign)
 
     def operation(self, *terms, evaluate=False):
@@ -19,9 +16,6 @@ class ProductOfTerms(OperationOnTerms):
 class AdditionOfTerms(OperationOnTerms):
 
     def __init__(self, *terms, name='', rank=None, sign=1):
-
-        if len(terms) < 2:
-            raise ValueError('More than one term must be provided to this class.')
 
         OperationOnTerms.__init__(self, *terms, name=name, rank=rank, sign=sign)
 

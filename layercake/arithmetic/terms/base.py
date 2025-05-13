@@ -229,6 +229,9 @@ class OperationOnTerms(ArithmeticTerm):
     """Base class for operations on arithmetic terms"""
     def __init__(self, *terms, **kwargs):
 
+        if len(terms) < 2:
+            raise ValueError('More than one term must be provided to this class.')
+
         if 'sign' in kwargs:
             sign = kwargs['sign']
         else:
