@@ -7,8 +7,8 @@ from sympy import symbols
 from layercake.variables.parameter import ScalingParameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
-from layercake.arithmetic.terms.operations import ProductOfTerms
-from layercake.arithmetic.terms.operators import OperatorTerm, ComposedOperatorsTerm
+from layercake.arithmetic.terms.jacobian import advection, Jacobian
+from layercake.arithmetic.terms.operators import OperatorTerm
 from layercake.arithmetic.equation import Equation
 from layercake.arithmetic.symbolic.operators import Laplacian, D
 from layercake.bakery.layers import Layer
@@ -36,18 +36,10 @@ theta = Field("theta", tt, b, s, units="[m^2][s^-2]", latex=r'\theta')
 lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
 e = Equation(psi, lhs_term=lapo)
 
-# Defining the Jacobian
-dxpsi = OperatorTerm(psi, D, x)
-dypsi = OperatorTerm(psi, D, y)
+# Defining the advection term
+advection_term = advection(psi, psi, b.coordinate_system, sign=-1)
 
-dxlapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (x, b.coordinate_system))
-
-dylapopsi = ComposedOperatorsTerm(psi, (D, Laplacian), (y, b.coordinate_system))
-
-jacobian1 = ProductOfTerms(dxpsi, dylapopsi, sign=-1)
-jacobian2 = ProductOfTerms(dypsi, dxlapopsi)
-
-e.add_rhs_terms([jacobian1, jacobian2])
+e.add_rhs_terms(advection_term)
 
 # adding an orographic term
 g = 0.1
@@ -57,16 +49,9 @@ hh = np.zeros(len(b))
 hh[1] = 1.
 h = ParameterField('h', u'h', hh, b, s)
 
-hdxpsi = OperatorTerm(psi, D, x, prefactor=gammap)
-hdyh = OperatorTerm(h, D, y)
+orographic_term = Jacobian(psi, h, b.coordinate_system, sign=-1, prefactors=(gammap, gammap))
 
-hdypsi = OperatorTerm(psi, D, y, prefactor=gammap)
-hdxh = OperatorTerm(h, D, x)
-
-hjacobian1 = ProductOfTerms(hdxpsi, hdyh, sign=-1)
-hjacobian2 = ProductOfTerms(hdypsi, hdxh)
-
-e.add_rhs_terms([hjacobian1, hjacobian2])
+e.add_rhs_terms(orographic_term)
 
 # adding the beta term
 betaa = symbols(u'β')
