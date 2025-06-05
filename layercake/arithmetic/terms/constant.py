@@ -1,5 +1,5 @@
 
-from layercake.arithmetic.terms.base import ArithmeticTerm
+from layercake.arithmetic.terms.base import ArithmeticTerms
 from layercake.variables.field import ParameterField
 
 from layercake.utils.commutativity import disable_commutativity
@@ -7,14 +7,14 @@ from layercake.arithmetic.utils import sproduct
 from sympy import Lambda
 
 
-class ConstantTerm(ArithmeticTerm):
+class ConstantTerm(ArithmeticTerms):
 
     def __init__(self, parameters_field, name='', sign=1):
 
         if not isinstance(parameters_field, ParameterField):
             raise ValueError('Input field for constant field must be a ParameterField object.')
 
-        ArithmeticTerm.__init__(self, name, sign=sign)
+        ArithmeticTerms.__init__(self, name, sign=sign)
 
         self._rank = 1
         self.field = parameters_field

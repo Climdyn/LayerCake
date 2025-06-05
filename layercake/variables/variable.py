@@ -6,7 +6,7 @@ import numpy as np
 
 class Variable(ABC):
 
-    def __init__(self, name, symbol, units=None, latex=None):
+    def __init__(self, name, symbol, units=None, latex=None, dynamical=False):
 
         self.name = name
         if isinstance(symbol, str):
@@ -23,11 +23,17 @@ class Variable(ABC):
         else:
             self.latex = latex
 
+        self._dynamical = dynamical
+
     def __str__(self):
         return self.name + ' (symbol: ' + str(self.symbol) + ',  units: ' + self.units + ')'
 
     def __repr__(self):
         return self.__str__()
+
+    @property
+    def dynamical(self):
+        return self._dynamical
 
 
 class VariablesArray(np.ndarray):

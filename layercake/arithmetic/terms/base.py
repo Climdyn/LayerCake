@@ -16,7 +16,7 @@ from layercake.inner_products.definition import InnerProductDefinition
 from layercake.arithmetic.utils import sproduct
 
 
-class ArithmeticTerm(ABC):
+class ArithmeticTerms(ABC):
     """Base class for arithmetic terms"""
     def __init__(self, name='', sign=1):
 
@@ -32,6 +32,11 @@ class ArithmeticTerm(ABC):
             return self.inner_products.shape.__len__()
         else:
             return self._rank
+
+    @property
+    @abstractmethod
+    def terms(self):
+        pass
 
     @property
     @abstractmethod
@@ -155,11 +160,11 @@ class ArithmeticTerm(ABC):
         return neg
 
 
-class SingleArithmeticTerm(ArithmeticTerm):
+class SingleArithmeticTerm(ArithmeticTerms):
     """Base class for single arithmetic terms"""
     def __init__(self, field, inner_product_definition=None, prefactor=None, name='', sign=1):
 
-        ArithmeticTerm.__init__(self, name, sign)
+        ArithmeticTerms.__init__(self, name, sign)
         self._rank = 2
         self.field = field
         self.prefactor = prefactor
@@ -167,6 +172,10 @@ class SingleArithmeticTerm(ArithmeticTerm):
             self.inner_product_definition = inner_product_definition
         else:
             self.inner_product_definition = field.inner_product_definition
+
+    @property
+    def terms(self):
+        return [self]
 
     @property
     def _symbolic_expressions_list(self):
@@ -225,7 +234,7 @@ class SingleArithmeticTerm(ArithmeticTerm):
         self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
 
 
-class OperationOnTerms(ArithmeticTerm):
+class OperationOnTerms(ArithmeticTerms):
     """Base class for operations on arithmetic terms"""
     def __init__(self, *terms, **kwargs):
 
@@ -241,7 +250,7 @@ class OperationOnTerms(ArithmeticTerm):
             if term.rank == 1:
                 raise ValueError(f'The term {term} is of rank 1, which is not accepted in OperationOnTerms input.')
 
-        ArithmeticTerm.__init__(self, sign=sign)
+        ArithmeticTerms.__init__(self, sign=sign)
         if 'name' in kwargs:
             self.name = kwargs['name']
         compute_rank = False
@@ -269,6 +278,10 @@ class OperationOnTerms(ArithmeticTerm):
                 self.inner_product_definition = terms[0].inner_product_definition
         else:
             self.inner_product_definition = terms[0].inner_product_definition
+
+    @property
+    def terms(self):
+        return self._terms
 
     @abstractmethod
     def _compute_rank(self):

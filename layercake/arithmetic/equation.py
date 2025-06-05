@@ -1,7 +1,7 @@
 
 
 from sympy import Symbol, S, Eq, Mul
-from layercake.arithmetic.terms.base import ArithmeticTerm
+from layercake.arithmetic.terms.base import ArithmeticTerms
 
 
 class Equation(object):
@@ -11,7 +11,6 @@ class Equation(object):
     def __init__(self, field, lhs_term, inner_product_definition=None, other_fields=None):
 
         self.field = field
-        self.other_fields = other_fields
         self.terms = list()
         self.lhs_term = lhs_term
         self.lhs_term.field = self.field
@@ -19,13 +18,31 @@ class Equation(object):
         self._cake = None
 
     def add_rhs_term(self, term):
-        if not issubclass(term.__class__, ArithmeticTerm):
+        if not issubclass(term.__class__, ArithmeticTerms):
             raise ValueError('Provided term must be a valid ArithmeticTerm object.')
         self.terms.append(term)
 
     def add_rhs_terms(self, terms):
         for t in terms:
             self.add_rhs_term(t)
+
+    @property
+    def other_fields(self):
+        other_fields = list()
+        for equation_term in self.terms:
+            for term in equation_term.terms:
+                if term.field is not self.field and term.field.dynamical and term.field not in other_fields:
+                    other_fields.append(term.field)
+        return other_fields
+
+    @property
+    def parameter_fields(self):
+        parameter_fields = list()
+        for equation_term in self.terms:
+            for term in equation_term.terms:
+                if term.field is not self.field and not term.field.dynamical and term.field not in parameter_fields:
+                    parameter_fields.append(term.field)
+        return parameter_fields
 
     @property
     def symbolic_expression(self):

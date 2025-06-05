@@ -10,7 +10,7 @@ class Field(Variable):
 
         _t = Symbol('t')
 
-        Variable.__init__(self, name, symbol, units, latex)
+        Variable.__init__(self, name, symbol, units, latex, True)
 
         self.basis = basis
         self.coordinate_system = basis.coordinate_system
