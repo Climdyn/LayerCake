@@ -350,7 +350,7 @@ class OperationOnTerms(ArithmeticTerms):
             if sdc not in ssdc:
                 ssdc.append(sdc)
         for i, ts in enumerate(self._terms):
-            dcexpr = ts.symbolic_expression
+            dcexpr = disable_commutativity(ts.symbolic_expression)
             if i == 0:
                 foo = dcexpr
             else:
@@ -369,7 +369,7 @@ class OperationOnTerms(ArithmeticTerms):
                 foo = dcexpr
             else:
                 foo = self.operation(foo, dcexpr)
-        return Lambda(tuple(ssdc),  sproduct(self.sign, foo))
+        return Lambda(tuple(ssdc), sproduct(self.sign, foo))
 
     @property
     def numerical_function(self):
