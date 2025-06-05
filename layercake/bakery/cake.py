@@ -17,6 +17,9 @@ class Cake(object):
         layer._cake_order = len(self.layers)
         self.layers.append(layer)
         layer._cake = self
+        for equation in layer.equations:
+            equation._cake = self
+            equation.field._cake = self
 
     @property
     def ndim(self):

@@ -16,15 +16,17 @@ class Field(Variable):
         self.coordinate_system = basis.coordinate_system
         self.inner_product_definition = inner_product_definition
         self.function = Function(symbol)(_t, *self.coordinate_system.coordinates_symbol_as_list)
+        if 'dynamical' not in state_kwargs:
+            state_kwargs['dynamical'] = True
         if state is None:
             self.state = VariablesArray(np.zeros(len(self.basis)), name, symbol, latex=latex, **state_kwargs)
         elif isinstance(state, VariablesArray):
             self.state = state
         else:
             self.state = VariablesArray(state, name, symbol, latex=latex, **state_kwargs)
-        # self._layer = None
-        # self._cake = None
-        # self._equation = None
+        self._layer = None
+        self._cake = None
+        self._equation = None
 
     def __str__(self):
         return self.name + ' (symbol: ' + str(self.symbol) + ',  units: ' + self.units + ', state: ' + str(self.state) + ' )'

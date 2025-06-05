@@ -1,3 +1,4 @@
+import warnings
 
 import numpy as np
 import sparse as sp
@@ -32,6 +33,7 @@ class Layer(object):
     def add_equation(self, equation):
         self.equations.append(equation)
         equation._layer = self
+        equation.field._layer = self
 
     @property
     def fields(self):
@@ -39,6 +41,16 @@ class Layer(object):
         for eq in self.equations:
             fields_list.append(eq.field)
         return fields_list
+
+    @property
+    def _fields_layer_tensor_extent(self):
+        extent = dict()
+        n = 1
+        for field in self.fields:
+            ni = n + field.state.__len__()
+            extent[field] = (n, ni)
+            n = ni
+        return extent
 
     @property
     def ndim(self):
@@ -77,21 +89,33 @@ class Layer(object):
 
             self.tensor = sp.zeros(shape, dtype=np.float64, format='dok')
             lhs_mat = np.zeros((self.ndim+1, self.ndim+1))
-            order = 1
+            lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
-                lhs_mat[order:order+ndim, order:order+ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
-                for term in eq.terms:
-                    slices = [slice(order, order+ndim)] + [slice(order, order+ndim) for _ in range(term.rank-1)]
-                    zeros = [0 for _ in range(term.rank, len(self.tensor.shape))]
+                lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
+                for equation_term in eq.terms:
+                    slices = [slice(lhs_order, lhs_order + ndim)]
+                    for term in equation_term.terms:
+                        term_field = term.field
+                        if term_field.dynamical:
+                            if self._cake is not None:
+                                term_extent = self._cake.fields_tensor_extent[term_field]
+                            elif term_field in self.fields:
+                                term_extent = self._fields_layer_tensor_extent[term_field]
+                            else:
+                                raise AttributeError(f'Field {term_field} provided in equation {eq} cannot be found in the cake or in the layer.')
+                            slices.append(slice(*term_extent))
+                        else:
+                            slices.append(0)
+                    zeros = [0 for _ in range(equation_term.rank, len(self.tensor.shape))]
                     args = slices+zeros
-                    if isinstance(term, ConstantTerm):
-                        increment = term.field.parameters.astype(float)
+                    if isinstance(equation_term, ConstantTerm):
+                        increment = equation_term.field.parameters.astype(float)
                     else:
-                        increment = term.inner_products.todense()
-                        if isinstance(term, ProductOfTerms):
+                        increment = equation_term.inner_products.todense()
+                        if isinstance(equation_term, ProductOfTerms):
                             contract = dict()
-                            for i, t in enumerate(term._terms):
+                            for i, t in enumerate(equation_term.terms):
                                 if isinstance(t.field, ParameterField):
                                     params = t.field.parameters.astype(float)
                                     contract[i] = params
@@ -99,15 +123,15 @@ class Layer(object):
                                 for i in sorted(list(contract.keys()), reverse=True):
                                     params = contract[i]
                                     increment = np.tensordot(increment, params, ((i+1,), (0,)))
-                                    args[i] = 0
-                        elif hasattr(term, 'field'):
-                            if isinstance(term.field, ParameterField):
-                                params = term.field.parameters.astype(float)
+                                    args[i+1] = 0
+                        elif hasattr(equation_term, 'field'):
+                            if isinstance(equation_term.field, ParameterField):
+                                params = equation_term.field.parameters.astype(float)
                                 increment = np.tensordot(increment, params, ((1,), (0,)))
                                 args[1] = 0
                     args = tuple(args)
                     self.tensor[args] = self.tensor[args] + increment
-                order += ndim
+                lhs_order += ndim
             self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
 
         else:

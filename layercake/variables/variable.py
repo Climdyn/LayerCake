@@ -61,6 +61,8 @@ class VariablesArray(np.ndarray):
         Specify whether the value provided is dimensional or not. Default to `True`.
     return_dimensional: bool, optional
         Defined if the value returned by the variables is dimensional or not. Default to `False`.
+    dynamical: bool, optional
+        Whether or not the variables are varying over time. Default to `False`.
 
     Warnings
     --------
@@ -70,7 +72,7 @@ class VariablesArray(np.ndarray):
     """
 
     def __new__(cls, values, name, symbol, units="", latex=None, scale_object=None,
-                input_dimensional=False, return_dimensional=False):
+                input_dimensional=False, return_dimensional=False, dynamical=False):
 
         if not isinstance(symbol, str):
             symbol = symbol.name
@@ -96,6 +98,7 @@ class VariablesArray(np.ndarray):
         arr._return_dimensional = return_dimensional
         arr._units = units
         arr._scale_object = scale_object
+        arr._dynamical = dynamical
 
         return arr
 
@@ -114,6 +117,7 @@ class VariablesArray(np.ndarray):
         self._units = getattr(arr, '_units', "")
         self._return_dimensional = getattr(arr, '_return_dimensional', False)
         self._scale_object = getattr(arr, '_scale_object', None)
+        self._dynamical = getattr(arr, '_dynamical', False)
 
     @property
     def dimensional_values(self):
@@ -197,6 +201,10 @@ class VariablesArray(np.ndarray):
     def units(self):
         """str: The units of the dimensional values."""
         return self._units
+
+    @property
+    def dynamical(self):
+        return self._dynamical
 
     @property
     def _nondimensionalization(self):

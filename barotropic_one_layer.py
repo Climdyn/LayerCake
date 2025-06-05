@@ -32,7 +32,7 @@ psi = Field("psi", p, b, s, units="[m^2][s^-2]", latex=r'\psi')
 # Defining the equation and LHS
 # Laplacian
 lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
-e = Equation(psi, lhs_term=lapo, inner_product_definition=s)
+e = Equation(psi, lhs_term=lapo)
 
 # Defining the Jacobian
 dxpsi = OperatorTerm(psi, D, x)

@@ -8,9 +8,10 @@ class Equation(object):
 
     _t = Symbol('t')
 
-    def __init__(self, field, lhs_term, inner_product_definition=None, other_fields=None):
+    def __init__(self, field, lhs_term):
 
         self.field = field
+        self.field._equation = self
         self.terms = list()
         self.lhs_term = lhs_term
         self.lhs_term.field = self.field
