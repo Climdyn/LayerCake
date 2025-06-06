@@ -46,7 +46,7 @@ theta = Field("theta", tt, b, s, units="[m^2][s^-2]", latex=r'\theta')
 
 # --------------------------------
 #
-#    Barotropic field equation
+#   Barotropic field equation
 #
 # --------------------------------
 
@@ -56,9 +56,11 @@ lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
 barotropic_equation = Equation(psi, lhs_term=lapo)
 
 # Defining the advection term
-advection_term = advection(psi, psi, b.coordinate_system, sign=-1)
+advection_term1 = advection(psi, psi, b.coordinate_system, sign=-1)
+advection_term2 = advection(theta, theta, b.coordinate_system, sign=-1)
 
-barotropic_equation.add_rhs_terms(advection_term)
+barotropic_equation.add_rhs_terms(advection_term1)
+barotropic_equation.add_rhs_terms(advection_term2)
 
 # adding an orographic term
 g = 0.5
@@ -83,7 +85,7 @@ barotropic_equation.add_rhs_term(betaterm)
 
 # adding the atmospheric friction
 kdd = symbols('k_d')
-kd = ScalingParameter(0.05, symbol=kdd)
+kd = ScalingParameter(0.1, symbol=kdd)
 friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd, sign=-1)
 barotropic_equation.add_rhs_term(friction)
 
@@ -92,7 +94,7 @@ barotropic_equation.add_rhs_term(ofriction)
 
 # --------------------------------
 #
-#    Baroclinic field equation
+#   Baroclinic field equation
 #
 # --------------------------------
 
@@ -141,7 +143,7 @@ baroclinic_equation.add_rhs_term(ofriction)
 
 # adding the friction with the ground
 kddp = symbols('k_dp')
-kdp = ScalingParameter(2 * 0.001, symbol=kddp)
+kdp = ScalingParameter(2 * 0.01, symbol=kddp)
 ground_friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kdp, sign=-1)
 baroclinic_equation.add_rhs_term(ground_friction)
 
@@ -154,19 +156,18 @@ baroclinic_equation.add_rhs_terms(thermal)
 # adding Newtonian cooling
 
 hdd = symbols('hd')
-hd = ScalingParameter(a * 0.05, symbol=hdd)
+hd = ScalingParameter(a * 0.045, symbol=hdd)
 rr = np.zeros(len(b))
 rr[0] = 0.1
 Tf = ParameterField('T', u'T', rr, b, s)
-To = LinearTerm(Tf, prefactor=hd, sign=-1)
-lin = LinearTerm(theta, prefactor=hd, sign=1)
+equilibrium_temperature = LinearTerm(Tf, prefactor=hd, sign=-1)
+newt = LinearTerm(theta, prefactor=hd, sign=1)
 
-newt = AdditionOfTerms(To, lin)
-baroclinic_equation.add_rhs_term(newt)
+baroclinic_equation.add_rhs_terms((newt, equilibrium_temperature))
 
 # --------------------------------
 #
-#      Constructing the layer
+#   Constructing the layer
 #
 # --------------------------------
 
@@ -175,24 +176,32 @@ layer.add_equation(barotropic_equation)
 layer.add_equation(baroclinic_equation)
 
 
-
-
-
-# # constructing the cake
-# cake = Cake()
-# cake.add_layer(layer)
+# --------------------------------
 #
-# # computing the tensor
-# cake.compute_tensor(True, True
-#                     )
-# # computing the tendencies
-# f, Df = cake.compute_tendencies()
+#   Constructing the cake
 #
-# # integrating
-# ic = np.random.rand(cake.ndim) * 0.1
-# res = solve_ivp(f, (0., 1000.), ic)
+# --------------------------------
+
+cake = Cake()
+cake.add_layer(layer)
+
+# --------------------------------
 #
-# # plotting
-# plt.plot(res.y.T)
-# plt.show()
+#   Computing the tendencies
+#
+# --------------------------------
+
+# computing the tensor
+cake.compute_tensor(True, True
+                    )
+# computing the tendencies
+f, Df = cake.compute_tendencies()
+
+# integrating
+ic = np.random.rand(cake.ndim) * 0.1
+res = solve_ivp(f, (0., 1000.), ic)
+
+# plotting
+plt.plot(res.y.T)
+plt.show()
 
