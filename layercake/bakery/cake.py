@@ -29,6 +29,17 @@ class Cake(object):
         return dim
 
     @property
+    def fields_tensor_extent(self):
+        extent = dict()
+        n = 1
+        for layer in self.layers:
+            for field in layer.fields:
+                ni = n + field.state.__len__()
+                extent[field] = (n, ni)
+                n = ni
+        return extent
+
+    @property
     def number_of_layers(self):
         return self.layers.__len__()
 
