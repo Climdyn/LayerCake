@@ -32,6 +32,13 @@ class AdditionOfTerms(OperationOnTerms):
 
         OperationOnTerms.__init__(self, *terms, name=name, rank=rank, sign=sign)
 
+        for i, term1 in enumerate(terms):
+            for term2 in terms[i:]:
+                if term2.field is not term1.field:
+                    raise ValueError(f'AdditionOfTerms must always involve the same field, '
+                                     f'but two different fields {term1.field} and {term2.field} have been provided.')
+
+
     @property
     def symbolic_expression(self):
         return sproduct(self.sign, self.operation(*map(lambda t: t.symbolic_expression, self._terms)))

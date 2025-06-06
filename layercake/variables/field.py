@@ -95,3 +95,8 @@ class ParameterField(Variable):
         """~numpy.ndarray(str): Description of the parameters in the array."""
         return self.parameters.descriptions
 
+    def __str__(self):
+        return self.name + ' (symbol: ' + str(self.symbol) + ',  units: ' + self.units + ', parameters: ' + str(self.parameters) + ' )'
+
+    def __repr__(self):
+        return self.__str__()
