@@ -85,7 +85,7 @@ barotropic_equation.add_rhs_term(betaterm)
 
 # adding the atmospheric friction
 kdd = symbols('k_d')
-kd = ScalingParameter(0.1, symbol=kdd)
+kd = ScalingParameter(0.05, symbol=kdd)
 friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd, sign=-1)
 barotropic_equation.add_rhs_term(friction)
 
@@ -144,7 +144,7 @@ baroclinic_equation.add_rhs_term(ofriction)
 # adding the friction with the ground
 kddp = symbols('k_dp')
 kdp = ScalingParameter(2 * 0.01, symbol=kddp)
-ground_friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kdp, sign=-1)
+ground_friction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kdp, sign=-1)
 baroclinic_equation.add_rhs_term(ground_friction)
 
 # adding jacobian from thermal wind relation
@@ -199,7 +199,10 @@ f, Df = cake.compute_tendencies()
 
 # integrating
 ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 1000.), ic)
+res = solve_ivp(f, (0., 20000.), ic)
+
+ic = res.y[:, -1]
+res = solve_ivp(f, (0., 20000.), ic)
 
 # plotting
 plt.plot(res.y.T)
