@@ -8,7 +8,7 @@ from layercake.variables.parameter import ScalingParameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
 from layercake.arithmetic.terms.operators import OperatorTerm
-from layercake.arithmetic.terms.jacobian import advection, Jacobian
+from layercake.arithmetic.terms.jacobian import vorticity_advection, Jacobian
 from layercake.arithmetic.equation import Equation
 from layercake.arithmetic.symbolic.operators import Laplacian, D
 from layercake.bakery.layers import Layer
@@ -35,7 +35,7 @@ lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
 e = Equation(psi, lhs_term=lapo)
 
 # Defining the advection term
-advection_term = advection(psi, psi, b.coordinate_system, sign=-1)
+advection_term = vorticity_advection(psi, psi, b.coordinate_system, sign=-1)
 
 e.add_rhs_terms(advection_term)
 

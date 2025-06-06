@@ -7,7 +7,7 @@ from sympy import symbols
 from layercake.variables.parameter import ScalingParameter, Parameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
-from layercake.arithmetic.terms.jacobian import advection, Jacobian
+from layercake.arithmetic.terms.jacobian import vorticity_advection, Jacobian
 from layercake.arithmetic.terms.operators import OperatorTerm
 from layercake.arithmetic.terms.operations import AdditionOfTerms
 from layercake.arithmetic.terms.linear import LinearTerm
@@ -56,8 +56,8 @@ lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
 barotropic_equation = Equation(psi, lhs_term=lapo)
 
 # Defining the advection term
-advection_term1 = advection(psi, psi, b.coordinate_system, sign=-1)
-advection_term2 = advection(theta, theta, b.coordinate_system, sign=-1)
+advection_term1 = vorticity_advection(psi, psi, b.coordinate_system, sign=-1)
+advection_term2 = vorticity_advection(theta, theta, b.coordinate_system, sign=-1)
 
 barotropic_equation.add_rhs_terms(advection_term1)
 barotropic_equation.add_rhs_terms(advection_term2)
@@ -110,8 +110,8 @@ lhs = AdditionOfTerms(lin_lhs, lapo)
 baroclinic_equation = Equation(theta, lhs_term=lhs)
 
 # Defining the advection terms
-advection_term1 = advection(psi, theta, b.coordinate_system, sign=-1)
-advection_term2 = advection(theta, psi, b.coordinate_system, sign=-1)
+advection_term1 = vorticity_advection(psi, theta, b.coordinate_system, sign=-1)
+advection_term2 = vorticity_advection(theta, psi, b.coordinate_system, sign=-1)
 
 baroclinic_equation.add_rhs_terms(advection_term1)
 baroclinic_equation.add_rhs_terms(advection_term2)

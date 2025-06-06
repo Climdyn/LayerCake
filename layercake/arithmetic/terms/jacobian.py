@@ -21,7 +21,7 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
     return jacobian1, jacobian2
 
 
-def advection(field1, field2, coordinate_system, sign=1, prefactors=(None, None)):
+def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(None, None)):
 
     u = coordinate_system.coordinates_symbol_as_list[0]
     v = coordinate_system.coordinates_symbol_as_list[1]
