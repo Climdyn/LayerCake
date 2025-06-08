@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from layercake.basis.planar_fourier import contiguous_channel_basis
 from sympy import symbols
-from layercake.variables.parameter import ScalingParameter
+from layercake.variables.parameter import Parameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
 from layercake.arithmetic.terms.operators import OperatorTerm
@@ -17,7 +17,7 @@ from layercake.bakery.cake import Cake
 
 # Defining the domain
 _n = symbols('n')
-n = ScalingParameter(1.3, symbol=_n)
+n = Parameter(1.3, symbol=_n)
 parameters = {'n': n}
 b = contiguous_channel_basis(2, 2, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
@@ -42,7 +42,7 @@ e.add_rhs_terms(advection_term)
 # adding an orographic term
 g = 0.1
 gamma = symbols(u'γ')
-gammap = ScalingParameter(g, symbol=gamma)
+gammap = Parameter(g, symbol=gamma)
 hh = np.zeros(len(b))
 hh[1] = 1.
 h = ParameterField('h', u'h', hh, b, s)
@@ -53,20 +53,20 @@ e.add_rhs_terms(orographic_term)
 
 # adding the beta term
 betaa = symbols(u'β')
-beta = ScalingParameter(0.20964969238375256, symbol=betaa)
+beta = Parameter(0.20964969238375256, symbol=betaa)
 betaterm = OperatorTerm(psi, D, x, prefactor=beta, sign=-1)
 
 e.add_rhs_term(betaterm)
 
 # adding a friction
 kdd = symbols('k_d')
-kd = ScalingParameter(0.05, symbol=kdd)
+kd = Parameter(0.05, symbol=kdd)
 friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd, sign=-1)
 e.add_rhs_term(friction)
 
 # adding an interaction with a background streamfunction
 Cdd = symbols('C')
-Cd = ScalingParameter(0.05, symbol=Cdd)
+Cd = Parameter(0.05, symbol=Cdd)
 rr = np.zeros(len(b))
 rr[0] = 0.3
 C = ParameterField('eta', u'η', rr, b, s)

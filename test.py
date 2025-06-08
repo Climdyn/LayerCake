@@ -2,7 +2,7 @@ import numpy as np
 
 from layercake.basis.planar_fourier import contiguous_basin_basis, contiguous_channel_basis
 from sympy import symbols
-from layercake.variables.parameter import ScalingParameter
+from layercake.variables.parameter import Parameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
 from layercake.arithmetic.terms.linear import LinearTerm
@@ -17,7 +17,7 @@ from layercake.bakery.cake import Cake
 
 _n = symbols('n')
 
-n = ScalingParameter(1.3, symbol=_n)
+n = Parameter(1.3, symbol=_n)
 
 parameters = {'n': n}
 
@@ -32,7 +32,7 @@ p = u'ψ'
 psi = Field("psi", p, b, s, units="[m^2][s^-2]", latex=r'\psi')
 
 aa = symbols('a')
-a = ScalingParameter(- 2, symbol=aa)
+a = Parameter(- 2, symbol=aa)
 x = symbols('x')
 
 l = LinearTerm(psi) #, prefactor=a)
@@ -42,7 +42,7 @@ e = Equation(psi, lhs_term=LinearTerm, inner_product_definition=s)
 e.add_rhs_term(l)
 
 R = symbols('R')
-r = ScalingParameter(1., symbol=R)
+r = Parameter(1., symbol=R)
 
 scs = SphericalCoordinateSystem(r)
 
