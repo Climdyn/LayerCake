@@ -17,16 +17,6 @@ from layercake.bakery.layers import Layer
 from layercake.bakery.cake import Cake
 
 
-# Defining the parameters
-# f0s = symbols('f0')
-# f0 = ScalingParameter(1.032e-4, symbol=f0s, units='[s^-1]')
-#
-# deltaps = symbols('Δp')
-# deltap = ScalingParameter(5.e4, symbol=deltaps, units='[Pa]')
-#
-# sigmas = symbols('σ')
-# sigma = Parameter(0.1, input_dimensional=False, return_dimensional=False, symbol=sigmas)
-
 # Defining the domain
 ns = symbols('n')
 n = Parameter(1.3, symbol=ns)
@@ -102,7 +92,6 @@ barotropic_equation.add_rhs_term(ofriction)
 # Laplacian
 vorticity = OperatorTerm(theta, Laplacian, b.coordinate_system)
 a_symbol = symbols('a')
-# a = Parameter(-2 * f0 ** 2 / (sigma * deltap ** 2), symbol=a_symbol)
 a = Parameter(2 / 0.2, symbol=a_symbol)
 
 lin_lhs = LinearTerm(theta, prefactor=a, sign=-1)

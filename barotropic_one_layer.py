@@ -21,6 +21,7 @@ n = Parameter(1.3, symbol=_n)
 parameters = {'n': n}
 b = contiguous_channel_basis(2, 2, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
+
 # coordinates
 x = b.coordinate_system.coordinates_symbol_as_list[0]
 y = b.coordinate_system.coordinates_symbol_as_list[1]
@@ -31,13 +32,13 @@ psi = Field("psi", p, b, s, units="[m^2][s^-2]", latex=r'\psi')
 
 # Defining the equation and LHS
 # Laplacian
-lapo = OperatorTerm(psi, Laplacian, b.coordinate_system)
-e = Equation(psi, lhs_term=lapo)
+vorticity = OperatorTerm(psi, Laplacian, b.coordinate_system)
+barotropic_equation = Equation(psi, lhs_term=vorticity)
 
 # Defining the advection term
 advection_term = vorticity_advection(psi, psi, b.coordinate_system, sign=-1)
 
-e.add_rhs_terms(advection_term)
+barotropic_equation.add_rhs_terms(advection_term)
 
 # adding an orographic term
 g = 0.1
@@ -49,20 +50,20 @@ h = ParameterField('h', u'h', hh, b, s)
 
 orographic_term = Jacobian(psi, h, b.coordinate_system, sign=-1, prefactors=(gammap, gammap))
 
-e.add_rhs_terms(orographic_term)
+barotropic_equation.add_rhs_terms(orographic_term)
 
 # adding the beta term
 betaa = symbols(u'β')
 beta = Parameter(0.20964969238375256, symbol=betaa)
 betaterm = OperatorTerm(psi, D, x, prefactor=beta, sign=-1)
 
-e.add_rhs_term(betaterm)
+barotropic_equation.add_rhs_term(betaterm)
 
 # adding a friction
 kdd = symbols('k_d')
 kd = Parameter(0.05, symbol=kdd)
 friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd, sign=-1)
-e.add_rhs_term(friction)
+barotropic_equation.add_rhs_term(friction)
 
 # adding an interaction with a background streamfunction
 Cdd = symbols('C')
@@ -72,11 +73,11 @@ rr[0] = 0.3
 C = ParameterField('eta', u'η', rr, b, s)
 CT = OperatorTerm(C, Laplacian, b.coordinate_system, prefactor=Cd)
 
-e.add_rhs_term(CT)
+barotropic_equation.add_rhs_term(CT)
 
 # constructing the layer
 layer = Layer()
-layer.add_equation(e)
+layer.add_equation(barotropic_equation)
 
 # constructing the cake
 cake = Cake()
