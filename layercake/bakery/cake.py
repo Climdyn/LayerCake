@@ -109,7 +109,7 @@ class Cake(object):
         Parameters
         ----------
         tensor: sparse.COO
-            The qgs tensor.
+            The system tensor.
 
         Returns
         -------
@@ -184,7 +184,7 @@ class Cake(object):
         Parameters
         ----------
         tensor_name: str, optional
-            Specify the name to print beside the values of the tensor. Default to `QgsTensor`.
+            Specify the name to print beside the values of the tensor. Default to `Tensor`.
         """
         if not tensor_name:
             tensor_name = 'Tensor'
@@ -199,7 +199,7 @@ class Cake(object):
         filename: str
             The filename where to print the tensor.
         tensor_name: str, optional
-            Specify the name to print beside the values of the tensor. Default to `QgsTensor`.
+            Specify the name to print beside the values of the tensor. Default to `Tensor`.
         """
         with open(filename, 'w') as f:
             with redirect_stdout(f):
@@ -211,7 +211,7 @@ class Cake(object):
         Parameters
         ----------
         tensor_name: str, optional
-            Specify the name to print beside the values of the tensor. Default to `QgsTensorJacobian`.
+            Specify the name to print beside the values of the tensor. Default to `TensorJacobian`.
         """
         if not tensor_name:
             tensor_name = 'TensorJacobian'
@@ -226,7 +226,7 @@ class Cake(object):
         filename: str
             The filename where to print the tensor.
         tensor_name: str, optional
-            Specify the name to print beside the values of the tensor. Default to `QgsTensorJacobian`.
+            Specify the name to print beside the values of the tensor. Default to `TensorJacobian`.
         """
         with open(filename, 'w') as f:
             with redirect_stdout(f):
