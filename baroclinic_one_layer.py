@@ -24,11 +24,11 @@ L_symbol = Symbol('L')
 L = Parameter(1591549.4309189534, symbol=L_symbol, units='[m]')
 
 # Domain aspect ratio
-n_symbol = symbols('n')
+n_symbol = Symbol('n')
 n = Parameter(1.3, symbol=n_symbol)
 
 # Coriolis parameter at the middle of the domain
-f0_symbol = symbols('f0')
+f0_symbol = Symbol('f_0')
 f0 = Parameter(1.032e-4, symbol=f0_symbol, units='[s^-1]')
 
 # Pressure difference between the two atmospheric layers
@@ -36,30 +36,34 @@ deltap_symbol = Symbol('Δp')
 deltap = Parameter(5.e4, symbol=deltap_symbol, units='[Pa]')
 
 # Static stability of the atmosphere
-sigma_symbol = symbols('σ')
+sigma_symbol = Symbol('σ')
 sigma = Parameter(2.1581898457499433e-06, symbol=sigma_symbol, units='[m^2][s^-2][Pa^-2]')
 
 # Meridional gradient of the Coriolis parameter at phi_0
-beta_symbol = symbols(u'β')
+beta_symbol = Symbol(u'β')
 beta = Parameter(1.3594204385792041e-11, symbol=beta_symbol, units='[m^-1][s^-1]')
 
 # atmosphere bottom friction coefficient
-kd_symbol = symbols('k_d')
+kd_symbol = Symbol('k_d')
 kd = Parameter(1.032e-05, symbol=kd_symbol, units='[s^-1]')
 
 # Atmosphere internal friction coefficient
-kdp_symbol = symbols('k_dp')
+kdp_symbol = Symbol("k_d'")
 kdp = Parameter(1.032e-06, symbol=kdp_symbol, units='[s^-1]')
+
+# Newtonian cooling parameters
+hd_symbol = symbols('hd')
+hd = Parameter(4.644e-06, symbol=hd_symbol, units='[s^-1]')
 
 # Defining the domain
 ######################
 
 parameters = {'n': n}
-b = contiguous_channel_basis(2, 2, parameters)
-s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
+atmospheric_basis = contiguous_channel_basis(2, 2, parameters)
+s = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system)
 # coordinates
-x = b.coordinate_system.coordinates_symbol_as_list[0]
-y = b.coordinate_system.coordinates_symbol_as_list[1]
+x = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[0]
+y = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[1]
 
 # Derived (non-dimensional) parameters
 #######################################
@@ -70,29 +74,25 @@ a_symbol = symbols('a')
 a = Parameter(2 / sigma_nondim, symbol=a_symbol)
 kd_deriv = Parameter(0.5 * kd / f0, symbol=kd_symbol)
 kdp_deriv = Parameter(2 * kdp / f0, symbol=kdp_symbol)
+hd_deriv = Parameter(a * hd / f0, symbol=hd_symbol, units='')
 
 # Orography (non-dimensional)
 
-hh = np.zeros(len(b))
+hh = np.zeros(len(atmospheric_basis))
 hh[1] = 0.2
-h = ParameterField('h', u'h', hh, b, s)
-
-# Newtonian cooling parameters
-hd_symbol = symbols('hd')
-hd = Parameter(4.644e-06, symbol=hd_symbol, units='[s^-1]')
-hd_deriv = Parameter(a * hd / f0, symbol=hd_symbol, units='')
+h = ParameterField('h', u'h', hh, atmospheric_basis, s)
 
 # Equilibrium temperature
-rr = np.zeros(len(b))
+rr = np.zeros(len(atmospheric_basis))
 rr[0] = 0.1
-Tf = ParameterField('T', u'T', rr, b, s)
+Tf = ParameterField('T', u'T', rr, atmospheric_basis, s)
 
 # Defining the fields
 #######################
 p = u'ψ'
-psi = Field("psi", p, b, s, units="[m^2][s^-2]", latex=r'\psi')
+psi = Field("psi", p, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\psi')
 tt = u'θ'
-theta = Field("theta", tt, b, s, units="[m^2][s^-2]", latex=r'\theta')
+theta = Field("theta", tt, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\theta')
 
 
 # --------------------------------
@@ -103,12 +103,12 @@ theta = Field("theta", tt, b, s, units="[m^2][s^-2]", latex=r'\theta')
 
 # Defining the equation and LHS
 # Laplacian
-vorticity = OperatorTerm(psi, Laplacian, b.coordinate_system)
+vorticity = OperatorTerm(psi, Laplacian, atmospheric_basis.coordinate_system)
 barotropic_equation = Equation(psi, lhs_term=vorticity)
 
 # Defining the advection term
-advection_term1 = vorticity_advection(psi, psi, b.coordinate_system, sign=-1)
-advection_term2 = vorticity_advection(theta, theta, b.coordinate_system, sign=-1)
+advection_term1 = vorticity_advection(psi, psi, atmospheric_basis.coordinate_system, sign=-1)
+advection_term2 = vorticity_advection(theta, theta, atmospheric_basis.coordinate_system, sign=-1)
 
 barotropic_equation.add_rhs_terms(advection_term1)
 barotropic_equation.add_rhs_terms(advection_term2)
@@ -118,22 +118,22 @@ g = 0.5  # must be divided by 2
 gamma = symbols(u'γ')
 gammap = Parameter(g, symbol=gamma)
 
-orographic_term1 = Jacobian(psi, h, b.coordinate_system, sign=-1, prefactors=(gammap, gammap))
-orographic_term2 = Jacobian(theta, h, b.coordinate_system, sign=1, prefactors=(gammap, gammap))
+orographic_term1 = Jacobian(psi, h, atmospheric_basis.coordinate_system, sign=-1, prefactors=(gammap, gammap))
+orographic_term2 = Jacobian(theta, h, atmospheric_basis.coordinate_system, sign=1, prefactors=(gammap, gammap))
 
 barotropic_equation.add_rhs_terms(orographic_term1)
 barotropic_equation.add_rhs_terms(orographic_term2)
 
 # adding the beta term
-betaterm = OperatorTerm(psi, D, x, prefactor=beta_nondim, sign=-1)
+beta_term = OperatorTerm(psi, D, x, prefactor=beta_nondim, sign=-1)
 
-barotropic_equation.add_rhs_term(betaterm)
+barotropic_equation.add_rhs_term(beta_term)
 
 # adding the friction with the ground
-friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd_deriv, sign=-1)
+friction = OperatorTerm(psi, Laplacian, atmospheric_basis.coordinate_system, prefactor=kd_deriv, sign=-1)
 barotropic_equation.add_rhs_term(friction)
 
-ofriction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kd_deriv)
+ofriction = OperatorTerm(theta, Laplacian, atmospheric_basis.coordinate_system, prefactor=kd_deriv)
 barotropic_equation.add_rhs_term(ofriction)
 
 # --------------------------------
@@ -144,45 +144,45 @@ barotropic_equation.add_rhs_term(ofriction)
 
 # Defining the equation and LHS
 # Laplacian
-vorticity = OperatorTerm(theta, Laplacian, b.coordinate_system)
+vorticity = OperatorTerm(theta, Laplacian, atmospheric_basis.coordinate_system)
 
 lin_lhs = LinearTerm(theta, prefactor=a, sign=-1)
 lhs = AdditionOfTerms(lin_lhs, vorticity)
 baroclinic_equation = Equation(theta, lhs_term=lhs)
 
 # Defining the advection terms
-advection_term1 = vorticity_advection(psi, theta, b.coordinate_system, sign=-1)
-advection_term2 = vorticity_advection(theta, psi, b.coordinate_system, sign=-1)
+advection_term1 = vorticity_advection(psi, theta, atmospheric_basis.coordinate_system, sign=-1)
+advection_term2 = vorticity_advection(theta, psi, atmospheric_basis.coordinate_system, sign=-1)
 
 baroclinic_equation.add_rhs_terms(advection_term1)
 baroclinic_equation.add_rhs_terms(advection_term2)
 
 # adding an orographic term
-orographic_term1 = Jacobian(psi, h, b.coordinate_system, sign=1, prefactors=(gammap, gammap))
-orographic_term2 = Jacobian(theta, h, b.coordinate_system, sign=-1, prefactors=(gammap, gammap))
+orographic_term1 = Jacobian(psi, h, atmospheric_basis.coordinate_system, sign=1, prefactors=(gammap, gammap))
+orographic_term2 = Jacobian(theta, h, atmospheric_basis.coordinate_system, sign=-1, prefactors=(gammap, gammap))
 
 baroclinic_equation.add_rhs_terms(orographic_term1)
 baroclinic_equation.add_rhs_terms(orographic_term2)
 
 # adding the beta term
-betaterm = OperatorTerm(theta, D, x, prefactor=beta_nondim, sign=-1)
-baroclinic_equation.add_rhs_term(betaterm)
+beta_term = OperatorTerm(theta, D, x, prefactor=beta_nondim, sign=-1)
+baroclinic_equation.add_rhs_term(beta_term)
 
 
 # adding the friction with the ground
-friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd_deriv, sign=1)
+friction = OperatorTerm(psi, Laplacian, atmospheric_basis.coordinate_system, prefactor=kd_deriv, sign=1)
 baroclinic_equation.add_rhs_term(friction)
 
-ofriction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kd_deriv, sign=-1)
+ofriction = OperatorTerm(theta, Laplacian, atmospheric_basis.coordinate_system, prefactor=kd_deriv, sign=-1)
 baroclinic_equation.add_rhs_term(ofriction)
 
 
 # adding the atmospheric friction
-ground_friction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kdp_deriv, sign=-1)
+ground_friction = OperatorTerm(theta, Laplacian, atmospheric_basis.coordinate_system, prefactor=kdp_deriv, sign=-1)
 baroclinic_equation.add_rhs_term(ground_friction)
 
 # adding jacobian from thermal wind relation
-thermal = Jacobian(psi, theta, b.coordinate_system, prefactors=(a, a))
+thermal = Jacobian(psi, theta, atmospheric_basis.coordinate_system, prefactors=(a, a))
 baroclinic_equation.add_rhs_terms(thermal)
 
 
