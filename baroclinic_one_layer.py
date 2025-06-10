@@ -3,7 +3,7 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 
 from layercake.basis.planar_fourier import contiguous_channel_basis
-from sympy import symbols
+from sympy import symbols, Symbol
 from layercake.variables.parameter import Parameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
@@ -16,10 +16,44 @@ from layercake.arithmetic.symbolic.operators import Laplacian, D
 from layercake.bakery.layers import Layer
 from layercake.bakery.cake import Cake
 
+# Setting some parameters
+##########################
+
+# Characteristic length scale (L_y / pi)
+L_symbol = Symbol('L')
+L = Parameter(1591549.4309189534, symbol=L_symbol, units='[m]')
+
+# Domain aspect ratio
+n_symbol = symbols('n')
+n = Parameter(1.3, symbol=n_symbol)
+
+# Coriolis parameter at the middle of the domain
+f0_symbol = symbols('f0')
+f0 = Parameter(1.032e-4, symbol=f0_symbol, units='[s^-1]')
+
+# Pressure difference between the two atmospheric layers
+deltap_symbol = Symbol('Δp')
+deltap = Parameter(5.e4, symbol=deltap_symbol, units='[Pa]')
+
+# Static stability of the atmosphere
+sigma_symbol = symbols('σ')
+sigma = Parameter(2.1581898457499433e-06, symbol=sigma_symbol, units='[m^2][s^-2][Pa^-2]')
+
+# Meridional gradient of the Coriolis parameter at phi_0
+beta_symbol = symbols(u'β')
+beta = Parameter(1.3594204385792041e-11, symbol=beta_symbol, units='[m^-1][s^-1]')
+
+# atmosphere bottom friction coefficient
+kd_symbol = symbols('k_d')
+kd = Parameter(1.032e-05, symbol=kd_symbol, units='[s^-1]')
+
+# Atmosphere internal friction coefficient
+kdp_symbol = symbols('k_dp')
+kdp = Parameter(1.032e-06, symbol=kdp_symbol, units='[s^-1]')
 
 # Defining the domain
-ns = symbols('n')
-n = Parameter(1.3, symbol=ns)
+######################
+
 parameters = {'n': n}
 b = contiguous_channel_basis(2, 2, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
@@ -27,7 +61,34 @@ s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system
 x = b.coordinate_system.coordinates_symbol_as_list[0]
 y = b.coordinate_system.coordinates_symbol_as_list[1]
 
+# Derived (non-dimensional) parameters
+#######################################
+
+sigma_nondim = Parameter((sigma * deltap ** 2) / (L ** 2 * f0 ** 2), symbol=sigma_symbol, units='')
+beta_nondim = Parameter(beta * L / f0, symbol=beta_symbol, units='')
+a_symbol = symbols('a')
+a = Parameter(2 / sigma_nondim, symbol=a_symbol)
+kd_deriv = Parameter(0.5 * kd / f0, symbol=kd_symbol)
+kdp_deriv = Parameter(2 * kdp / f0, symbol=kdp_symbol)
+
+# Orography (non-dimensional)
+
+hh = np.zeros(len(b))
+hh[1] = 0.2
+h = ParameterField('h', u'h', hh, b, s)
+
+# Newtonian cooling parameters
+hd_symbol = symbols('hd')
+hd = Parameter(4.644e-06, symbol=hd_symbol, units='[s^-1]')
+hd_deriv = Parameter(a * hd / f0, symbol=hd_symbol, units='')
+
+# Equilibrium temperature
+rr = np.zeros(len(b))
+rr[0] = 0.1
+Tf = ParameterField('T', u'T', rr, b, s)
+
 # Defining the fields
+#######################
 p = u'ψ'
 psi = Field("psi", p, b, s, units="[m^2][s^-2]", latex=r'\psi')
 tt = u'θ'
@@ -53,12 +114,9 @@ barotropic_equation.add_rhs_terms(advection_term1)
 barotropic_equation.add_rhs_terms(advection_term2)
 
 # adding an orographic term
-g = 0.5
+g = 0.5  # must be divided by 2
 gamma = symbols(u'γ')
 gammap = Parameter(g, symbol=gamma)
-hh = np.zeros(len(b))
-hh[1] = 0.2
-h = ParameterField('h', u'h', hh, b, s)
 
 orographic_term1 = Jacobian(psi, h, b.coordinate_system, sign=-1, prefactors=(gammap, gammap))
 orographic_term2 = Jacobian(theta, h, b.coordinate_system, sign=1, prefactors=(gammap, gammap))
@@ -67,19 +125,15 @@ barotropic_equation.add_rhs_terms(orographic_term1)
 barotropic_equation.add_rhs_terms(orographic_term2)
 
 # adding the beta term
-betaa = symbols(u'β')
-beta = Parameter(0.20964969238375256, symbol=betaa)
-betaterm = OperatorTerm(psi, D, x, prefactor=beta, sign=-1)
+betaterm = OperatorTerm(psi, D, x, prefactor=beta_nondim, sign=-1)
 
 barotropic_equation.add_rhs_term(betaterm)
 
-# adding the atmospheric friction
-kdd = symbols('k_d')
-kd = Parameter(0.05, symbol=kdd)
-friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd, sign=-1)
+# adding the friction with the ground
+friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd_deriv, sign=-1)
 barotropic_equation.add_rhs_term(friction)
 
-ofriction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kd)
+ofriction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kd_deriv)
 barotropic_equation.add_rhs_term(ofriction)
 
 # --------------------------------
@@ -91,8 +145,6 @@ barotropic_equation.add_rhs_term(ofriction)
 # Defining the equation and LHS
 # Laplacian
 vorticity = OperatorTerm(theta, Laplacian, b.coordinate_system)
-a_symbol = symbols('a')
-a = Parameter(2 / 0.2, symbol=a_symbol)
 
 lin_lhs = LinearTerm(theta, prefactor=a, sign=-1)
 lhs = AdditionOfTerms(lin_lhs, vorticity)
@@ -105,9 +157,7 @@ advection_term2 = vorticity_advection(theta, psi, b.coordinate_system, sign=-1)
 baroclinic_equation.add_rhs_terms(advection_term1)
 baroclinic_equation.add_rhs_terms(advection_term2)
 
-
 # adding an orographic term
-
 orographic_term1 = Jacobian(psi, h, b.coordinate_system, sign=1, prefactors=(gammap, gammap))
 orographic_term2 = Jacobian(theta, h, b.coordinate_system, sign=-1, prefactors=(gammap, gammap))
 
@@ -115,42 +165,30 @@ baroclinic_equation.add_rhs_terms(orographic_term1)
 baroclinic_equation.add_rhs_terms(orographic_term2)
 
 # adding the beta term
-betaa = symbols(u'β')
-beta = Parameter(0.20964969238375256, symbol=betaa)
-betaterm = OperatorTerm(theta, D, x, prefactor=beta, sign=-1)
-
+betaterm = OperatorTerm(theta, D, x, prefactor=beta_nondim, sign=-1)
 baroclinic_equation.add_rhs_term(betaterm)
 
 
-# adding the atmospheric friction
-friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd, sign=1)
+# adding the friction with the ground
+friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd_deriv, sign=1)
 baroclinic_equation.add_rhs_term(friction)
 
-ofriction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kd, sign=-1)
+ofriction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kd_deriv, sign=-1)
 baroclinic_equation.add_rhs_term(ofriction)
 
 
-# adding the friction with the ground
-kddp = symbols('k_dp')
-kdp = Parameter(2 * 0.01, symbol=kddp)
-ground_friction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kdp, sign=-1)
+# adding the atmospheric friction
+ground_friction = OperatorTerm(theta, Laplacian, b.coordinate_system, prefactor=kdp_deriv, sign=-1)
 baroclinic_equation.add_rhs_term(ground_friction)
 
 # adding jacobian from thermal wind relation
-
 thermal = Jacobian(psi, theta, b.coordinate_system, prefactors=(a, a))
 baroclinic_equation.add_rhs_terms(thermal)
 
 
 # adding Newtonian cooling
-
-hdd = symbols('hd')
-hd = Parameter(a * 0.045, symbol=hdd)
-rr = np.zeros(len(b))
-rr[0] = 0.1
-Tf = ParameterField('T', u'T', rr, b, s)
-equilibrium_temperature = LinearTerm(Tf, prefactor=hd, sign=-1)
-newt = LinearTerm(theta, prefactor=hd, sign=1)
+equilibrium_temperature = LinearTerm(Tf, prefactor=hd_deriv, sign=-1)
+newt = LinearTerm(theta, prefactor=hd_deriv, sign=1)
 
 baroclinic_equation.add_rhs_terms((newt, equilibrium_temperature))
 
