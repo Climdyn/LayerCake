@@ -87,8 +87,8 @@ class Cake(object):
                     zeros = [0 for _ in range(lmax, len(layer.tensor.shape))]
                 args = tuple(slices + zeros)
                 tensor[args] = tensor[args] + layer.tensor.todense()[1:]
-                tensor = tensor.to_coo()
-                tensor = self.simplify_tensor(tensor)
+            tensor = tensor.to_coo()
+            tensor = self.simplify_tensor(tensor)
         else:
             tensor = None
 
