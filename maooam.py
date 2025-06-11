@@ -32,19 +32,19 @@ f0 = Parameter(1.032e-4, symbol=Symbol('f_0'), units='[s^-1]')
 deltap = Parameter(5.e4, symbol=Symbol('Δp'), units='[Pa]')
 
 # Static stability of the atmosphere
-sigma = Parameter(2.1581898457499433e-06, symbol=Symbol('σ'), units='[m^2][s^-2][Pa^-2]')
+sigma = Parameter(2.1581898457499433e-6, symbol=Symbol('σ'), units='[m^2][s^-2][Pa^-2]')
 
 # Meridional gradient of the Coriolis parameter at phi_0
-beta = Parameter(1.3594204385792041e-11, symbol=Symbol(u'β'), units='[m^-1][s^-1]')
+beta = Parameter(1.620094191522763e-11, symbol=Symbol(u'β'), units='[m^-1][s^-1]')
 
 # atmosphere bottom friction coefficient
-kd = Parameter(1.032e-05, symbol=Symbol('k_d'), units='[s^-1]')
+kd = Parameter(2.9928e-6, symbol=Symbol('k_d'), units='[s^-1]')
 
 # Atmosphere internal friction coefficient
-kdp = Parameter(1.032e-06, symbol=Symbol("k_d'"), units='[s^-1]')
+kdp = Parameter(2.9928e-6, symbol=Symbol("k_d'"), units='[s^-1]')
 
 # Friction between the ocean and the atmosphere
-d = Parameter(0.05, symbol=Symbol('d'))
+d = Parameter(1.1e-7, symbol=Symbol('d'), units='[s^-1]')
 
 # Friction of the ocean with the bottom
 r = Parameter(1.e-7, symbol=Symbol('r'), units='[s^-1]')
@@ -84,7 +84,7 @@ gp = Parameter(0.031, symbol=Symbol("g'"), units='[m][s^-2]')
 
 parameters = {'n': n}
 atmospheric_basis = contiguous_channel_basis(2, 2, parameters)
-oceanic_basis = contiguous_basin_basis(2, 2, parameters)
+oceanic_basis = contiguous_basin_basis(2, 4, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system)
 # coordinates
 x = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[0]
@@ -95,6 +95,8 @@ y = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[1]
 
 sigma_nondim = Parameter((sigma * deltap ** 2) / (L ** 2 * f0 ** 2), symbol=sigma.symbol, units='')
 beta_nondim = Parameter(beta * L / f0, symbol=beta.symbol, units='')
+d_nondim = Parameter(d / f0, symbol=d.symbol)
+r_nondim = Parameter(r / f0, symbol=r.symbol)
 a = Parameter(2 / sigma_nondim, symbol=Symbol('a'))
 kd_deriv = Parameter(0.5 * kd / f0, symbol=kd.symbol)
 kdp_deriv = Parameter(2 * kdp / f0, symbol=kdp.symbol)
@@ -126,9 +128,9 @@ tt = u'θ_a'
 theta_a = Field("theta_a", tt, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\theta_{\rm a}')
 
 p_o = u'ψ_o'
-psi_o = Field("psi_o", p, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\psi_{\rm o}')
-tto = u'δT_o'
-deltaT_o = Field("deltaT_o", tt, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\delta T_{\rm o}')
+psi_o = Field("psi_o", p_o, oceanic_basis, s, units="[m^2][s^-2]", latex=r'\psi_{\rm o}')
+tt_o = u'δT_o'
+deltaT_o = Field("deltaT_o", tt_o, oceanic_basis, s, units="[m^2][s^-2]", latex=r'\delta T_{\rm o}')
 
 # --------------------------------------------------------
 #
@@ -234,9 +236,6 @@ baroclinic_equation.add_rhs_term(Cat)
 # Defining the equation and LHS
 # Laplacian
 vorticity = OperatorTerm(psi_o, Laplacian, oceanic_basis.coordinate_system)
-G_symbol = symbols('G')
-G = Parameter(1., symbol=G_symbol)
-
 lin_lhs = LinearTerm(psi_o, prefactor=G)
 lhs = AdditionOfTerms(lin_lhs, vorticity)
 oceanic_equation = Equation(psi_o, lhs_term=lhs)
@@ -250,17 +249,17 @@ beta_term = OperatorTerm(psi_o, D, x, prefactor=beta_nondim, sign=-1)
 oceanic_equation.add_rhs_term(beta_term)
 
 # adding friction with the ocean
-friction = OperatorTerm(psi_a, Laplacian, oceanic_basis.coordinate_system, prefactor=d, sign=1)
+friction = OperatorTerm(psi_a, Laplacian, oceanic_basis.coordinate_system, prefactor=d_nondim, sign=1)
 oceanic_equation.add_rhs_term(friction)
 
-ofriction = OperatorTerm(theta_a, Laplacian, oceanic_basis.coordinate_system, prefactor=d, sign=-1)
+ofriction = OperatorTerm(theta_a, Laplacian, oceanic_basis.coordinate_system, prefactor=d_nondim, sign=-1)
 oceanic_equation.add_rhs_term(ofriction)
 
-ocfriction = OperatorTerm(psi_o, Laplacian, oceanic_basis.coordinate_system, prefactor=d, sign=-1)
+ocfriction = OperatorTerm(psi_o, Laplacian, oceanic_basis.coordinate_system, prefactor=d_nondim, sign=-1)
 oceanic_equation.add_rhs_term(ocfriction)
 
 # adding friction at the bottom of the ocean
-bfriction = OperatorTerm(psi_o, Laplacian, oceanic_basis.coordinate_system, prefactor=r, sign=-1)
+bfriction = OperatorTerm(psi_o, Laplacian, oceanic_basis.coordinate_system, prefactor=r_nondim, sign=-1)
 oceanic_equation.add_rhs_term(bfriction)
 
 
@@ -273,7 +272,7 @@ oceanic_equation.add_rhs_term(bfriction)
 # Defining the equation and LHS
 # Laplacian
 lhs = LinearTerm(deltaT_o)
-ocean_temperature_equation = Equation(theta_a, lhs_term=lhs)
+ocean_temperature_equation = Equation(deltaT_o, lhs_term=lhs)
 
 # Defining the advection term
 advection_term = Jacobian(psi_o, deltaT_o, oceanic_basis.coordinate_system, sign=-1)
@@ -335,12 +334,12 @@ f, Df = cake.compute_tendencies()
 
 # integrating
 ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 20000.), ic)
+res = solve_ivp(f, (0., 10000000.), ic)
 
 ic = res.y[:, -1]
-res = solve_ivp(f, (0., 20000.), ic)
+res = solve_ivp(f, (0., 1000000.), ic)
 
 # plotting
-plt.plot(res.y.T)
+plt.plot(res.y[21], res.y[29])
 plt.show()
-#
+
