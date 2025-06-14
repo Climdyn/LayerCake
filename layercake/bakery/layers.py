@@ -1,6 +1,9 @@
 
 import numpy as np
+from numpy.linalg import LinAlgError
 import sparse as sp
+from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableSparseMatrix
+from sympy.matrices.exceptions import NonInvertibleMatrixError
 from layercake.arithmetic.terms.constant import ConstantTerm
 from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.variables.field import ParameterField
@@ -75,23 +78,27 @@ class Layer(object):
             for term in eq.terms:
                 term.compute_inner_products(field.basis, numerical=numerical)
 
-    def compute_tensor(self, numerical=True, compute_inner_products=False):
+    def compute_tensor(self, numerical=True, compute_inner_products=False, substitutions=None):
 
         if compute_inner_products:
             self.compute_inner_products(numerical=numerical)
 
+        if self._cake is not None:
+            shape = tuple([self.ndim + 1] + [self._cake.ndim + 1] * (self.maximum_rank - 1))
+        else:
+            shape = tuple([self.ndim + 1] * self.maximum_rank)
+
         if numerical:
-            if self._cake is not None:
-                shape = tuple([self.ndim + 1] + [self._cake.ndim + 1] * (self.maximum_rank - 1))
-            else:
-                shape = tuple([self.ndim + 1] * self.maximum_rank)
 
             self.tensor = sp.zeros(shape, dtype=np.float64, format='dok')
-            lhs_mat = np.zeros((self.ndim+1, self.ndim+1))
+            lhs_mat = MutableSparseMatrix(np.zeros((self.ndim+1, self.ndim+1)))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
-                lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
+                try:
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
+                except LinAlgError:
+                    raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
                     for term in equation_term.terms:
@@ -134,5 +141,58 @@ class Layer(object):
             self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
 
         else:
-            pass
+            if substitutions is None:
+                substitutions = dict()
+            self.tensor = MutableSparseNDimArray(iterable=[0.,], shape=shape)
+            lhs_mat = MutableSparseMatrix((self.ndim+1, self.ndim+1))
+            lhs_order = 1
+            for field, eq in zip(self.fields, self.equations):
+                ndim = field.state.__len__()
+                try:
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.subs(substitutions).inverse().symplify()
+                except NonInvertibleMatrixError:
+                    raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+                # stopping here, not yet ready
+                for equation_term in eq.terms:
+                    slices = [slice(lhs_order, lhs_order + ndim)]
+                    for term in equation_term.terms:
+                        term_field = term.field
+                        if term_field.dynamical:
+                            if self._cake is not None:
+                                term_extent = self._cake.fields_tensor_extent[term_field]
+                            elif term_field in self.fields:
+                                term_extent = self._fields_layer_tensor_extent[term_field]
+                            else:
+                                raise AttributeError(f'Field {term_field} provided in equation {eq} cannot be found in the cake or in the layer.')
+                            slices.append(slice(*term_extent))
+                        else:
+                            slices.append(0)
+                    zeros = [0 for _ in range(equation_term.rank, len(self.tensor.shape))]
+                    args = slices+zeros
+                    if isinstance(equation_term, ConstantTerm):
+                        increment = equation_term.field.parameters.astype(float)
+                    else:
+                        increment = equation_term.inner_products.todense()
+                        if isinstance(equation_term, ProductOfTerms):
+                            contract = dict()
+                            for i, t in enumerate(equation_term.terms):
+                                if isinstance(t.field, ParameterField):
+                                    params = t.field.parameters.astype(float)
+                                    contract[i] = params
+                            if contract:
+                                for i in sorted(list(contract.keys()), reverse=True):
+                                    params = contract[i]
+                                    increment = np.tensordot(increment, params, ((i+1,), (0,)))
+                                    args[i+1] = 0
+                        elif hasattr(equation_term, 'field'):
+                            if isinstance(equation_term.field, ParameterField):
+                                params = equation_term.field.parameters.astype(float)
+                                increment = np.tensordot(increment, params, ((1,), (0,)))
+                                args[1] = 0
+                    args = tuple(args)
+                    self.tensor[args] = self.tensor[args] + increment
+                lhs_order += ndim
+            self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
+
+
 

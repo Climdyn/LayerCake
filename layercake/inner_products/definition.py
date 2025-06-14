@@ -63,15 +63,22 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     """
 
-    def __init__(self, coordinate_system, optimizer=None):
+    def __init__(self, coordinate_system, optimizer=None, kwargs=None):
 
         InnerProductDefinition.__init__(self)
         self.coordinate_system = coordinate_system
 
         if optimizer is None:
+            self.optimizer = self._no_optimizer
+        elif optimizer == 'trig':
             self.optimizer = self._trig_optimizer
         else:
             self.optimizer = optimizer
+
+        if kwargs is not None:
+            self.kwargs = kwargs
+        else:
+            self.kwargs = dict()
 
     def set_optimizer(self, optimizer):
         """Function to set the optimizer.
@@ -112,9 +119,9 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         _extent_x = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
         _extent_y = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
         if symbolic_expr:
-            return Integral(expr, (_x, *_extent_x), (_y, *_extent_y))
+            return Integral(expr, (_x, *_extent_x), (_y, *_extent_y), **self.kwargs)
         else:
-            return integrate(expr, (_x, *_extent_x), (_y, *_extent_y))
+            return integrate(expr, (_x, *_extent_x), (_y, *_extent_y), **self.kwargs)
 
     def inner_product(self, S, G, symbolic_expr=False, integrand=False):
         """Function defining the inner product to be computed symbolically:
