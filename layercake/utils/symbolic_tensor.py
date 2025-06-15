@@ -1,0 +1,40 @@
+
+from sympy import tensorproduct, tensorcontraction
+
+
+def symbolic_tensordot(a, b, axes=2):
+    """Compute tensor dot product along specified axes of two sympy symbolic arrays
+
+    This is based on `Numpy`_ :meth:`~numpy.tensordot` .
+
+    .. _Numpy: https://numpy.org/
+
+    Parameters
+    ----------
+    a, b: ~sympy.tensor.array.DenseNDimArray or ~sympy.tensor.array.SparseNDimArray
+        Arrays to take the dot product of.
+
+    axes: int or 2-tuple
+        If an integer is provided, sum over the last `axes` axes of `a` and the first `axes` axes
+        of `b` in order.
+        Else, specify the axes to be summed by a 2-tuple of tuples containing the axes.
+        The sizes of the corresponding axes must match.
+
+    Returns
+    -------
+    output: Sympy tensor
+        The tensor dot product of the input.
+
+    """
+    nda = len(a.shape)
+    if isinstance(axes, int):
+        a_com = (nda + i for i in range(-axes, 0))
+        b_com = (nda + i for i in range(axes))
+    else:
+        a_com = axes[0]
+        b_com = (nda + i for i in axes[1])
+    sum_cols = a_com + b_com
+
+    prod = tensorproduct(a, b)
+
+    return tensorcontraction(prod, sum_cols)

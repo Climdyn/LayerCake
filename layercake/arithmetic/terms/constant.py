@@ -20,6 +20,10 @@ class ConstantTerm(ArithmeticTerms):
         self.field = parameters_field
 
     @property
+    def terms(self):
+        return [self]
+
+    @property
     def _symbolic_expressions_list(self):
         return [self.symbolic_expression]
 

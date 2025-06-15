@@ -2,11 +2,12 @@
 import numpy as np
 from numpy.linalg import LinAlgError
 import sparse as sp
-from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableSparseMatrix
+from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray
 from sympy.matrices.exceptions import NonInvertibleMatrixError
 from layercake.arithmetic.terms.constant import ConstantTerm
 from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.variables.field import ParameterField
+from layercake.utils.symbolic_tensor import symbolic_tensordot
 
 
 class Layer(object):
@@ -152,7 +153,6 @@ class Layer(object):
                     lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.subs(substitutions).inverse().symplify()
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
-                # stopping here, not yet ready
                 for equation_term in eq.terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
                     for term in equation_term.terms:
@@ -170,29 +170,35 @@ class Layer(object):
                     zeros = [0 for _ in range(equation_term.rank, len(self.tensor.shape))]
                     args = slices+zeros
                     if isinstance(equation_term, ConstantTerm):
-                        increment = equation_term.field.parameters.astype(float)
+                        term_symbol_list = list()
+                        term_symbol_list.append(list(equation_term.field.symbols))
+                        increment = ImmutableMatrix(term_symbol_list, shape=(len(term_symbol_list), 1))
                     else:
-                        increment = equation_term.inner_products.todense()
+                        increment = equation_term.inner_products
                         if isinstance(equation_term, ProductOfTerms):
                             contract = dict()
                             for i, t in enumerate(equation_term.terms):
                                 if isinstance(t.field, ParameterField):
-                                    params = t.field.parameters.astype(float)
+                                    term_symbol_list = list()
+                                    term_symbol_list.append(list(t.field.symbols))
+                                    params = ImmutableMatrix(term_symbol_list, shape=(len(term_symbol_list), 1))
                                     contract[i] = params
                             if contract:
                                 for i in sorted(list(contract.keys()), reverse=True):
                                     params = contract[i]
-                                    increment = np.tensordot(increment, params, ((i+1,), (0,)))
+                                    increment = symbolic_tensordot(increment, params, ((i+1,), (0,)))
                                     args[i+1] = 0
                         elif hasattr(equation_term, 'field'):
                             if isinstance(equation_term.field, ParameterField):
-                                params = equation_term.field.parameters.astype(float)
-                                increment = np.tensordot(increment, params, ((1,), (0,)))
+                                term_symbol_list = list()
+                                term_symbol_list.append(list(equation_term.field.symbols))
+                                params = ImmutableMatrix(term_symbol_list, shape=(len(term_symbol_list), 1))
+                                increment = symbolic_tensordot(increment, params, ((1,), (0,)))
                                 args[1] = 0
                     args = tuple(args)
                     self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
-            self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
+            self.tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1))
 
 
 
