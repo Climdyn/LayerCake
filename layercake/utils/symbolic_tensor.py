@@ -28,12 +28,12 @@ def symbolic_tensordot(a, b, axes=2):
     """
     nda = len(a.shape)
     if isinstance(axes, int):
-        a_com = (nda + i for i in range(-axes, 0))
-        b_com = (nda + i for i in range(axes))
+        a_com = [nda + i for i in range(-axes, 0)]
+        b_com = [nda + i for i in range(axes)]
     else:
         a_com = axes[0]
-        b_com = (nda + i for i in axes[1])
-    sum_cols = a_com + b_com
+        b_com = [nda + i for i in axes[1]]
+    sum_cols = tuple(a_com) + tuple(b_com)
 
     prod = tensorproduct(a, b)
 

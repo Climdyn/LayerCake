@@ -2,7 +2,8 @@
 import numpy as np
 from numpy.linalg import LinAlgError
 import sparse as sp
-from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray
+from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray, S
+from sympy import zeros as sympy_zeros
 from sympy.matrices.exceptions import NonInvertibleMatrixError
 from layercake.arithmetic.terms.constant import ConstantTerm
 from layercake.arithmetic.terms.operations import ProductOfTerms
@@ -144,13 +145,13 @@ class Layer(object):
         else:
             if substitutions is None:
                 substitutions = dict()
-            self.tensor = MutableSparseNDimArray(iterable=[0.,], shape=shape)
-            lhs_mat = MutableSparseMatrix((self.ndim+1, self.ndim+1))
+            self.tensor = MutableSparseNDimArray(iterable=[S.Zero,], shape=shape)
+            lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
                 try:
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.subs(substitutions).inverse().symplify()
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.subs(substitutions).inverse().simplify()
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.terms:
@@ -172,7 +173,7 @@ class Layer(object):
                     if isinstance(equation_term, ConstantTerm):
                         term_symbol_list = list()
                         term_symbol_list.append(list(equation_term.field.symbols))
-                        increment = ImmutableMatrix(term_symbol_list, shape=(len(term_symbol_list), 1))
+                        increment = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)
                     else:
                         increment = equation_term.inner_products
                         if isinstance(equation_term, ProductOfTerms):
@@ -181,21 +182,33 @@ class Layer(object):
                                 if isinstance(t.field, ParameterField):
                                     term_symbol_list = list()
                                     term_symbol_list.append(list(t.field.symbols))
-                                    params = ImmutableMatrix(term_symbol_list, shape=(len(term_symbol_list), 1))
+                                    params = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)
                                     contract[i] = params
                             if contract:
                                 for i in sorted(list(contract.keys()), reverse=True):
                                     params = contract[i]
                                     increment = symbolic_tensordot(increment, params, ((i+1,), (0,)))
                                     args[i+1] = 0
+                                    iargs = list()
+                                    for j in increment.shape[:-1]:
+                                        iargs.append(slice(j))
+                                    iargs.append(0)
+                                    increment = increment[tuple(iargs)]
                         elif hasattr(equation_term, 'field'):
                             if isinstance(equation_term.field, ParameterField):
                                 term_symbol_list = list()
                                 term_symbol_list.append(list(equation_term.field.symbols))
-                                params = ImmutableMatrix(term_symbol_list, shape=(len(term_symbol_list), 1))
+                                params = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)
                                 increment = symbolic_tensordot(increment, params, ((1,), (0,)))
                                 args[1] = 0
+                                iargs = list()
+                                for j in increment.shape[:-1]:
+                                    iargs.append(slice(j))
+                                iargs.append(0)
+                                increment = increment[tuple(iargs)]
                     args = tuple(args)
+                    if increment.is_Matrix:
+                        increment = ImmutableSparseNDimArray(increment)
                     self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
             self.tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1))
