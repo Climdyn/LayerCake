@@ -4,6 +4,7 @@ import numpy as np
 import sparse as sp
 from numba import njit
 from layercake.utils.tensor import sparse_mul, jsparse_mul
+from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray, S
 
 real_eps = np.finfo(np.float64).eps
 
@@ -74,23 +75,41 @@ class Cake(object):
 
     @property
     def tensor(self):
+        shape = tuple([self.ndim + 1] * self.maximum_rank)
         if isinstance(self.layers[0].tensor, sp.COO):
-            shape = tuple([self.ndim + 1] * self.maximum_rank)
+            numerical = True
+        elif isinstance(self.layers[0].tensor, ImmutableSparseNDimArray):
+            numerical = False
+        else:
+            raise ValueError('Unable to determine the tensor status of layer 1.')
+
+        if numerical:
             tensor = sp.zeros(shape, dtype=np.float64, format='dok')
-            for i, layer in enumerate(self.layers):
-                lmax = layer.maximum_rank
-                if i < self.number_of_layers - 1:
-                    slices = [slice(self._layers_first_index[i], self._layers_first_index[i + 1])] + [slice(0, None) for _ in range(lmax - 1)]
-                    zeros = [0 for _ in range(lmax, len(layer.tensor.shape))]
-                else:
-                    slices = [slice(self._layers_first_index[i], None)] + [slice(0, None) for _ in range(lmax - 1)]
-                    zeros = [0 for _ in range(lmax, len(layer.tensor.shape))]
-                args = tuple(slices + zeros)
+        else:
+            tensor = MutableSparseNDimArray(iterable=[S.Zero, ], shape=shape)
+
+        for i, layer in enumerate(self.layers):
+            if not isinstance(layer.tensor, sp.COO):
+                raise ValueError("Your cake is composed of both symbolic and numerical layers. "
+                                 "Can't compute the full tensor.")
+            lmax = layer.maximum_rank
+            if i < self.number_of_layers - 1:
+                slices = ([slice(self._layers_first_index[i], self._layers_first_index[i + 1])]
+                          + [slice(0, None) for _ in range(lmax - 1)])
+                zeros = [0 for _ in range(lmax, len(layer.tensor.shape))]
+            else:
+                slices = ([slice(self._layers_first_index[i], None)]
+                          + [slice(0, None) for _ in range(lmax - 1)])
+                zeros = [0 for _ in range(lmax, len(layer.tensor.shape))]
+            args = tuple(slices + zeros)
+            if numerical:
                 tensor[args] = tensor[args] + layer.tensor.todense()[1:]
+            else:
+                tensor[args] = tensor[args] + layer.tensor[1:]
+
+        if numerical:
             tensor = tensor.to_coo()
             tensor = self.simplify_tensor(tensor)
-        else:
-            tensor = None
 
         return tensor
 

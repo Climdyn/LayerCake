@@ -145,7 +145,7 @@ class Layer(object):
         else:
             if substitutions is None:
                 substitutions = dict()
-            self.tensor = MutableSparseNDimArray(iterable=[S.Zero,], shape=shape)
+            self.tensor = MutableSparseNDimArray(iterable={}, shape=shape)
             lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):

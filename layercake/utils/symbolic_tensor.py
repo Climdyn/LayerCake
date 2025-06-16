@@ -38,3 +38,24 @@ def symbolic_tensordot(a, b, axes=2):
     prod = tensorproduct(a, b)
 
     return tensorcontraction(prod, sum_cols)
+
+
+def remove_dic_zeros(dic):
+    """Removes zero values from dictionary
+
+    Parameters
+    ----------
+    dic: dict
+        dictionary which could include 0 in values
+    Returns
+    -------
+    dict
+        dictionary with same keys and values as input, but keys with value of 0 are removed
+    """
+
+    non_zero_dic = dict()
+    for key in dic.keys():
+        if dic[key] != 0:
+            non_zero_dic[key] = dic[key]
+
+    return non_zero_dic

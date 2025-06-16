@@ -14,6 +14,7 @@ from layercake.arithmetic.symbolic.operators import evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 from layercake.inner_products.definition import InnerProductDefinition
 from layercake.arithmetic.utils import sproduct
+from layercake.utils.symbolic_tensor import remove_dic_zeros
 
 
 class ArithmeticTerms(ABC):
@@ -136,6 +137,7 @@ class ArithmeticTerms(ABC):
             output = _parallel_compute(pool, args_list, substitutions, res, timeout,
                                        symbolic_int=not numerical, permute=permute)
         if not numerical:
+            output = remove_dic_zeros(output)
             if self._rank > 2:
                 self.inner_products = ImmutableSparseNDimArray(output, matrix_shape)
             elif self._rank in [1, 2]:
