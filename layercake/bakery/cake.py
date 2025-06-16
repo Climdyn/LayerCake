@@ -89,7 +89,8 @@ class Cake(object):
             tensor = MutableSparseNDimArray(iterable=[S.Zero, ], shape=shape)
 
         for i, layer in enumerate(self.layers):
-            if not isinstance(layer.tensor, sp.COO):
+            if (numerical and not isinstance(layer.tensor, sp.COO) or
+                    (not numerical and not isinstance(layer.tensor, ImmutableSparseNDimArray))):
                 raise ValueError("Your cake is composed of both symbolic and numerical layers. "
                                  "Can't compute the full tensor.")
             lmax = layer.maximum_rank
@@ -110,6 +111,8 @@ class Cake(object):
         if numerical:
             tensor = tensor.to_coo()
             tensor = self.simplify_tensor(tensor)
+        else:
+            tensor = ImmutableSparseNDimArray(tensor)
 
         return tensor
 
