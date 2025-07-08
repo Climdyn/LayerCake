@@ -59,3 +59,26 @@ def remove_dic_zeros(dic):
             non_zero_dic[key] = dic[key]
 
     return non_zero_dic
+
+
+def _get_coords_from_index(dic_index, ndim, shape_len):
+    idx = list()
+    svv = dic_index * ndim
+    for _ in range(shape_len - 1):
+        svv = svv / ndim
+        idx.append(int(svv % ndim))
+        svv -= idx[-1]
+    idx.append(int(svv / ndim))
+    return tuple(idx[::-1])
+
+
+def get_coords_and_values_from_tensor(tensor):
+    ndim = tensor.shape[0]
+    shape_len = len(tensor.shape)
+    coo_list = list()
+    for n, val in tensor._args[0].items():
+        coords = _get_coords_from_index(n, ndim, shape_len)
+        coo_list.append((*coords, val))
+    return coo_list
+
+

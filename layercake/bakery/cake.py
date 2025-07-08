@@ -4,9 +4,10 @@ import numpy as np
 import sparse as sp
 from numba import njit
 from layercake.utils.tensor import sparse_mul, jsparse_mul
-from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray, S
+from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
 
 real_eps = np.finfo(np.float64).eps
+
 
 class Cake(object):
 
@@ -86,7 +87,7 @@ class Cake(object):
         if numerical:
             tensor = sp.zeros(shape, dtype=np.float64, format='dok')
         else:
-            tensor = MutableSparseNDimArray(iterable=[S.Zero, ], shape=shape)
+            tensor = MutableSparseNDimArray(iterable={}, shape=shape)
 
         for i, layer in enumerate(self.layers):
             if (numerical and not isinstance(layer.tensor, sp.COO) or
