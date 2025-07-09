@@ -1,4 +1,4 @@
-
+import numpy as np
 from sympy import tensorproduct, tensorcontraction
 
 
@@ -72,13 +72,25 @@ def _get_coords_from_index(dic_index, ndim, shape_len):
     return tuple(idx[::-1])
 
 
-def get_coords_and_values_from_tensor(tensor):
+def get_coords_and_values_from_tensor(tensor, output='tuple'):
     ndim = tensor.shape[0]
     shape_len = len(tensor.shape)
-    coo_list = list()
+    if output == 'numpy':
+        n_entries = len(tensor._args[0])
+        coo_list = np.zeros((n_entries, shape_len+1), dtype=object)
+        i_entries = 0
+    else:
+        coo_list = list()
     for n, val in tensor._args[0].items():
         coords = _get_coords_from_index(n, ndim, shape_len)
-        coo_list.append((*coords, val))
+        if output == 'tuple':
+            coo_list.append((*coords, val))
+        elif output == 'list':
+            coo_list.append([*coords, val])
+        else:
+            coo_list[i_entries, :shape_len] = coords
+            coo_list[i_entries, shape_len] = val
+            i_entries += 1
     return coo_list
 
 

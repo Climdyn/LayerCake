@@ -4,7 +4,9 @@ import numpy as np
 import sparse as sp
 from numba import njit
 from layercake.utils.tensor import sparse_mul, jsparse_mul
+from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor
 from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
+from sympy import simplify
 
 real_eps = np.finfo(np.float64).eps
 
@@ -111,9 +113,10 @@ class Cake(object):
 
         if numerical:
             tensor = tensor.to_coo()
-            tensor = self.simplify_tensor(tensor)
         else:
             tensor = ImmutableSparseNDimArray(tensor)
+
+        tensor = self.simplify_tensor(tensor)
 
         return tensor
 
@@ -185,21 +188,41 @@ class Cake(object):
 
         Parameters
         ----------
-        tensor: sparse.COO
+        tensor: sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
             The tensor to simplify.
 
         Returns
         -------
-        sparse.COO
+        sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
             The upper-triangularized tensor.
         """
-        coords = tensor.coords.copy()
-        sorted_indices = np.sort(coords[1:, :], axis=0)
-        coords[1:, :] = sorted_indices
+        if isinstance(tensor, sp.COO):
+            coords_val = tensor.coords.copy()
+            sorted_indices = np.sort(coords_val[1:, :], axis=0)
+            coords_val[1:, :] = sorted_indices
 
-        upp_tensor = sp.COO(coords, tensor.data.copy(), shape=tensor.shape, prune=True)
+            upp_tensor = sp.COO(coords_val, tensor.data.copy(), shape=tensor.shape, prune=True)
 
-        return upp_tensor
+            return upp_tensor
+        elif isinstance(tensor, ImmutableSparseNDimArray):
+            coords_val = get_coords_and_values_from_tensor(tensor, 'numpy')
+            sorted_indices = np.sort(coords_val[:, 1:-1], axis=1)
+            coords_val[:, 1:-1] = sorted_indices
+            tensor_dict = dict()
+            for cv in coords_val:
+                coords = tuple(cv[:-1])
+                val = cv[-1]
+                if coords not in tensor_dict:
+                    tensor_dict[coords] = val
+                else:
+                    old_val = tensor[coords]
+                    new_val = simplify(old_val + val)
+                    if new_val != 0:
+                        tensor_dict[coords] = new_val
+
+            return ImmutableSparseNDimArray(iterable=tensor_dict, shape=tensor.shape)
+        else:
+            raise ValueError('Unable to determine the kind of tensor to simplify.')
 
     def print_tensor(self, tensor_name=""):
         """Routine to print the tensor.
