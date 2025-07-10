@@ -33,6 +33,10 @@ class EquationFormatter(ABC):
                         new_term += f'* {self._format_components(variable, c)} '
                 equations_list[i] += new_term
 
+        for i in range(ndim):
+            for code, new_code in self.lang_translation.items():
+                equations_list[i] = equations_list[i].replace(code, new_code)
+
         return equations_list[1:]
 
     def _format_components(self, s, idx):
