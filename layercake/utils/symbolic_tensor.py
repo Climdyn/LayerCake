@@ -61,7 +61,7 @@ def remove_dic_zeros(dic):
     return non_zero_dic
 
 
-def _get_coords_from_index(dic_index, ndim, shape_len):
+def get_coords_from_index(dic_index, ndim, shape_len):
     idx = list()
     svv = dic_index * ndim
     for _ in range(shape_len - 1):
@@ -82,7 +82,7 @@ def get_coords_and_values_from_tensor(tensor, output='tuple'):
     else:
         coo_list = list()
     for n, val in tensor._args[0].items():
-        coords = _get_coords_from_index(n, ndim, shape_len)
+        coords = get_coords_from_index(n, ndim, shape_len)
         if output == 'tuple':
             coo_list.append((*coords, val))
         elif output == 'list':
