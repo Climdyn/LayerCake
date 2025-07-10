@@ -4,9 +4,10 @@ import numpy as np
 import sparse as sp
 from numba import njit
 from layercake.utils.tensor import sparse_mul, jsparse_mul
-from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor
+from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor, compute_jacobian_permutations
 from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
 from sympy import simplify
+from sympy.tensor.array import permutedims
 
 real_eps = np.finfo(np.float64).eps
 
@@ -124,12 +125,14 @@ class Cake(object):
     def jacobian_tensor(self):
         tensor = self.tensor
         if isinstance(tensor, sp.COO):
-            return self._jacobian_from_tensor(tensor)
+            return self._jacobian_from_numerical_tensor(tensor)
+        elif isinstance(tensor, ImmutableSparseNDimArray):
+            return self._jacobian_from_symbolic_tensor(tensor)
         else:
-            return None
+            raise ValueError('Unable to determine the kind of tensor to simplify.')
 
     @staticmethod
-    def _jacobian_from_tensor(tensor):
+    def _jacobian_from_numerical_tensor(tensor):
         """Function to compute the Jacobian tensor.
 
         Parameters
@@ -149,6 +152,30 @@ class Cake(object):
 
         for i in range(1, n_perm+1):
             jacobian_tensor += tensor.swapaxes(1, i+1)
+
+        return jacobian_tensor
+
+    @staticmethod
+    def _jacobian_from_symbolic_tensor(tensor):
+        """Function to compute the Jacobian tensor.
+
+        Parameters
+        ----------
+        tensor: ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
+            The system tensor.
+
+        Returns
+        -------
+        ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
+            The Jacobian tensor.
+        """
+
+        perms = compute_jacobian_permutations(tensor.shape)
+
+        jacobian_tensor = tensor.copy()
+
+        for perm in perms:
+            jacobian_tensor += permutedims(tensor, perm)
 
         return jacobian_tensor
 

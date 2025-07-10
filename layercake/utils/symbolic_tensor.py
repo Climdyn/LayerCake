@@ -94,3 +94,14 @@ def get_coords_and_values_from_tensor(tensor, output='tuple'):
     return coo_list
 
 
+def compute_jacobian_permutations(shape):
+    n_perm = len(shape) - 2
+    permutations = list()
+    for i in range(1, n_perm+1):
+        perm = [0, i+1,]
+        perm += [j for j in range(2, i+1)]
+        perm.append(1)
+        perm += [j for j in range(i+2, n_perm+2)]
+        permutations.append(perm)
+
+    return permutations
