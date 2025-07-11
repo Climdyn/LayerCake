@@ -5,6 +5,8 @@ import sparse as sp
 from numba import njit
 from layercake.utils.tensor import sparse_mul, jsparse_mul
 from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor, compute_jacobian_permutations
+from layercake.formatters.fortran import FortranJacobianEquationFormatter, FortranEquationFormatter
+from layercake.formatters.python import PythonJacobianEquationFormatter, PythonEquationFormatter
 from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
 from sympy import simplify
 from sympy.tensor.array import permutedims
@@ -179,7 +181,7 @@ class Cake(object):
 
         return jacobian_tensor
 
-    def compute_tendencies(self):
+    def compute_tendencies(self, language='python', lang_translation=None):
         if self.tensor is not None:
 
             if isinstance(self.tensor, sp.COO):
@@ -202,10 +204,32 @@ class Cake(object):
                     return mul_jac[1:, 1:]
 
                 return f, Df
+
+            elif isinstance(self.tensor, ImmutableSparseNDimArray):
+                if language == 'python':
+                    formatter = PythonEquationFormatter(lang_translation)
+                    jacobian_formatter = PythonJacobianEquationFormatter(lang_translation)
+                elif language == 'fortran':
+                    formatter = FortranEquationFormatter(lang_translation)
+                    jacobian_formatter = FortranJacobianEquationFormatter(lang_translation)
+                elif isinstance(language, (tuple, list)):
+                    formatter = language[0]
+                    jacobian_formatter = language[1]
+                else:
+                    raise ValueError('Unable to determine the formatter.')
+
+                t = self.tensor
+                equations_list = formatter(t)
+                jt = self.jacobian_tensor
+                jacobian_equations_list = jacobian_formatter(jt)
+
+                return (equations_list, t.free_symbols), (jacobian_equations_list, jt.free_symbols)
+
             else:
-                return None, None
+                raise ValueError('Something went very wrong. Unable to determine the kind of the tensor.')
         else:
-            return None, None
+            raise ValueError("You must first compute the tensor of your cake before computing the tendencies."
+                             "Run the 'compute_tensor' method first.")
 
     @staticmethod
     def simplify_tensor(tensor):
