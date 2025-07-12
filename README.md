@@ -10,7 +10,10 @@ LayerCake is framework to design systems of partial differential equations (PDEs
 and convert them to ordinary differential equations (ODEs) via Galerkin-type expansions.
 
 LayerCake allows you to construct systems of PDEs, and to specify coordinate systems and basis functions to compute
-the ODEs.
+the ODE systems. The output of this procedure is either a [Numba](https://numba.pydata.org/)ified Python callable, 
+or a list of symbolic ODE tendencies that can be integrated in any of the supported languages 
+(Fortran, Julia and Python for the moment). These two kind of output allow for the study of the computed models with 
+the modern tools available in all these languages.
 
 LayerCake has been designed with geophysics in mind, although it may be useful for other applications.
 

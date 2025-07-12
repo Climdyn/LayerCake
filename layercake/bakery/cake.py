@@ -212,6 +212,8 @@ class Cake(object):
                 elif language == 'fortran':
                     formatter = FortranEquationFormatter(lang_translation)
                     jacobian_formatter = FortranJacobianEquationFormatter(lang_translation)
+                elif language == 'julia':
+                    raise NotImplementedError('Julia language is not yet implemented. Stay tuned !')
                 elif isinstance(language, (tuple, list)):
                     formatter = language[0]
                     jacobian_formatter = language[1]
