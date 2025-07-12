@@ -1,9 +1,16 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
+from sympy import symbols, Symbol
+
+import sys
+import os
+if os.path.basename(os.getcwd()) == 'LayerCake':
+    sys.path.extend([os.path.abspath('./')])
+else:
+    sys.path.extend([os.path.abspath('../..')])
 
 from layercake.basis.planar_fourier import contiguous_channel_basis
-from sympy import symbols, Symbol
 from layercake.variables.parameter import Parameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
@@ -15,6 +22,20 @@ from layercake.arithmetic.equation import Equation
 from layercake.arithmetic.symbolic.operators import Laplacian, D
 from layercake.bakery.layers import Layer
 from layercake.bakery.cake import Cake
+
+##############################################################################################
+#
+# This script defines the Charney & Strauss 1980 baroclinic QG model 2-½ layer model
+# (https://doi.org/10.1175/1520-0469(1980)037%3C1157:FDIMEA%3E2.0.CO;2)
+# in the Reinhold & Pierrehumbert 1982 configuration
+# (https://doi.org/10.1175/1520-0493(1982)110%3C1105:DOWRQS%3E2.0.CO;2)
+# in numerical mode and then integrates (run) it, and plots the resulting trajectory in 2D.
+#
+# Note that the model is a two-layer one (250 and 750 HPa levels),
+# but reduced on a single layer at 500 hPa, with a baroclinic (ψ) and &
+# barotropic (θ) streamfunction on that level. (Hence the name "2-½ layer model".)
+#
+##############################################################################################
 
 # Setting some parameters
 ##########################

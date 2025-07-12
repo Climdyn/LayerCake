@@ -1,9 +1,17 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
+from sympy import symbols
+
+import sys
+import os
+if os.path.basename(os.getcwd()) == 'LayerCake':
+    sys.path.extend([os.path.abspath('./')])
+else:
+    sys.path.extend([os.path.abspath('../..')])
+
 
 from layercake.basis.planar_fourier import contiguous_channel_basis
-from sympy import symbols
 from layercake.variables.parameter import Parameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
@@ -14,12 +22,18 @@ from layercake.arithmetic.symbolic.operators import Laplacian, D
 from layercake.bakery.layers import Layer
 from layercake.bakery.cake import Cake
 
+##############################################################################################
+#
+# This script defines a barotropic one layer model over a beta plane
+# in numerical mode and then integrates (run) it, and plots the resulting trajectory.
+#
+##############################################################################################
 
 # Defining the domain
 _n = symbols('n')
 n = Parameter(1.3, symbol=_n)
 parameters = {'n': n}
-b = contiguous_channel_basis(2, 2, parameters)
+b = contiguous_channel_basis(1, 2, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
 
 # coordinates
@@ -96,4 +110,3 @@ res = solve_ivp(f, (0., 1000.), ic)
 # plotting
 plt.plot(res.y.T)
 plt.show()
-

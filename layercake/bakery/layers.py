@@ -93,7 +93,7 @@ class Layer(object):
         if numerical:
 
             self.tensor = sp.zeros(shape, dtype=np.float64, format='dok')
-            lhs_mat = MutableSparseMatrix(np.zeros((self.ndim+1, self.ndim+1)))
+            lhs_mat = np.zeros((self.ndim+1, self.ndim+1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()

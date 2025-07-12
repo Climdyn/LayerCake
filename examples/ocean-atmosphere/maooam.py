@@ -1,9 +1,16 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
+from sympy import symbols, Symbol
+
+import sys
+import os
+if os.path.basename(os.getcwd()) == 'LayerCake':
+    sys.path.extend([os.path.abspath('./')])
+else:
+    sys.path.extend([os.path.abspath('../..')])
 
 from layercake.basis.planar_fourier import contiguous_channel_basis, contiguous_basin_basis
-from sympy import symbols, Symbol
 from layercake.variables.parameter import Parameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 from layercake.variables.field import Field, ParameterField
@@ -15,6 +22,15 @@ from layercake.arithmetic.equation import Equation
 from layercake.arithmetic.symbolic.operators import Laplacian, D
 from layercake.bakery.layers import Layer
 from layercake.bakery.cake import Cake
+
+
+##############################################################################################
+#
+# This script defines the MAOOAM model (https://gmd.copernicus.org/articles/9/2793/2016/)
+# in numerical mode and then integrates (run) it, and plots the resulting trajectory in 2D.
+# See also https://doi.org/10.1016/j.physd.2015.07.006
+#
+##############################################################################################
 
 # Setting some parameters
 ##########################
