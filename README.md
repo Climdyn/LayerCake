@@ -2,7 +2,7 @@
 
 > “Welcome to the layer cake son.”
 >
-> -- <cite>Michael Gambon - Layer Cake (2004)</cite>
+> -- *Michael Gambon - Layer Cake (2004)*
 
 ## General Information
 
