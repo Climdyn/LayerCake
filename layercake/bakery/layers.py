@@ -47,6 +47,27 @@ class Layer(object):
         return fields_list
 
     @property
+    def parameters(self):
+        parameters_list = list()
+        for eq in self.equations:
+            for param in eq.parameters:
+                if not self._isin(param, parameters_list):
+                    parameters_list.append(param)
+        return parameters_list
+
+    @staticmethod
+    def _isin(o, it):
+        res = False
+        for i in it:
+            if o is i:
+                res = True
+                break
+        return res
+    @property
+    def parameters_symbols(self):
+        return [p.symbol for p in self.parameters]
+
+    @property
     def _fields_layer_tensor_extent(self):
         extent = dict()
         n = 1

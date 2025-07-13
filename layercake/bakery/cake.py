@@ -36,6 +36,34 @@ class Cake(object):
         return dim
 
     @property
+    def fields(self):
+        fields_list = list()
+        for layer in self.layers:
+            fields_list += layer.fields
+        return fields_list
+
+    @property
+    def parameters(self):
+        parameters_list = list()
+        for layer in self.layers:
+            for param in layer.parameters:
+                if not self._isin(param, parameters_list):
+                    parameters_list.append(param)
+        return parameters_list
+
+    @staticmethod
+    def _isin(o, it):
+        res = False
+        for i in it:
+            if o is i:
+                res = True
+                break
+        return res
+    @property
+    def parameters_symbols(self):
+        return [p.symbol for p in self.parameters]
+
+    @property
     def fields_tensor_extent(self):
         extent = dict()
         n = 1

@@ -1,7 +1,7 @@
 
 
 from sympy import Symbol, S, Eq, Mul
-from layercake.arithmetic.terms.base import ArithmeticTerms
+from layercake.arithmetic.terms.base import ArithmeticTerms, OperationOnTerms
 
 
 class Equation(object):
@@ -44,6 +44,40 @@ class Equation(object):
                 if term.field is not self.field and not term.field.dynamical and term.field not in parameter_fields:
                     parameter_fields.append(term.field)
         return parameter_fields
+
+    @property
+    def parameters(self):
+        parameters_list = list()
+        for term in self.terms:
+            if issubclass(term.__class__, OperationOnTerms):
+                for tterm in term.terms:
+                    param = tterm.prefactor
+                    if param is not None and not self._isin(param, parameters_list):
+                        parameters_list.append(param)
+            else:
+                param = term.prefactor
+                if param is not None and not self._isin(param, parameters_list):
+                    parameters_list.append(param)
+
+        for param_field in self.parameter_fields:
+            for param in param_field.parameters:
+                if param is not None and not self._isin(param, parameters_list):
+                    parameters_list.append(param)
+
+        return parameters_list
+
+    @staticmethod
+    def _isin(o, it):
+        res = False
+        for i in it:
+            if o is i:
+                res = True
+                break
+        return res
+
+    @property
+    def parameters_symbols(self):
+        return [p.symbol for p in self.parameters]
 
     @property
     def symbolic_expression(self):
