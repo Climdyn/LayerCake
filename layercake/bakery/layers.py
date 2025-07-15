@@ -101,7 +101,8 @@ class Layer(object):
             for term in eq.terms:
                 term.compute_inner_products(field.basis, numerical=numerical)
 
-    def compute_tensor(self, numerical=True, compute_inner_products=False, substitutions=None):
+    def compute_tensor(self, numerical=True, compute_inner_products=False,
+                       substitutions=None, basis_subs=False, parameters_subs=None):
 
         if compute_inner_products:
             self.compute_inner_products(numerical=numerical)
@@ -165,14 +166,22 @@ class Layer(object):
 
         else:
             if substitutions is None:
-                substitutions = dict()
+                substitutions = list()
+            if parameters_subs is not None:
+                p_subs = [(param.symbol, float(param)) for param in parameters_subs]
+            else:
+                p_subs = list()
             self.tensor = MutableSparseNDimArray(iterable={}, shape=shape)
             lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
+                if basis_subs:
+                    b_subs = field.basis.substitutions
+                else:
+                    b_subs = list()
                 ndim = field.state.__len__()
                 try:
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.subs(substitutions).inverse().simplify()
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.subs(b_subs).inverse().simplify()
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.terms:
@@ -232,7 +241,7 @@ class Layer(object):
                         increment = ImmutableSparseNDimArray(increment)
                     self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
-            self.tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1))
+            self.tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1)).subs(p_subs).subs(substitutions)
 
 
 
