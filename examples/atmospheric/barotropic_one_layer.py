@@ -32,7 +32,7 @@ from layercake.bakery.cake import Cake
 # Defining the domain
 _n = symbols('n')
 n = Parameter(1.3, symbol=_n)
-parameters = {'n': n}
+parameters = [n]
 b = contiguous_channel_basis(1, 2, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
 

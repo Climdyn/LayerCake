@@ -79,7 +79,7 @@ hd = Parameter(4.644e-06, symbol=hd_symbol, units='[s^-1]')
 # Defining the domain
 ######################
 
-parameters = {'n': n}
+parameters = [n]
 atmospheric_basis = contiguous_channel_basis(2, 2, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system)
 # coordinates

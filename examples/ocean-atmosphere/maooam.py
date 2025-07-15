@@ -98,7 +98,7 @@ gp = Parameter(0.031, symbol=Symbol("g'"), units='[m][s^-2]')
 # Defining the domain
 ######################
 
-parameters = {'n': n}
+parameters = [n]
 atmospheric_basis = contiguous_channel_basis(2, 2, parameters)
 oceanic_basis = contiguous_basin_basis(2, 4, parameters)
 s = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system)

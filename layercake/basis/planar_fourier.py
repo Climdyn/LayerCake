@@ -45,20 +45,23 @@ class PlanarChannelFourierBasis(SymbolicBasis):
 
     def __init__(self, parameters, spectral_blocks, length=None):
 
-        if 'n' not in parameters:
+        for param in parameters:
+            if str(param.symbol) == 'n':
+                break
+        else:
             raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
 
-        aspect_ratio = float(parameters['n'])
+        aspect_ratio = float(param)
 
         if length is None:
-            length = 2 * sympy.pi / parameters['n'].symbol
+            length = 2 * sympy.pi / param.symbol
             # length = 2 * np.pi / aspect_ratio
 
         self.length = length
         coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., sympy.pi)))
         # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
         SymbolicBasis.__init__(self, coordinate_system, parameters)
-        self._n = self.parameters['n'].symbol
+        self._n = param.symbol
         self.substitutions.append((self._n, aspect_ratio))
 
         awavenum = channel_wavenumbers(spectral_blocks)
@@ -71,19 +74,23 @@ class PlanarChannelFourierBasis(SymbolicBasis):
                 self.functions.append(mode_eq)
 
     def set_parameters(self, parameters):
-        if 'n' not in parameters:
+
+        for param in parameters:
+            if str(param.symbol) == 'n':
+                break
+        else:
             raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
 
-        aspect_ratio = float(parameters['n'])
+        aspect_ratio = float(param)
 
         if self.length is None:
-            length = 2 * np.pi / aspect_ratio
+            length = 2 * sympy.pi / param.symbol
         else:
             length = self.length
 
-        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., aspect_ratio * length / 2), (0., length)))
+        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., sympy.pi)))
         self.coordinate_system = coordinate_system
-        self._n = self.parameters['n'].symbol
+        self._n = param.symbol
         self.substitutions = list()
         self.substitutions.append((self._n, aspect_ratio))
 
@@ -112,20 +119,23 @@ class PlanarBasinFourierBasis(SymbolicBasis):
 
     def __init__(self, parameters, spectral_blocks, length=None):
 
-        if 'n' not in parameters:
+        for param in parameters:
+            if str(param.symbol) == 'n':
+                break
+        else:
             raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
 
-        aspect_ratio = float(parameters['n'])
+        aspect_ratio = float(param)
 
         if length is None:
-            length = 2 * sympy.pi / parameters['n'].symbol
+            length = 2 * sympy.pi / param.symbol
             # length = 2 * np.pi / aspect_ratio
 
         self.length = length
         coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., sympy.pi)))
         # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
         SymbolicBasis.__init__(self, coordinate_system, parameters)
-        self._n = self.parameters['n'].symbol
+        self._n = param.symbol
         self.substitutions.append((self._n, aspect_ratio))
 
         owavenum = basin_wavenumbers(spectral_blocks)
@@ -138,19 +148,23 @@ class PlanarBasinFourierBasis(SymbolicBasis):
                 self.functions.append(mode_eq)
 
     def set_parameters(self, parameters):
-        if 'n' not in parameters:
+
+        for param in parameters:
+            if str(param.symbol) == 'n':
+                break
+        else:
             raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
 
-        aspect_ratio = float(parameters['n'])
+        aspect_ratio = float(param)
 
         if self.length is None:
-            length = 2 * np.pi / aspect_ratio
+            length = 2 * sympy.pi / param.symbol
         else:
             length = self.length
 
-        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., aspect_ratio * length / 2), (0., length)))
+        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., sympy.pi)))
         self.coordinate_system = coordinate_system
-        self._n = self.parameters['n'].symbol
+        self._n = param.symbol
         self.substitutions = list()
         self.substitutions.append((self._n, aspect_ratio))
 
