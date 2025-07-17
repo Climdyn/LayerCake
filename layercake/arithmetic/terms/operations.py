@@ -38,7 +38,6 @@ class AdditionOfTerms(OperationOnTerms):
                     raise ValueError(f'AdditionOfTerms must always involve the same field, '
                                      f'but two different fields {term1.field} and {term2.field} have been provided.')
 
-
     @property
     def symbolic_expression(self):
         return sproduct(self.sign, self.operation(*map(lambda t: t.symbolic_expression, self._terms)))

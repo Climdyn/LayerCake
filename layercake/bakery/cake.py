@@ -78,10 +78,12 @@ class Cake(object):
     def number_of_layers(self):
         return self.layers.__len__()
 
-    def compute_tensor(self, numerical=True, compute_inner_products=False):
+    def compute_tensor(self, numerical=True, compute_inner_products=False,
+                       substitutions=None, basis_subs=False, parameters_subs=None):
 
         for layer in self.layers:
-            layer.compute_tensor(numerical, compute_inner_products)
+            layer.compute_tensor(numerical, compute_inner_products,
+                                 substitutions, basis_subs, parameters_subs)
 
     @property
     def maximum_rank(self):

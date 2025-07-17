@@ -1,6 +1,6 @@
 
 
-from sympy import Symbol, S, Eq, Mul
+from sympy import Symbol, S, Eq
 from layercake.arithmetic.terms.base import ArithmeticTerms, OperationOnTerms
 
 

@@ -73,8 +73,6 @@ class Parameter(float):
 
     def __new__(cls, value, units="", description="", symbol=None, symbolic_expression=None):
 
-        no_scale = False
-
         f = float.__new__(cls, value)
         f._units = units
         f._description = description
@@ -514,7 +512,6 @@ class ParametersArray(np.ndarray):
             symbolic_expressions[idx] = self[idx].symbolic_expression
         return symbolic_expressions
 
-
     @property
     def units(self):
         """str: The units of the dimensional value."""
@@ -647,5 +644,3 @@ class ParametersArray(np.ndarray):
                 return other / self
         else:
             return other / self
-
-

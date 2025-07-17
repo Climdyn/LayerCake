@@ -62,7 +62,7 @@ class VariablesArray(np.ndarray):
     return_dimensional: bool, optional
         Defined if the value returned by the variables is dimensional or not. Default to `False`.
     dynamical: bool, optional
-        Whether or not the variables are varying over time. Default to `False`.
+        Whether the variables are varying over time. Default to `False`.
 
     Warnings
     --------

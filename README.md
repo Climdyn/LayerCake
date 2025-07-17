@@ -31,7 +31,7 @@ Not yet avalialble.
 
 ### With Anaconda
 
-The second easiest way to install and run LayerCake is to use an appropriate environment 
+The second-easiest way to install and run LayerCake is to use an appropriate environment 
 created through [Anaconda](https://www.anaconda.com/).
 
 First install Anaconda and clone the repository:

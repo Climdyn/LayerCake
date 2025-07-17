@@ -41,5 +41,3 @@ class Coordinate(Variable):
         Variable.__init__(self, name, symbol, units)
         self.extent = extent
         self.infinitesimal_length = infinitesimal_length
-
-

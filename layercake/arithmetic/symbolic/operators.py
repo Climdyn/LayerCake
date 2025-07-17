@@ -149,4 +149,3 @@ def Laplacian(coordinate_system):
         else:
             laplacian = laplacian + Mul(divergence[i] * nabla[i], evaluate=False)
     return laplacian
-

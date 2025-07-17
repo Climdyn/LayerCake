@@ -1,4 +1,3 @@
-import sympy
 
 from layercake.variables.coordinate import Coordinate
 from sympy import symbols, Symbol, pi, cos, S
@@ -68,8 +67,3 @@ class SphericalCoordinateSystem(CoordinateSystem):
         llambda = Coordinate('lambda', llambdas, extent=extent[0], infinitesimal_length=R * cos(phis))
         phi = Coordinate("phi", phis, extent=extent[1], infinitesimal_length=R)
         CoordinateSystem.__init__(self, coordinates=[llambda, phi], name='Spherical Coordinate System')
-
-
-
-
-

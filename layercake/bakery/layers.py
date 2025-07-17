@@ -2,7 +2,7 @@
 import numpy as np
 from numpy.linalg import LinAlgError
 import sparse as sp
-from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray, S
+from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray
 from sympy import zeros as sympy_zeros
 from sympy.matrices.exceptions import NonInvertibleMatrixError
 from layercake.arithmetic.terms.constant import ConstantTerm
@@ -63,6 +63,7 @@ class Layer(object):
                 res = True
                 break
         return res
+
     @property
     def parameters_symbols(self):
         return [p.symbol for p in self.parameters]
@@ -165,6 +166,7 @@ class Layer(object):
             self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
 
         else:
+            b_subs = list()
             if substitutions is None:
                 substitutions = list()
             if parameters_subs is not None:
@@ -175,13 +177,17 @@ class Layer(object):
             lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
+                bsb = field.basis.substitutions
                 if basis_subs:
-                    b_subs = field.basis.substitutions
-                else:
-                    b_subs = list()
+                    for sbsb in bsb:
+                        for obsb in b_subs:
+                            if sbsb[0] == obsb[0]:
+                                break
+                        else:
+                            b_subs.append(sbsb)
                 ndim = field.state.__len__()
                 try:
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.subs(b_subs).inverse().simplify()
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.inverse().simplify()
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.terms:
@@ -241,7 +247,5 @@ class Layer(object):
                         increment = ImmutableSparseNDimArray(increment)
                     self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
-            self.tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1)).subs(p_subs).subs(substitutions)
-
-
-
+            self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1))
+                           .subs(b_subs).subs(p_subs).subs(substitutions))

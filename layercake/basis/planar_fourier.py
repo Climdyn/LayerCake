@@ -18,7 +18,7 @@ import sympy
 
 from layercake.basis.base import SymbolicBasis
 from layercake.variables.systems import PlanarCartesianCoordinateSystem
-from sympy import symbols, sin, cos, sqrt
+from sympy import sin, cos, sqrt
 
 
 class PlanarChannelFourierBasis(SymbolicBasis):

@@ -22,7 +22,7 @@
 import sys
 
 from abc import ABC
-from sympy import Symbol, symbols, lambdify, diff
+from sympy import Symbol, lambdify, diff
 
 
 class Basis(ABC):
@@ -199,8 +199,9 @@ class SymbolicBasis(Basis):
         SymbolicBasis:
             A new basis object with the differentiated basis function.
         """
-        return {name: self.derivative(x, order) for name, x in zip(self.coordinate_system.coordinates_name,
-                                                                   self.coordinate_system.coordinates_symbol_as_list)}
+        return {name: self.derivative(variable, order)
+                for name, variable in zip(self.coordinate_system.coordinates_name,
+                                          self.coordinate_system.coordinates_symbol_as_list)}
 
 
 # Rem: Class not used currently in the model.

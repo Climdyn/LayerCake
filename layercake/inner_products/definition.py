@@ -11,7 +11,7 @@
 
 from abc import ABC, abstractmethod
 from sympy.simplify.fu import TR8, TR10
-from sympy import Symbol, diff, integrate, symbols, pi, Integral
+from sympy import integrate, Integral
 
 
 class InnerProductDefinition(ABC):
