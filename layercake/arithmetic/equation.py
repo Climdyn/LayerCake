@@ -43,12 +43,15 @@ class Equation(object):
             for term in equation_term.terms:
                 if term.field is not self.field and not term.field.dynamical and term.field not in parameter_fields:
                     parameter_fields.append(term.field)
+        for term in self.lhs_term.terms:
+            if term.field is not self.field and not term.field.dynamical and term.field not in parameter_fields:
+                parameter_fields.append(term.field)
         return parameter_fields
 
     @property
     def parameters(self):
         parameters_list = list()
-        for term in self.terms:
+        for term in self.terms + [self.lhs_term]:
             if issubclass(term.__class__, OperationOnTerms):
                 for tterm in term.terms:
                     param = tterm.prefactor

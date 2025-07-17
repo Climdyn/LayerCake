@@ -8,7 +8,7 @@ from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor, c
 from layercake.formatters.fortran import FortranJacobianEquationFormatter, FortranEquationFormatter
 from layercake.formatters.python import PythonJacobianEquationFormatter, PythonEquationFormatter
 from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
-from sympy import simplify
+from sympy import simplify, N
 from sympy.tensor.array import permutedims
 
 real_eps = np.finfo(np.float64).eps
@@ -298,16 +298,18 @@ class Cake(object):
                 if coords not in tensor_dict:
                     tensor_dict[coords] = val
                 else:
-                    old_val = tensor[coords]
+                    old_val = tensor_dict[coords]
                     new_val = simplify(old_val + val)
                     if new_val != 0:
                         tensor_dict[coords] = new_val
+                    else:
+                        del tensor_dict[coords]
 
             return ImmutableSparseNDimArray(iterable=tensor_dict, shape=tensor.shape)
         else:
             raise ValueError('Unable to determine the kind of tensor to simplify.')
 
-    def print_tensor(self, tensor_name=""):
+    def print_tensor(self, tensor_name="", to_numerics=False):
         """Routine to print the tensor.
 
         Parameters
@@ -317,10 +319,22 @@ class Cake(object):
         """
         if not tensor_name:
             tensor_name = 'Tensor'
-        for coo, val in zip(self.tensor.coords.T, self.tensor.data):
-            self._string_format(print, tensor_name, coo, val)
+        if isinstance(self.tensor, sp.COO):
+            for coo, val in zip(self.tensor.coords.T, self.tensor.data):
+                self._string_format(print, tensor_name, coo, val)
+        elif isinstance(self.tensor, ImmutableSparseNDimArray):
+            coords_val = get_coords_and_values_from_tensor(self.tensor, 'tuple')
+            for coo_val in coords_val:
+                coo = coo_val[:-1]
+                val = coo_val[-1]
+                if to_numerics:
+                    self._string_format(print, tensor_name, coo, N(val))
+                else:
+                    self._string_format_symbolic(print, tensor_name, coo, val)
+        else:
+            raise ValueError('Unrecognized tensor format.')
 
-    def print_tensor_to_file(self, filename, tensor_name=""):
+    def print_tensor_to_file(self, filename, tensor_name="", to_numerics=False):
         """Routine to print the tensor to a file.
 
         Parameters
@@ -332,9 +346,9 @@ class Cake(object):
         """
         with open(filename, 'w') as f:
             with redirect_stdout(f):
-                self.print_tensor(tensor_name)
+                self.print_tensor(tensor_name, to_numerics)
 
-    def print_jacobian_tensor(self, tensor_name=""):
+    def print_jacobian_tensor(self, tensor_name="", to_numerics=False):
         """Routine to print the Jacobian tensor.
 
         Parameters
@@ -344,10 +358,22 @@ class Cake(object):
         """
         if not tensor_name:
             tensor_name = 'TensorJacobian'
-        for coo, val in zip(self.jacobian_tensor.coords.T, self.jacobian_tensor.data):
-            self._string_format(print, tensor_name, coo, val)
+        if isinstance(self.jacobian_tensor, sp.COO):
+            for coo, val in zip(self.jacobian_tensor.coords.T, self.jacobian_tensor.data):
+                self._string_format(print, tensor_name, coo, val)
+        elif isinstance(self.jacobian_tensor, ImmutableSparseNDimArray):
+            coords_val = get_coords_and_values_from_tensor(self.jacobian_tensor, 'tuple')
+            for coo_val in coords_val:
+                coo = coo_val[:-1]
+                val = coo_val[-1]
+                if to_numerics:
+                    self._string_format(print, tensor_name, coo, N(val))
+                else:
+                    self._string_format_symbolic(print, tensor_name, coo, val)
+        else:
+            raise ValueError('Unrecognized Jacobian tensor format.')
 
-    def print_jacobian_tensor_to_file(self, filename, tensor_name=""):
+    def print_jacobian_tensor_to_file(self, filename, tensor_name="", to_numerics=False):
         """Routine to print the Jacobian tensor to a file.
 
         Parameters
@@ -359,7 +385,7 @@ class Cake(object):
         """
         with open(filename, 'w') as f:
             with redirect_stdout(f):
-                self.print_jacobian_tensor(tensor_name)
+                self.print_jacobian_tensor(tensor_name, to_numerics)
 
     @staticmethod
     def _string_format(func, symbol, indices, value):
@@ -368,4 +394,13 @@ class Cake(object):
             for i in indices:
                 s += "["+str(i)+"]"
             s += " = % .5E" % value
+            func(s)
+
+    @staticmethod
+    def _string_format_symbolic(func, symbol, indices, value):
+        if abs(value) >= real_eps:
+            s = symbol
+            for i in indices:
+                s += "["+str(i)+"]"
+            s += f" = {value}"
             func(s)
