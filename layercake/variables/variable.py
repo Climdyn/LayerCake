@@ -80,6 +80,7 @@ class Variable(ABC):
 
     @property
     def dynamical(self):
+        """bool: Whether the variable can vary over time."""
         return self._dynamical
 
 
@@ -185,6 +186,7 @@ class VariablesArray(np.ndarray):
 
     @property
     def dynamical(self):
+        """bool: Whether the variables can vary over time."""
         return self._dynamical
 
     #   Not sure these operations will be needed.
