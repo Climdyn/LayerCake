@@ -1,5 +1,32 @@
 
+"""
+
+    Variables utility module
+    ========================
+
+    Defines useful functions.
+
+"""
+
+
 def combine_units(units1, units2, operation):
+    """Combine units strings together with a given operation on the exponents.
+
+    Parameters
+    ----------
+    units1: str
+       First units string to combine.
+    units2: str
+       Second units string to combine.
+    operation: str
+       Operation to perform on the units exponents. Presently can be `'-'` or `'+'`.
+
+    Returns
+    -------
+    str
+        The resulting units string.
+
+    """
     ul = units1.split('][')
     ul[0] = ul[0][1:]
     ul[-1] = ul[-1][:-1]
