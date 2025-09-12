@@ -51,7 +51,7 @@ class CoordinateSystem(object):
 
     @property
     def extent(self):
-        """dict(tuple(float)): Dictionary of the coordinates extents."""
+        """dict(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol)): Dictionary of the coordinates extents."""
         return {coo.name: coo.extent for coo in self.coordinates}
 
     @property
@@ -73,7 +73,7 @@ class PlanarCartesianCoordinateSystem(CoordinateSystem):
 
         Parameters
         ----------
-        extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol)
+        extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol))
             Defines the extent of the plane.
         """
 
@@ -93,8 +93,9 @@ class SphericalCoordinateSystem(CoordinateSystem):
     ----------
     radius: Variable or Parameter
         The radius of the sphere
-    extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol), optional
-        Defines the extent of the plane.
+    extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol)), optional
+        Defines the extent of the coordinates on the sphere.
+        If not provided, the coordinate system covers the whole sphere.
 
     """
 
