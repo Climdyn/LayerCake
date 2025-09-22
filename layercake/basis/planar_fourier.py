@@ -247,7 +247,7 @@ def fourier_functions(wave_number, n, coordinate_system):
 
     Returns
     -------
-    `Sympy`_ expression
+    ~sympy.core.expr.Expr
         Symbolic expression of the mode.
 
     .. _Sympy: https://www.sympy.org/

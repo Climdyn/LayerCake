@@ -104,14 +104,14 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
         Parameters
         ----------
-        expr: Sympy expression
+        expr: ~sympy.core.expr.Expr
             The expression to integrate.
         symbolic_expr: bool, optional
             If `True`, return the integral as a symbolic expression object. Else, return the integral performed symbolically.
 
         Returns
         -------
-        Sympy expression
+        ~sympy.core.expr.Expr
             The result of the symbolic integration.
         """
         _x = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
@@ -129,9 +129,9 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
         Parameters
         ----------
-        S: Sympy expression
+        S: ~sympy.core.expr.Expr
             Left-hand side function of the product.
-        G: Sympy expression
+        G: ~sympy.core.expr.Expr
             Right-hand side function of the product.
         symbolic_expr: bool, optional
             If `True`, return the integral as a symbolic expression object. Else, return the integral performed symbolically.
@@ -140,7 +140,7 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
         Returns
         -------
-        Sympy expression
+        ~sympy.core.expr.Expr
             The result of the symbolic integration
         """
         _x = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]

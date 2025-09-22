@@ -1,3 +1,15 @@
+
+"""
+
+    Symbolic tensor utility module
+    ==============================
+
+    Defines useful functions to deal with `Sympy`_ symbolic tensors.
+
+    .. _Sympy: https://www.sympy.org/
+
+"""
+
 import numpy as np
 from sympy import tensorproduct, tensorcontraction
 
@@ -22,7 +34,7 @@ def symbolic_tensordot(a, b, axes=2):
 
     Returns
     -------
-    output: Sympy tensor
+    ~sympy.tensor.array.DenseNDimArray or ~sympy.tensor.array.SparseNDimArray
         The tensor dot product of the input.
 
     """
@@ -46,11 +58,11 @@ def remove_dic_zeros(dic):
     Parameters
     ----------
     dic: dict
-        dictionary which could include 0 in values
+        Dictionary which could include zeroes in values to remove.
     Returns
     -------
     dict
-        dictionary with same keys and values as input, but keys with value of 0 are removed
+        Dictionary with same keys and values as input, but keys with zero value are removed.
     """
 
     non_zero_dic = dict()
@@ -62,6 +74,27 @@ def remove_dic_zeros(dic):
 
 
 def get_coords_from_index(dic_index, ndim, shape_len):
+    """Get the coordinates of a `Sympy`_ sparse tensor entry along each axis, given its private dictionary index.
+
+    Notes
+    -----
+    Assumes that every axis has the same length `ndim`.
+
+    Warnings
+    --------
+    Assumes that the private dictionary has a certain indexing rationale, which may change over time in `Sympy`_
+
+    Parameters
+    ----------
+    dic_index: int
+        Index of the sought entry in the sparse tensor private dictionary.
+    ndim: int
+        The length of the axes.
+    shape_len: int
+        Rank of the tensor.
+
+    .. _Sympy: https://www.sympy.org/
+    """
     idx = list()
     svv = dic_index * ndim
     for _ in range(shape_len - 1):
@@ -73,6 +106,33 @@ def get_coords_from_index(dic_index, ndim, shape_len):
 
 
 def get_coords_and_values_from_tensor(tensor, output='tuple'):
+    """Get the coordinates and values of a `Sympy`_ sparse tensor, as a coordinates-values list.
+
+    Warnings
+    --------
+    This a function implemented to compensate for the lack of such feature in `Sympy`_, and which might need to be
+    reimplemented or replaced in the future.
+
+    Parameters
+    ----------
+    tensor: ~sympy.tensor.array.SparseNDimArray
+        The tensor from which to return the coordinates and values list.
+    output: str
+        The kind of output. Can be:
+
+        * `numpy`: return the list as a `Numpy`_ array.
+        * `list`: return the list as nested Python lists.
+        * `tuple`: return the list as a list of tuples.
+
+        Default to `tuple`.
+    Returns
+    -------
+    list(list) or list(tuple) or ~numpy.ndarray
+        The coordinates-values list.
+
+    .. _Numpy: https://numpy.org/
+    .. _Sympy: https://www.sympy.org/
+    """
     ndim = tensor.shape[0]
     shape_len = len(tensor.shape)
     if output == 'numpy':
@@ -95,6 +155,18 @@ def get_coords_and_values_from_tensor(tensor, output='tuple'):
 
 
 def compute_jacobian_permutations(shape):
+    """Return the axes permutations needed to compute the Jacobian tensor associated to the symbolic models tendencies' tensor.
+
+    Parameters
+    ----------
+    shape: tuple
+        The shape of the tendencies' tensor.
+
+    Returns
+    -------
+    list(list(int))
+        The list of permutations of the axes needed to compute the models Jacobian matrix.
+    """
     n_perm = len(shape) - 2
     permutations = list()
     for i in range(1, n_perm+1):
