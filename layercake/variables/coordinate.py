@@ -10,7 +10,7 @@
     Description of the classes
     --------------------------
 
-    * :class:`CoordinateSystem`: Base class to define coordinate systems for the the models.
+    * :class:`CoordinateSystem`: Base class to define coordinate systems for the models.
     * :class:`PlanarCartesianCoordinateSystem`: Cartesian coordinate system defined on a plane.
     * :class:`SphericalCoordinateSystem`: Coordinate system defined on a sphere.
 
