@@ -26,6 +26,28 @@ class OperatorTerm(SingleArithmeticTerm):
         else:
             return sproduct(self.sign * self.prefactor, self._operator, self.field.symbol)
 
+    @property
+    def latex(self):
+        if self.sign > 0:
+            s = f'+ '
+        else:
+            s = f'- '
+
+        op = f'{self._operator.latex} {self.field.latex} '
+        if self.prefactor is None:
+            return s + op
+        if hasattr(self.prefactor, 'latex'):
+            if self.prefactor.latex is not None:
+                s += f'{self.prefactor.latex} '
+                return s + op
+        if hasattr(self.prefactor, 'symbol'):
+            if self.prefactor.symbol is not None:
+                s += f'{self.prefactor.symbol} '
+                return s + op
+
+        s += f'{self.prefactor} '
+        return s + op
+
 
 class ComposedOperatorsTerm(SingleArithmeticTerm):
 
@@ -56,3 +78,27 @@ class ComposedOperatorsTerm(SingleArithmeticTerm):
         if self.prefactor is not None:
             expr = sproduct(self.prefactor, expr)
         return sproduct(self.sign, expr)
+
+    @property
+    def latex(self):
+        if self.sign > 0:
+            s = f'+ '
+        else:
+            s = f'- '
+
+        op = f'{self.field.latex} '
+        for oper in self._operators[::-1]:
+            op = f'{oper.latex} ' + op
+        if self.prefactor is None:
+            return s + op
+        if hasattr(self.prefactor, 'latex'):
+            if self.prefactor.latex is not None:
+                s += f'{self.prefactor.latex} '
+                return s + op
+        if hasattr(self.prefactor, 'symbol'):
+            if self.prefactor.symbol is not None:
+                s += f'{self.prefactor.symbol} '
+                return s + op
+
+        s += f'{self.prefactor} '
+        return s + op

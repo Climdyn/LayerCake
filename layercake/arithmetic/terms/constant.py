@@ -59,6 +59,14 @@ class ConstantTerm(ArithmeticTerms):
     def numerical_expression(self):
         return sproduct(self.sign, self.symbolic_expression)
 
+    @property
+    def latex(self):
+        if self.sign > 0:
+            s = '+ '
+        else:
+            s = '- '
+        return s + self.field.latex
+
     def _inner_product_arguments(self, basis, indices, numerical=False):
         pass
 

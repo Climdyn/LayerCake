@@ -17,6 +17,26 @@ class D(Expr):
         super(D, self).__init__()
         self.evaluate = False
         self.variables = variables
+        latexes = list()
+        for var in variables:
+            if hasattr(var, 'latex'):
+                if var.latex is not None:
+                    latexes.append(var.latex)
+                    continue
+            if hasattr(var, 'symbol'):
+                if var.symbol is not None:
+                    latexes.append(str(var.symbol))
+                    continue
+            latexes.append(str(var))
+
+        if len(variables) > 1:
+            self.latex = r'\frac{\partial^' + str(len(variables)) + r'}{'
+        else:
+            self.latex = r'\frac{\partial}{'
+
+        for var in latexes[:-1]:
+            self.latex += r'\partial ' + var + ' '
+        self.latex += r'\partial ' + latexes[-1] + r'}'
 
     def __repr__(self):
         return 'D%s' % str(self.variables)
@@ -115,6 +135,14 @@ def evaluate_expr(expr):
     return expr
 
 
+def _latex_repr(r):
+    def wrapper(f):
+        f.latex = r
+        return f
+    return wrapper
+
+
+@_latex_repr(r'\nabla')
 def Nabla(coordinate_system):
     if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Nabla only take coordinates systems as input.')
@@ -125,6 +153,7 @@ def Nabla(coordinate_system):
     return Matrix([derivative_list])
 
 
+@_latex_repr(r'\nabla \cdot')
 def Divergence(coordinate_system):
 
     if not isinstance(coordinate_system, CoordinateSystem):
@@ -138,6 +167,7 @@ def Divergence(coordinate_system):
     return Matrix([derivative_list])
 
 
+@_latex_repr(r'\Delta')
 def Laplacian(coordinate_system):
     if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Laplacian only take coordinates systems as input.')

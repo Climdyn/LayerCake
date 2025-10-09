@@ -22,3 +22,23 @@ class LinearTerm(SingleArithmeticTerm):
             return sproduct(self.sign, self.field.symbol)
         else:
             return sproduct(self.sign * self.prefactor, self.field.symbol)
+
+    @property
+    def latex(self):
+        if self.sign > 0:
+            s = f'+ '
+        else:
+            s = f'- '
+        if self.prefactor is None:
+            return s + self.field.latex
+        if hasattr(self.prefactor, 'latex'):
+            if self.prefactor.latex is not None:
+                s += f'{self.prefactor.latex} '
+                return s + self.field.latex
+        if hasattr(self.prefactor, 'symbol'):
+            if self.prefactor.symbol is not None:
+                s += f'{self.prefactor.symbol} '
+                return s + self.field.latex
+
+        s += f'{self.prefactor} '
+        return s + self.field.latex

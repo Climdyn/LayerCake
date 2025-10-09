@@ -25,6 +25,21 @@ class ProductOfTerms(OperationOnTerms):
     def operation(self, *terms, evaluate=False):
         return sproduct(*terms, evaluate=evaluate)
 
+    @property
+    def latex(self):
+        if self.sign > 0:
+            s = f'+ '
+        else:
+            s = f'- '
+
+        latexes = [t.latex for t in self.terms]
+        for lat in latexes:
+            if lat[0] == '-':
+                s += f'({lat}) '
+            else:
+                s += f'{lat[1:]} '
+        return s
+
 
 class AdditionOfTerms(OperationOnTerms):
 
@@ -80,3 +95,11 @@ class AdditionOfTerms(OperationOnTerms):
 
     def operation(self, *terms, evaluate=False):
         return sadd(*terms, evaluate=evaluate)
+
+    @property
+    def latex(self):
+        latexes = [t.latex for t in self.terms]
+        s = ''
+        for lat in latexes:
+            s += f'{lat} '
+        return s

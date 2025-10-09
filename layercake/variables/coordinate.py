@@ -35,6 +35,8 @@ class Coordinate(Variable):
         value. Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
     infinitesimal_length: float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol
         Infinitesimal length associated with the
+    latex: str
+        Latex string representing the coordinate.
 
     Attributes
     ----------
@@ -49,6 +51,8 @@ class Coordinate(Variable):
         value. Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
     infinitesimal_length: float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol
         Infinitesimal length associated with the
+    latex: str
+        Latex string representing the coordinate.
 
     Warning
     -------
@@ -56,8 +60,8 @@ class Coordinate(Variable):
 
     """
 
-    def __init__(self, name, symbol, extent, infinitesimal_length=S.One, units=None):
+    def __init__(self, name, symbol, extent, infinitesimal_length=S.One, units=None, latex=None):
 
-        Variable.__init__(self, name, symbol, units)
+        Variable.__init__(self, name, symbol, units, latex)
         self.extent = extent
         self.infinitesimal_length = infinitesimal_length

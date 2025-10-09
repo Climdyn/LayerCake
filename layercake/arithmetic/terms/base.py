@@ -147,6 +147,11 @@ class ArithmeticTerms(ABC):
         else:
             self.inner_products = res.to_coo()
 
+    @property
+    # @abstractmethod
+    def latex(self):
+        return None
+
     def __repr__(self):
         return self.symbolic_expression.__str__()
 

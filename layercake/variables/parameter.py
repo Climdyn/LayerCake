@@ -60,6 +60,8 @@ class Parameter(float):
         String describing the parameter.
     symbol: ~sympy.core.symbol.Symbol, optional
         A `Sympy`_ symbol to represent the parameter in symbolic expressions.
+    latex: str, optional
+        A latex string to define the parameter in the latex equations.
     symbolic_expression: ~sympy.core.expr.Expr, optional
         A `Sympy`_ expression to represent a relationship to other parameters.
 
@@ -71,13 +73,14 @@ class Parameter(float):
     .. _Sympy: https://www.sympy.org/
     """
 
-    def __new__(cls, value, units="", description="", symbol=None, symbolic_expression=None):
+    def __new__(cls, value, units="", description="", symbol=None, latex=None, symbolic_expression=None):
 
         f = float.__new__(cls, value)
         f._units = units
         f._description = description
         f._symbol = symbol
         f._symbolic_expression = symbolic_expression
+        f._latex = latex
 
         return f
 
@@ -85,6 +88,11 @@ class Parameter(float):
     def symbol(self):
         """~sympy.core.symbol.Symbol: Returns the symbol of the parameter."""
         return self._symbol
+
+    @property
+    def latex(self):
+        """str: A latex string defining the parameter in the latex equations."""
+        return self._latex
 
     @property
     def symbolic_expression(self):
