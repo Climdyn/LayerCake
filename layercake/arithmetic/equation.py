@@ -11,10 +11,16 @@
 
 from sympy import Symbol, S, Eq
 from layercake.arithmetic.terms.base import ArithmeticTerms, OperationOnTerms
+import matplotlib.pyplot as plt
 
 
 class Equation(object):
     """Main class to define and specify partial differential equations.
+
+    Notes
+    -----
+    The left-hand side is always expressed as a partial time derivative of
+    something: :math:`\\partial_t` .
 
     Parameters
     ----------
@@ -213,6 +219,28 @@ class Equation(object):
             Default to `False`, i.e. no permutation is applied.
         """
         self.lhs_term.compute_inner_products(basis, numerical, timeout, num_threads, permute)
+
+    def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True):
+        lhs = self.lhs_term.terms[0].latex
+        if drop_first_lhs_char:
+            lhs = lhs[2:]
+        if enclose_lhs:
+            latex_string = r'\frac{\partial}{\partial t} ' + r'\left(' + lhs + r'\right)'
+        else:
+            latex_string = r'\frac{\partial}{\partial t} ' + lhs
+
+        latex_string += ' = '
+        for term in self.terms:
+            latex_string += term.latex
+
+        return latex_string
+
+    def show_latex(self, **kwargs):
+        latex_string = self.to_latex(**kwargs)
+        plt.plot()
+        plt.axis('off')
+        plt.text(-0.1, 0.4, '$%s$' % latex_string)
+        plt.show()
 
     def __repr__(self):
         eq = self.symbolic_expression
