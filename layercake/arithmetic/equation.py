@@ -221,6 +221,18 @@ class Equation(object):
         self.lhs_term.compute_inner_products(basis, numerical, timeout, num_threads, permute)
 
     def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True):
+        """Generate a LaTeX string representing the equation mathematically.
+
+        Parameters
+        ----------
+        enclose_lhs: bool, optional
+            Whether to enclose the left-hand side term inside parenthesis.
+            Default to `True`.
+        drop_first_lhs_char: bool, optional
+            Whether to drop the first two character of the left-hand side latex string.
+            Useful to drop the sign in front of it.
+            Default to `True`.
+        """
         lhs = self.lhs_term.terms[0].latex
         if drop_first_lhs_char:
             lhs = lhs[2:]
@@ -235,8 +247,20 @@ class Equation(object):
 
         return latex_string
 
-    def show_latex(self, **kwargs):
-        latex_string = self.to_latex(**kwargs)
+    def show_latex(self, enclose_lhs=True, drop_first_lhs_char=True):
+        """Show the LaTeX string representing the equation mathematically rendered in a window.
+
+        Parameters
+        ----------
+        enclose_lhs: bool, optional
+            Whether to enclose the left-hand side term inside parenthesis.
+            Default to `True`.
+        drop_first_lhs_char: bool, optional
+            Whether to drop the first two character of the left-hand side latex string.
+            Useful to drop the sign in front of it.
+            Default to `True`.
+        """
+        latex_string = self.to_latex(enclose_lhs=enclose_lhs, drop_first_lhs_char=drop_first_lhs_char)
         plt.plot()
         plt.axis('off')
         plt.text(-0.1, 0.4, '$%s$' % latex_string)
