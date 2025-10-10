@@ -220,7 +220,7 @@ class Equation(object):
         """
         self.lhs_term.compute_inner_products(basis, numerical, timeout, num_threads, permute)
 
-    def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True):
+    def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
         """Generate a LaTeX string representing the equation mathematically.
 
         Parameters
@@ -232,6 +232,10 @@ class Equation(object):
             Whether to drop the first two character of the left-hand side latex string.
             Useful to drop the sign in front of it.
             Default to `True`.
+        drop_first_rhs_char: bool, optional
+            Whether to drop the first two character of the right-hand side latex string.
+            Useful to drop the sign in front of it.
+            Default to `False`.
         """
         lhs = self.lhs_term.terms[0].latex
         if drop_first_lhs_char:
@@ -241,13 +245,17 @@ class Equation(object):
         else:
             latex_string = r'\frac{\partial}{\partial t} ' + lhs
 
-        latex_string += ' = '
-        for term in self.terms:
+        fterm = self.terms[0].latex
+        if drop_first_rhs_char:
+            fterm = fterm[2:]
+        latex_string += ' = ' + fterm
+
+        for term in self.terms[1:]:
             latex_string += term.latex
 
         return latex_string
 
-    def show_latex(self, enclose_lhs=True, drop_first_lhs_char=True):
+    def show_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
         """Show the LaTeX string representing the equation mathematically rendered in a window.
 
         Parameters
@@ -259,11 +267,18 @@ class Equation(object):
             Whether to drop the first two character of the left-hand side latex string.
             Useful to drop the sign in front of it.
             Default to `True`.
+        drop_first_rhs_char: bool, optional
+            Whether to drop the first two character of the right-hand side latex string.
+            Useful to drop the sign in front of it.
+            Default to `False`.
         """
-        latex_string = self.to_latex(enclose_lhs=enclose_lhs, drop_first_lhs_char=drop_first_lhs_char)
-        plt.plot()
+        latex_string = self.to_latex(enclose_lhs=enclose_lhs,
+                                     drop_first_lhs_char=drop_first_lhs_char,
+                                     drop_first_rhs_char=drop_first_rhs_char
+                                     )
+        plt.figure(figsize=(8, 2))
         plt.axis('off')
-        plt.text(-0.1, 0.4, '$%s$' % latex_string)
+        plt.text(-0.1, 0.5, '$%s$' % latex_string)
         plt.show()
 
     def __repr__(self):
