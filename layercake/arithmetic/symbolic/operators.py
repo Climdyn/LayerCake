@@ -150,7 +150,10 @@ def Nabla(coordinate_system):
     derivative_list = list()
     for coord in coordinate_system.coordinates:
         derivative_list.append(Mul(coord.infinitesimal_length**(-1), D(coord.symbol), evaluate=False))
-    return Matrix([derivative_list])
+
+    mat = Matrix([derivative_list])
+    mat.latex = r'\nabla'
+    return mat
 
 
 @_latex_repr(r'\nabla \cdot')
@@ -164,18 +167,35 @@ def Divergence(coordinate_system):
     for coord in coordinate_system.coordinates:
         derivative_list.append(Mul(volume**(-1), Mul(D(coord.symbol), volume, evaluate=False), evaluate=False))
 
-    return Matrix([derivative_list])
+    mat = Matrix([derivative_list])
+    mat.latex = r'\nabla \cdot'
+    return mat
 
 
-@_latex_repr(r'\Delta')
+class _Add(Add):
+
+    def __new__(cls, *args, **kwargs):
+        try:
+            latex = kwargs.pop('latex')
+        except KeyError:
+            latex = ''
+        a = Add.__new__(cls, *args, **kwargs)
+        a._latex = latex
+
+        return a
+
+    @property
+    def latex(self):
+        return self._latex
+
+
+@_latex_repr(r'\nabla^2')
 def Laplacian(coordinate_system):
     if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Laplacian only take coordinates systems as input.')
     nabla = Nabla(coordinate_system)
     divergence = Divergence(coordinate_system)
-    for i in range(len(nabla)):
-        if i == 0:
-            laplacian = Mul(divergence[i] * nabla[i], evaluate=False)
-        else:
-            laplacian = laplacian + Mul(divergence[i] * nabla[i], evaluate=False)
+    laplacian = Mul(divergence[0] * nabla[0], evaluate=False)
+    for i in range(1, len(nabla)):
+        laplacian = _Add(laplacian, Mul(divergence[i] * nabla[i], evaluate=False), latex=r'\nabla^2')
     return laplacian
