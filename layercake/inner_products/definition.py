@@ -15,8 +15,7 @@ from sympy import integrate, Integral
 
 
 class InnerProductDefinition(ABC):
-    """Base class to define the model's basis inner products.
-    """
+    """Base class to define the model's basis inner products."""
 
     def __init__(self):
         pass

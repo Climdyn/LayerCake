@@ -18,7 +18,29 @@ from layercake.utils.symbolic_tensor import remove_dic_zeros
 
 
 class ArithmeticTerms(ABC):
-    """Base class for arithmetic terms"""
+    """Base class for partial differential equation arithmetic terms.
+    Holds the symbolic representation of term(s) and his(their) decomposition on a given function basis.
+
+    Parameters
+    ----------
+    name: str, optional
+        Name of the term(s). Must be defined in subclasses.
+    sign: int, optional
+        Sign in front of the term(s). Either +1 or -1.
+        Default to +1.
+
+    Attributes
+    ----------
+    name: str, optional
+        Name of the term. Must be defined in subclasses.
+    sign: int, optional
+        Sign in front of the term(s). Either +1 or -1.
+    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)
+        The inner products tensor of the term.
+        Set initially to `None` (not computed).
+    inner_product_definition: InnerProductDefinition
+        Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
+    """
     def __init__(self, name='', sign=1):
 
         self.sign = sign
@@ -29,6 +51,7 @@ class ArithmeticTerms(ABC):
 
     @property
     def rank(self):
+        """int: Rank of the tensor storing the term(s) decomposition on the provided function basis."""
         if self.inner_products is not None:
             return self.inner_products.shape.__len__()
         else:
@@ -37,6 +60,7 @@ class ArithmeticTerms(ABC):
     @property
     @abstractmethod
     def terms(self):
+        """list(ArithmeticTerms): List of the terms."""
         pass
 
     @property
@@ -62,21 +86,25 @@ class ArithmeticTerms(ABC):
     @property
     @abstractmethod
     def symbolic_expression(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the term(s). Only contains symbols."""
         pass
 
     @property
     @abstractmethod
     def numerical_expression(self):
+        """~sympy.core.expr.Expr: The numeric expression of the term(s), with parameters replaced by their numerical value."""
         pass
 
     @property
     @abstractmethod
     def symbolic_function(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the term(s), but as a symbolic functional. Only contains symbols."""
         pass
 
     @property
     @abstractmethod
     def numerical_function(self):
+        """~sympy.core.expr.Expr: The numeric expression of the term(s), as a symbolic functional, but with parameters replaced by their numerical value."""
         pass
 
     @staticmethod
@@ -84,6 +112,8 @@ class ArithmeticTerms(ABC):
         return enable_commutativity(evaluate_expr(func))
 
     def _integrations(self, *basis, inner_product=None, numerical=False):
+        """Returns the list of all the integrations to be computed to get the full tensor of inner products related to the term(s).
+        Elements of the list includes indices locating the inner products in the tensor, inner product definition, and inner products integral arguments."""
         if len(basis) == 1:
             nmod = len(basis[0])
             nmodr = (range(nmod),) * self._rank
@@ -101,10 +131,32 @@ class ArithmeticTerms(ABC):
 
     @abstractmethod
     def _inner_product_arguments(self, basis, indices, numerical=False):
+        """Returns the list of all the arguments of the inner products integral to be computed to get the full tensor of inner products related to the term(s)."""
         pass
 
     @abstractmethod
     def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        """Compute the inner products tensor, either symbolic or numerical ones, representing the term(s) decomposed on a given function basis.
+        Computations are parallelized on multiple CPUs.
+        Results are stored in the :attr:`~ArithmeticTerm.inner_products` attribute.
+
+        Parameters
+        ----------
+        basis: SymbolicBasis
+            Symbolic function basis on which the term must be decomposed.
+        numerical: bool, optional
+            Whether to compute numerical or symbolic inner products.
+            Default to `False` (symbolic inner products as output).
+        timeout: int or bool or None, optional
+            TODO
+        num_threads: None or int, optional
+            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
+            Default to `None`.
+        permute: bool, optional
+            If `True`, applies all the possible permutations to the tensor indices
+            from 1 to the rank of the tensor.
+            Default to `False`, i.e. no permutation is applied.
+        """
         pass
 
     def _compute_inner_products(self, *basis, numerical=False, timeout=None, num_threads=None, permute=False):
@@ -148,8 +200,9 @@ class ArithmeticTerms(ABC):
             self.inner_products = res.to_coo()
 
     @property
-    # @abstractmethod
+    # @abstractmethod TODO: uncomment and check
     def latex(self):
+        """str: Return a LaTeX representation of the term(s)."""
         return None
 
     def __repr__(self):
@@ -159,6 +212,7 @@ class ArithmeticTerms(ABC):
         return self.__repr__()
 
     def copy(self):
+        """ArithmeticTerms: Return a copy of the term(s) object."""
         return deepcopy(self)
 
     def __neg__(self):
