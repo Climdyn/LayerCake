@@ -1,4 +1,22 @@
 
+"""
+
+    Arithmetic terms definition module
+    ==================================
+
+    This module defines base classes for partial differential equation arithmetic terms.
+    The corresponding objects hold the symbolic representation of the terms and their decomposition
+    on given function basis.
+
+    Description of the classes
+    --------------------------
+
+    * :class:`ArithmeticTerms`: General base class for partial differential equation arithmetic terms.
+    * :class:`SingleArithmeticTerm`: Base class for single arithmetic terms (singleton) involving the field over which the partial differential equation acts.
+    * :class:`OperationOnTerms`: Base class for operations on arithmetic terms. Perform the same operation on multiple terms.
+
+"""
+
 from abc import ABC, abstractmethod
 import sparse as sp
 from pebble import ProcessPool as Pool
@@ -18,8 +36,13 @@ from layercake.utils.symbolic_tensor import remove_dic_zeros
 
 
 class ArithmeticTerms(ABC):
-    """Base class for partial differential equation arithmetic terms.
+    """General base class for partial differential equation arithmetic term(s).
     Holds the symbolic representation of (possibly multiple) term(s) and his(their) decomposition(s) on a given function basis.
+
+    More precisely, models a term :math:`\\pm T(u_1, u_2)` in the partial differential equation, where
+    the :math:`u_1, u_2` are the coordinates of the model.
+    Upon decomposition on function basis, it can be represented as a tensor :math:`\\mathcal{T}_{i_1, \\ldots, i_r}` where :math:`r`
+    is the tensor (and term(s)) rank.
 
     Parameters
     ----------
@@ -32,7 +55,7 @@ class ArithmeticTerms(ABC):
     Attributes
     ----------
     name: str, optional
-        Name of the term. Must be defined in subclasses.
+        Name of the term(s). Must be defined in subclasses.
     sign: int, optional
         Sign in front of the term(s). Either +1 or -1.
     inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)
@@ -155,7 +178,7 @@ class ArithmeticTerms(ABC):
 
     @abstractmethod
     def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
-        """Compute the inner products tensor, either symbolic or numerical ones, representing the term(s) decomposed on a given function basis.
+        """Compute the inner products tensor :math:`\\mathcal{T}_{i_1, \\ldots, i_r}`, either symbolic or numerical ones, representing the term(s) decomposed on a given function basis.
         Computations are parallelized on multiple CPUs.
         Results are stored in the :attr:`~ArithmeticTerms.inner_products` attribute.
 
@@ -261,7 +284,19 @@ class ArithmeticTerms(ABC):
 
 class SingleArithmeticTerm(ArithmeticTerms):
     """Base class for single arithmetic terms (singleton) involving the field over which the partial differential equation acts.
-    Holds the symbolic representation of the term and his decomposition on a given function basis.
+    Holds the symbolic representation of the term and his decomposition on given function basis.
+
+    More precisely, models a term in the partial differential equation as a linear functional :math:`\\pm T[\\psi](u_1, u_2)`,
+    where :math:`\\psi` is the field solution of the equation, and the :math:`u_1, u_2` are the coordinates of the model.
+    Upon decomposition on function basis, it can be represented as a tensor
+
+    .. math:
+
+        \\mathcal{T}_{i_1, i_2} = \\left\\langle \\phi_{i_1} , \\pm T[\\eta_{i_2}] \\right\\rangle
+
+    where the :math:`\\phi_i` are basis functions provided by the user, and the :math:`\\eta_i`` are basis functions on which
+    the field :math:`\\psi` is decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
+    The rank :math:`r` of this kind of term (and its tensor rank) is thus always 2.
 
     Parameters
     ----------
@@ -416,6 +451,19 @@ class OperationOnTerms(ArithmeticTerms):
     """Base class for operations on arithmetic terms. Perform the same operation on multiple terms.
     Holds the symbolic representation of the result and his decomposition on a given function basis.
 
+    More precisely, models a term in the partial differential equation as an operation :math:`\\wedge` acting
+    on multiple multilinear functional terms :math:`\\pm T(u_1, u_2) = \\bigwedge_{i=1}^k T_i[\\psi^i_1,\\ldots, \\psi^i_{j_i}}] (u_1, u_2)`,
+    where the :math:`\\psi_i_k` are the :math:`j_i` fields (possibly the same) on which the functional :math:`T_i` are acting,
+    and the :math:`u_1, u_2` are the coordinates of the model.
+    Upon decomposition on function basis, it can be represented as a tensor
+
+    .. math:
+
+        \\mathcal{T}_{j, j_1, \\ldots, j_r} = \\left\\langle \\phi_{j} , \\pm \\bigwedge_{i=1}^k T_i[\\eta^i_1, \\ldots, \\eta^i_{j_i}] \\right\\rangle
+
+    where the :math:`\\phi_i` are basis functions provided by the user, and the :math:`\\eta_i`` are basis functions on which
+    the field :math:`\\psi` is decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
+    The rank :math:`r` of this kind of term (and its tensor rank) is thus always 2.
     Parameters
     ----------
     *terms: ArithmeticTerms
