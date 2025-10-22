@@ -451,19 +451,19 @@ class OperationOnTerms(ArithmeticTerms):
     """Base class for operations on arithmetic terms. Perform the same operation on multiple terms.
     Holds the symbolic representation of the result and his decomposition on a given function basis.
 
-    More precisely, models a term in the partial differential equation as an operation :math:`\\wedge` acting
+    More precisely, models a term in the partial differential equation as a provided operation noted :math:`\\wedge`, acting
     on multiple multilinear functional terms :math:`\\pm T(u_1, u_2) = \\bigwedge_{i=1}^k T_i[\\psi^i_1,\\ldots, \\psi^i_{j_i}}] (u_1, u_2)`,
-    where the :math:`\\psi_i_k` are the :math:`j_i` fields (possibly the same) on which the functional :math:`T_i` are acting,
+    where the :math:`\\psi^i_k` are the :math:`j_i` fields (possibly the same) on which the functional :math:`T_i` are acting,
     and the :math:`u_1, u_2` are the coordinates of the model.
     Upon decomposition on function basis, it can be represented as a tensor
 
     .. math:
 
-        \\mathcal{T}_{j, j_1, \\ldots, j_r} = \\left\\langle \\phi_{j} , \\pm \\bigwedge_{i=1}^k T_i[\\eta^i_1, \\ldots, \\eta^i_{j_i}] \\right\\rangle
+        \\mathcal{T}_{j, k_{1,1}, \\ldots, k_{1,j_1}, \\ldots, k_{l,1}, \\ldots, k_{l,{j_l}}} = \\left\\langle \\phi_{j} , \\pm \\bigwedge_{i=1}^l T_i\\left[\\left(\\eta^i_1\\right)_{k_{i,1}}, \\ldots, \\left(\\eta^i_{j_i}\\right)_{k_{i,j_i}}\\right] \\right\\rangle
 
-    where the :math:`\\phi_i` are basis functions provided by the user, and the :math:`\\eta_i`` are basis functions on which
-    the field :math:`\\psi` is decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
-    The rank :math:`r` of this kind of term (and its tensor rank) is thus always 2.
+    where the :math:`\\phi_j` are basis functions provided by the user, and the :math:`\\left(\\eta^i_j\\right)_k`` are basis functions on which
+    the fields :math:`\\psi^i_j` are decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
+    The rank :math:`r` of this kind of term (and its tensor rank) is thus :math:`1+\\sum_{i=1}^l j_i`.
     Parameters
     ----------
     *terms: ArithmeticTerms
