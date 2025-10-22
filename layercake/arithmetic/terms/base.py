@@ -40,7 +40,7 @@ class ArithmeticTerms(ABC):
     Holds the symbolic representation of (possibly multiple) term(s) and his(their) decomposition(s) on a given function basis.
 
     More precisely, models a term :math:`\\pm T(u_1, u_2)` in the partial differential equation, where
-    the :math:`u_1, u_2` are the coordinates of the model.
+    :math:`u_1, u_2` are the coordinates of the model.
     Upon decomposition on function basis, it can be represented as a tensor :math:`\\mathcal{T}_{i_1, \\ldots, i_r}` where :math:`r`
     is the tensor (and term(s)) rank.
 
@@ -136,7 +136,7 @@ class ArithmeticTerms(ABC):
 
     def _integrations(self, *basis, inner_product=None, numerical=False):
         """Returns the list of all the integrations to be computed to get the full tensor of inner products related to the term(s).
-        Elements of the list includes indices locating the inner products in the tensor, inner product definition, and inner products integral arguments."""
+        Elements of the list includes indices locating the inner products in the tensor, inner product Sympy expression, and inner products integral arguments."""
         if len(basis) == 1:
             nmod = len(basis[0])
             nmodr = (range(nmod),) * self._rank
@@ -178,7 +178,8 @@ class ArithmeticTerms(ABC):
 
     @abstractmethod
     def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
-        """Compute the inner products tensor :math:`\\mathcal{T}_{i_1, \\ldots, i_r}`, either symbolic or numerical ones, representing the term(s) decomposed on a given function basis.
+        """Compute the inner products tensor :math:`\\mathcal{T}_{i_1, \\ldots, i_r}`, either symbolic or numerical ones,
+        representing the term(s) decomposed on a given function basis.
         Computations are parallelized on multiple CPUs.
         Results are stored in the :attr:`~ArithmeticTerms.inner_products` attribute.
 
