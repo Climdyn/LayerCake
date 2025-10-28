@@ -1,9 +1,54 @@
 
+"""
+
+    Arithmetic operations module
+    ============================
+
+    This module defines terms resulting from arithmetic operation being applied to arithmetic terms.
+    The corresponding objects hold the symbolic representation of the terms and their decomposition
+    on given function basis.
+
+    Description of the classes
+    --------------------------
+
+    * :class:`ProductOfTerms`: Product of a list of terms in a partial differential equation.
+    * :class:`AdditionOfTerms`: Addition of a list of terms in a partial differential equation.
+
+"""
+
 from layercake.arithmetic.terms.base import OperationOnTerms
 from layercake.arithmetic.utils import sproduct, sadd
 
 
 class ProductOfTerms(OperationOnTerms):
+    """Term representing the product of multiple arithmetic terms.
+
+    Parameters
+    ----------
+    *terms: ArithmeticTerms
+        Arithmetic terms to take the product of.
+    name: str, optional
+        Name of the term.
+    rank: int, optional
+        Can be used to force the rank of the term, i.e. force the rank of the tensor storing the term(s) decomposition on the provided function basis.
+        Compute the rank automatically if not provided.
+    sign: int, optional
+        Sign in front of the term. Either +1 or -1.
+        Default to +1.
+
+    Attributes
+    ----------
+    name: str
+        Name of the term.
+    sign: int
+        Sign in front of the term. Either +1 or -1.
+    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)
+        The inner products tensor of the term.
+        Set initially to `None` (not computed).
+    inner_product_definition: InnerProductDefinition
+        Object defining the integral representation of the inner product that is used to compute the term representation
+        on a given function basis.
+    """
 
     def __init__(self, *terms, name='', rank=None, sign=1):
 
@@ -23,10 +68,28 @@ class ProductOfTerms(OperationOnTerms):
         return basis_list
 
     def operation(self, *terms, evaluate=False):
+        """Operation (here the product) acting on the terms.
+
+        Parameters
+        ----------
+        *terms: ArithmeticTerms
+            Terms on which the operation must be applied.
+        evaluate: bool
+            Whether to let `Sympy`_ evaluate the operation or not.
+            Default to `False`.
+
+        Returns
+        -------
+        ~sympy.core.expr.Expr
+            The result of the operation on the terms, as a `Sympy`_ symbolic expression.
+
+        .. _Sympy: https://www.sympy.org/
+        """
         return sproduct(*terms, evaluate=evaluate)
 
     @property
     def latex(self):
+        """str: Return a LaTeX representation of the terms."""
         if self.sign > 0:
             s = f'+ '
         else:
@@ -42,6 +105,38 @@ class ProductOfTerms(OperationOnTerms):
 
 
 class AdditionOfTerms(OperationOnTerms):
+    """Term representing the addition of multiple arithmetic terms.
+
+    Warnings
+    --------
+    Provided terms must have the same rank, and involve the same field.
+
+    Parameters
+    ----------
+    *terms: ArithmeticTerms
+        Arithmetic terms to take the addition of.
+    name: str, optional
+        Name of the term.
+    rank: int, optional
+        Can be used to force the rank of the term, i.e. force the rank of the tensor storing the term(s) decomposition on the provided function basis.
+        Compute the rank automatically if not provided.
+    sign: int, optional
+        Sign in front of the term. Either +1 or -1.
+        Default to +1.
+
+    Attributes
+    ----------
+    name: str
+        Name of the term.
+    sign: int
+        Sign in front of the term. Either +1 or -1.
+    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)
+        The inner products tensor of the term.
+        Set initially to `None` (not computed).
+    inner_product_definition: InnerProductDefinition
+        Object defining the integral representation of the inner product that is used to compute the term representation
+        on a given function basis.
+    """
 
     def __init__(self, *terms, name='', rank=None, sign=1):
 
@@ -55,10 +150,14 @@ class AdditionOfTerms(OperationOnTerms):
 
     @property
     def symbolic_expression(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the result of the operation on the terms, but as a symbolic functional.
+        Only contains symbols."""
         return sproduct(self.sign, self.operation(*map(lambda t: t.symbolic_expression, self._terms)))
 
     @property
     def numerical_expression(self):
+        """~sympy.core.expr.Expr: The numerical expression of the result of the operation on the terms, as a symbolic functional,
+        and with parameters replaced by their numerical value."""
         return sproduct(self.sign, self.operation(*map(lambda t: t.numerical_expression, self._terms)))
 
     @property
@@ -94,10 +193,28 @@ class AdditionOfTerms(OperationOnTerms):
         return basis, self._terms[0].field.basis
 
     def operation(self, *terms, evaluate=False):
+        """Operation (here the addition) acting on the terms.
+
+        Parameters
+        ----------
+        *terms: ArithmeticTerms
+            Terms on which the operation must be applied.
+        evaluate: bool
+            Whether to let `Sympy`_ evaluate the operation or not.
+            Default to `False`.
+
+        Returns
+        -------
+        ~sympy.core.expr.Expr
+            The result of the operation on the terms, as a `Sympy`_ symbolic expression.
+
+        .. _Sympy: https://www.sympy.org/
+        """
         return sadd(*terms, evaluate=evaluate)
 
     @property
     def latex(self):
+        """str: Return a LaTeX representation of the terms."""
         latexes = [t.latex for t in self.terms]
         s = ''
         for lat in latexes:
