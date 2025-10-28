@@ -1,4 +1,17 @@
 
+"""
+
+    Operators definition module
+    ===========================
+
+    This module defines various symbolic operators (mainly differential ones)
+    acting on the fields of the partial differential equations in `Sympy`_ expression.
+
+    .. _Sympy: https://www.sympy.org/
+
+"""
+
+
 from sympy.core.decorators import call_highest_priority
 from sympy import Expr, Matrix, Mul, Add, diff
 from sympy.core.numbers import Zero
@@ -10,6 +23,30 @@ from layercake.variables.systems import CoordinateSystem
 
 
 class D(Expr):
+    """Symbolic differential operator acting on `Sympy`_ expression.
+    Inspired by `this post <https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy>`.
+
+    .. _Sympy: https://www.sympy.org/
+
+    Parameters
+    ----------
+    *variables: ~sympy.core.symbol.Symbol
+        Variables with respect to which the operator differentiate.
+        The number of variables indicate the order of the derivative.
+
+    Attributes
+    ----------
+    variables: list(~sympy.core.symbol.Symbol)
+        Variables with respect to which the operator differentiate.
+        The number of variables indicate the order of the derivative.
+    evaluate: bool
+        Whether the expression resulting from the action of the operator is
+        evaluated.
+        Default to `False`.
+    latex: str
+        LaTeX representation of the operator.
+
+    """
     _op_priority = 11.
     is_commutative = False
 
@@ -120,6 +157,21 @@ def _evaluate_add(expr):
 
 
 def evaluate_expr(expr):
+    """Evaluate a given `Sympy`_ expression.
+
+    .. _Sympy: https://www.sympy.org/
+
+    Parameters
+    ----------
+    expr: ~sympy.core.expr.Expr
+        The expression to evaluate.
+
+    Returns
+    -------
+    ~sympy.core.expr.Expr
+        The evaluated expression.
+
+    """
     if isinstance(expr, Matrix):
         for i, elem in enumerate(expr):
             elem = elem.expand()
@@ -144,6 +196,24 @@ def _latex_repr(r):
 
 @_latex_repr(r'\nabla')
 def Nabla(coordinate_system):
+    """Function returning the Nabla (Del - :math:`\\nabla`) operator associated with a given
+    coordinate system.
+
+    Notes
+    -----
+    The returned expression has an additional `latex` attribute.
+
+    Parameters
+    ----------
+    coordinate_system: ~coordinates.CoordinateSystem
+        Coordinate system for which the :math:`\\nabla` operator must be returned.
+
+    Returns
+    -------
+    ~sympy.core.expr.Expr
+        The :math:`\\nabla` operator associated with the coordinate system.
+
+    """
     if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Nabla only take coordinates systems as input.')
 
@@ -158,6 +228,24 @@ def Nabla(coordinate_system):
 
 @_latex_repr(r'\nabla \cdot')
 def Divergence(coordinate_system):
+    """Function returning the divergence (:math:`\\nabla \\cdot`) operator associated with a given
+    coordinate system.
+
+    Notes
+    -----
+    The returned expression has an additional `latex` attribute.
+
+    Parameters
+    ----------
+    coordinate_system: ~coordinates.CoordinateSystem
+        Coordinate system for which the divergence operator must be returned.
+
+    Returns
+    -------
+    ~sympy.core.expr.Expr
+        The divergence operator associated with the coordinate system.
+
+    """
 
     if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Divergence only take coordinates systems as input.')
@@ -191,6 +279,24 @@ class _Add(Add):
 
 @_latex_repr(r'\nabla^2')
 def Laplacian(coordinate_system):
+    """Function returning the Laplacian (:math:`\\nabla^2`) operator associated with a given
+    coordinate system.
+
+    Notes
+    -----
+    The returned expression has an additional `latex` attribute.
+
+    Parameters
+    ----------
+    coordinate_system: ~coordinates.CoordinateSystem
+        Coordinate system for which the Laplacian operator must be returned.
+
+    Returns
+    -------
+    ~sympy.core.expr.Expr
+        The Laplacian operator associated with the coordinate system.
+
+    """
     if not isinstance(coordinate_system, CoordinateSystem):
         raise ValueError('Laplacian only take coordinates systems as input.')
     nabla = Nabla(coordinate_system)
