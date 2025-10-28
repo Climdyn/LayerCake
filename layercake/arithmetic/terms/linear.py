@@ -17,29 +17,29 @@ from layercake.arithmetic.utils import sproduct
 class LinearTerm(SingleArithmeticTerm):
     """Linear term in a partial differential equation, of the form :math:`a \\psi(u_1, u_2)`,
     where :math:`u_1, u_2` are the coordinates of the model, :math:`a` is a prefactor, and where :math:`\\psi` is
-    the field solution of the equation.
+    a field of the equation.
 
     Parameters
     ----------
-    field: ~field.Field
-        The field over which the partial differential equation acts.
+    field: ~field.Field or ~field.ParameterField
+        A field appearing in the partial differential equation.
     inner_product_definition: InnerProductDefinition, optional
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
     prefactor: parameter.Parameter, optional
-        Prefactor in front of the single term.
+        Prefactor in front of the term.
         Must be specified as a model parameter.
     name: str, optional
-        Name of the term(s).
+        Name of the term.
     sign: int, optional
-        Sign in front of the term(s). Either +1 or -1.
+        Sign in front of the term. Either +1 or -1.
         Default to +1.
 
     Attributes
     ----------
-    field: ~field.Field
-        The field over which the partial differential equation acts.
+    field: ~field.Field or ~field.ParameterField
+        The field appearing in the partial differential equation.
     name: str
         Name of the term.
     sign: int
@@ -50,7 +50,7 @@ class LinearTerm(SingleArithmeticTerm):
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
     prefactor: parameter.Parameter
-        Prefactor in front of the single term.
+        Prefactor in front of the term.
     """
 
     def __init__(self, field, inner_product_definition=None, prefactor=None, name='', sign=1):

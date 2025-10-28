@@ -28,22 +28,22 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
 
     Parameters
     ----------
-    field1: field.Field or field.ParameterField
+    field1: ~field.Field or ~field.ParameterField
         First field on which the Jacobian act (corresponds to the field :math:`\\psi` in the formula above).
-    field2: field.Field or field.ParameterField
+    field2: ~field.Field or ~field.ParameterField
         Second field on which the Jacobian act (corresponds to the field :math:`\\phi` in the formula above).
     coordinate_system: ~coordinates.CoordinateSystem
         Coordinate system on which the model is defined.
     sign: int, optional
         Sign in front of the Jacobian term. Either +1 or -1.
         Default to +1.
-    prefactors: tuple(parameter.Parameter), optional
+    prefactors: tuple(~parameter.Parameter), optional
         2-tuple providing the prefactors in front of each of the two terms composing the Jacobian.
         Must be specified as model parameters.
 
     Returns
     -------
-    tuple(ProductOfTerms)
+    tuple(~operations.ProductOfTerms)
         2-tuple containing arithmetic terms representing each term of the Jacobian.
     """
 
@@ -74,22 +74,22 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
 
     Parameters
     ----------
-    field1: field.Field or field.ParameterField
+    field1: ~field.Field or ~field.ParameterField
         First field, advected by the vorticity.
-    field2: field.Field or field.ParameterField
+    field2: ~field.Field or ~field.ParameterField
         Second field with which the vorticity :math:`\\nabla^2` is computed.
     coordinate_system: ~coordinates.CoordinateSystem
         Coordinate system on which the model is defined.
     sign: int, optional
         Sign in front of the vorticity advection term. Either +1 or -1.
         Default to +1.
-    prefactors: tuple(parameter.Parameter), optional
+    prefactors: tuple(~parameter.Parameter), optional
         2-tuple providing the prefactors in front of each of the two terms of the Jacobian of the
         vorticity advection. Must be specified as model parameters.
 
     Returns
     -------
-    tuple(ProductOfTerms)
+    tuple(~operations.ProductOfTerms)
         2-tuple containing arithmetic terms representing each term of the vorticity advection.
     """
 

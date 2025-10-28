@@ -302,8 +302,8 @@ class SingleArithmeticTerm(ArithmeticTerms):
 
     Parameters
     ----------
-    field: ~field.Field
-        The field over which the partial differential equation acts.
+    field: ~field.Field or ~field.ParameterField
+        A field appearing in the partial differential equation.
     inner_product_definition: InnerProductDefinition, optional
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
@@ -312,15 +312,15 @@ class SingleArithmeticTerm(ArithmeticTerms):
         Prefactor in front of the single term.
         Must be specified as a model parameter.
     name: str, optional
-        Name of the term(s). Must be defined in subclasses.
+        Name of the term. Must be defined in subclasses.
     sign: int, optional
         Sign in front of the term(s). Either +1 or -1.
         Default to +1.
 
     Attributes
     ----------
-    field: ~field.Field
-        The field over which the partial differential equation acts.
+    field: ~field.Field or ~field.ParameterField
+        The field appearing in the partial differential equation.
     name: str
         Name of the term. Must be defined in subclasses.
     sign: int

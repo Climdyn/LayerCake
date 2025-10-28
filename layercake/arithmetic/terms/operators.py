@@ -1,9 +1,72 @@
 
+"""
+
+    Operator arithmetic term definition module
+    =================================================
+
+    This module defines operator terms in partial differential equations.
+    The corresponding objects hold the symbolic representation of the terms and their decomposition
+    on given function basis.
+
+    Description of the classes
+    --------------------------
+
+    * :class:`OperatorTerm`: Operator term in a partial differential equation, acting on fields of the equation.
+    * :class:`ComposedOperatorsTerm`:
+
+"""
+
 from layercake.arithmetic.terms.base import SingleArithmeticTerm
 from layercake.arithmetic.utils import sproduct
 
 
 class OperatorTerm(SingleArithmeticTerm):
+    """Operator term in a partial differential equation, acting on fields of the equation,
+    and of the form :math:`a H \\psi(u_1, u_2)`, where :math:`H` is the operator,
+    :math:`u_1, u_2` are the coordinates of the model, :math:`a` is a prefactor,
+    and :math:`\\psi` is a field of the equation.
+
+    Parameters
+    ----------
+    field: ~field.Field or ~field.ParameterField
+        A field appearing in the partial differential equation, and on which the
+        operator acts.
+    operator: object
+        Object or function returning the action of the operator on symbolic Sympy expressions.
+        Must also have a `latex` attribute.
+    operator_args: tuple
+        Tuple of arguments to pass to the `operator` object or function.
+    inner_product_definition: InnerProductDefinition, optional
+        Object defining the integral representation of the inner product that is used
+        to compute the term representation on a given function basis.
+        If not provided, it will use the inner product definition found in the `field` object.
+        Default to using the inner product definition found in the `field` object.
+    prefactor: parameter.Parameter, optional
+        Prefactor in front of the operator.
+        Must be specified as a model parameter.
+    name: str, optional
+        Name of the term.
+    sign: int, optional
+        Sign in front of the term(s). Either +1 or -1.
+        Default to +1.
+
+    Attributes
+    ----------
+    field: ~field.Field or ~field.ParameterField
+        The field appearing in the partial differential equation, and on which the
+        operator acts.
+    name: str
+        Name of the term.
+    sign: int
+        Sign in front of the term. Either +1 or -1.
+    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)
+        The inner products tensor of the term.
+        Set initially to `None` (not computed).
+    inner_product_definition: InnerProductDefinition
+        Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
+    prefactor: parameter.Parameter
+        Prefactor in front of the operator.
+    """
 
     def __init__(self, field, operator, operator_args, inner_product_definition=None, prefactor=None, name='', sign=1):
 
@@ -14,6 +77,7 @@ class OperatorTerm(SingleArithmeticTerm):
 
     @property
     def symbolic_expression(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the operator. Only contains symbols."""
         if self.prefactor is None:
             return sproduct(self.sign * self._operator, self.field.symbol)
         else:
@@ -21,6 +85,7 @@ class OperatorTerm(SingleArithmeticTerm):
 
     @property
     def numerical_expression(self):
+        """~sympy.core.expr.Expr: The numeric expression of the operator, with parameters replaced by their numerical value."""
         if self.prefactor is None:
             return sproduct(self.sign * self._operator, self.field.symbol)
         else:
@@ -28,6 +93,7 @@ class OperatorTerm(SingleArithmeticTerm):
 
     @property
     def latex(self):
+        """str: Return a LaTeX representation of the operator."""
         if self.sign > 0:
             s = f'+ '
         else:
