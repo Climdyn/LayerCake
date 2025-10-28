@@ -59,7 +59,7 @@ class LinearTerm(SingleArithmeticTerm):
 
     @property
     def symbolic_expression(self):
-        """~sympy.core.expr.Expr: The symbolic expression of the term(s). Only contains symbols."""
+        """~sympy.core.expr.Expr: The symbolic expression of the term. Only contains symbols."""
         if self.prefactor is None:
             return sproduct(self.sign, self.field.symbol)
         else:
@@ -67,7 +67,7 @@ class LinearTerm(SingleArithmeticTerm):
 
     @property
     def numerical_expression(self):
-        """~sympy.core.expr.Expr: The numeric expression of the term(s), with parameters replaced by their numerical value."""
+        """~sympy.core.expr.Expr: The numeric expression of the term, with parameters replaced by their numerical value."""
         if self.prefactor is None:
             return sproduct(self.sign, self.field.symbol)
         else:
@@ -75,7 +75,7 @@ class LinearTerm(SingleArithmeticTerm):
 
     @property
     def latex(self):
-        """str: Return a LaTeX representation of the term(s)."""
+        """str: Return a LaTeX representation of the term."""
         if self.sign > 0:
             s = f'+ '
         else:

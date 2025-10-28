@@ -127,7 +127,8 @@ class ArithmeticTerms(ABC):
     @property
     @abstractmethod
     def numerical_function(self):
-        """~sympy.core.expr.Expr: The numeric expression of the term(s), as a symbolic functional, but with parameters replaced by their numerical value."""
+        """~sympy.core.expr.Expr: The numeric expression of the term(s), as a symbolic functional,
+        but with parameters replaced by their numerical value."""
         pass
 
     @staticmethod
