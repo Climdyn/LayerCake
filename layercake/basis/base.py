@@ -76,13 +76,11 @@ class SymbolicBasis(Basis):
     ----------
     substitutions: list(tuple)
         List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
-        a `Sympy`_  expression and then the value to substitute.
+        a |Sympy|  expression and then the value to substitute.
     coordinate_system: ~coordinates.CoordinateSystem
         Coordinate system on which the basis is defined.
     parameters: list(~parameter.Parameter)
         Dictionary holding the parameters appearing in the equations defining the basis.
-
-    .. _Sympy: https://www.sympy.org/
 
     """
 
@@ -114,7 +112,7 @@ class SymbolicBasis(Basis):
         ----------
         extra_subs: list(tuple), optional
             List of 2-tuples containing extra substitutions to be made with the functions. The 2-tuples contain first
-            a `Sympy`_  expression and then the value to substitute.
+            a |Sympy|  expression and then the value to substitute.
 
         Returns
         -------
@@ -141,7 +139,7 @@ class SymbolicBasis(Basis):
         ----------
         extra_subs: list(tuple), optional
             List of 2-tuples containing extra substitutions to be made with the functions before transforming them into
-            python callable. The 2-tuples contain first a `Sympy`_  expression and then the value to substitute.
+            python callable. The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
 
         Returns
         -------

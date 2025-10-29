@@ -96,15 +96,14 @@ class ProductOfTerms(OperationOnTerms):
         *terms: ArithmeticTerms
             Terms on which the operation must be applied.
         evaluate: bool
-            Whether to let `Sympy`_ evaluate the operation or not.
+            Whether to let |Sympy| evaluate the operation or not.
             Default to `False`.
 
         Returns
         -------
         ~sympy.core.expr.Expr
-            The result of the operation on the terms, as a `Sympy`_ symbolic expression.
+            The result of the operation on the terms, as a |Sympy| symbolic expression.
 
-        .. _Sympy: https://www.sympy.org/
         """
         return sproduct(*terms, evaluate=evaluate)
 
@@ -242,15 +241,14 @@ class AdditionOfTerms(OperationOnTerms):
         *terms: ArithmeticTerms
             Terms on which the operation must be applied.
         evaluate: bool
-            Whether to let `Sympy`_ evaluate the operation or not.
+            Whether to let |Sympy| evaluate the operation or not.
             Default to `False`.
 
         Returns
         -------
         ~sympy.core.expr.Expr
-            The result of the operation on the terms, as a `Sympy`_ symbolic expression.
+            The result of the operation on the terms, as a |Sympy| symbolic expression.
 
-        .. _Sympy: https://www.sympy.org/
         """
         return sadd(*terms, evaluate=evaluate)
 

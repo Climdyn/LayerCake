@@ -40,7 +40,7 @@ class InnerProductDefinition(ABC):
 
 
 class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
-    """Standard class to define symbolic inner products using `Sympy`_.
+    """Standard class to define symbolic inner products using |Sympy|.
 
     Parameters
     ----------
@@ -57,8 +57,6 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
     optimizer: None or callable
         A function to optimize the computation of the integrals or the integrand.
         If `None`, does not optimize the computation.
-
-    .. _Sympy: https://www.sympy.org/
 
     """
 

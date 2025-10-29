@@ -139,7 +139,7 @@ class Cake(object):
         substitutions: list(tuple), optional
             List of 2-tuples containing extra symbolic substitutions to be made at the end of the tensor computation.
             Only applies for the symbolic tendencies.
-            The 2-tuples contain first a `Sympy`_  expression and then the value to substitute.
+            The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
         basis_subs: bool, optional
             Whether to substitute the parameters appearing in the definition of the basis of functions by
             their numerical value.

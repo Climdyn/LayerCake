@@ -27,7 +27,7 @@ class Field(Variable):
     name: str
         Name of the field.
     symbol: ~sympy.core.symbol.Symbol
-        A `Sympy`_ symbol to represent the field in symbolic expressions.
+        A |Sympy| symbol to represent the field in symbolic expressions.
     basis: SymbolicBasis
         A symbolic basis of functions on which the Galerkin expansion of the field is performed.
     inner_product_definition: InnerProductDefinition
@@ -50,7 +50,7 @@ class Field(Variable):
     name: str
         Name of the field.
     symbol: ~sympy.core.symbol.Symbol
-        The `Sympy`_ symbol representing the field in symbolic expressions.
+        The |Sympy| symbol representing the field in symbolic expressions.
     basis: SymbolicBasis
         The symbolic basis of functions on which the Galerkin expansion of the field is performed.
     inner_product_definition: InnerProductDefinition
@@ -107,7 +107,7 @@ class ParameterField(Variable):
     name: str
         Name of the field.
     symbol: ~sympy.core.symbol.Symbol
-        A `Sympy`_ symbol to represent the field in symbolic expressions.
+        A |Sympy| symbol to represent the field in symbolic expressions.
     basis: SymbolicBasis
         A symbolic basis of functions on which the Galerkin expansion of the field is performed.
     inner_product_definition: InnerProductDefinition
@@ -130,7 +130,7 @@ class ParameterField(Variable):
     name: str
         Name of the field.
     symbol: ~sympy.core.symbol.Symbol
-        The `Sympy`_ symbol representing the field in symbolic expressions.
+        The |Sympy| symbol representing the field in symbolic expressions.
     basis: SymbolicBasis
         The symbolic basis of functions on which the Galerkin expansion of the field is performed.
     inner_product_definition: InnerProductDefinition

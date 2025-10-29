@@ -5,9 +5,7 @@
     ===========================
 
     This module defines various symbolic operators (mainly differential ones)
-    acting on the fields of the partial differential equations in `Sympy`_ expression.
-
-    .. _Sympy: https://www.sympy.org/
+    acting on the fields of the partial differential equations in |Sympy| expression.
 
 """
 
@@ -23,10 +21,8 @@ from layercake.variables.systems import CoordinateSystem
 
 
 class D(Expr):
-    """Symbolic differential operator acting on `Sympy`_ expression.
+    """Symbolic differential operator acting on |Sympy| expression.
     Inspired by `this post <https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy>`_.
-
-    .. _Sympy: https://www.sympy.org/
 
     Parameters
     ----------
@@ -157,9 +153,7 @@ def _evaluate_add(expr):
 
 
 def evaluate_expr(expr):
-    """Evaluate a given `Sympy`_ expression.
-
-    .. _Sympy: https://www.sympy.org/
+    """Evaluate a given |Sympy| expression.
 
     Parameters
     ----------

@@ -8,3 +8,4 @@ Documentation of the classes and functions of the models.
    :maxdepth: 2
 
    technical/variables
+   technical/utils

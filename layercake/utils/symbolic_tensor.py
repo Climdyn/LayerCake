@@ -4,9 +4,7 @@
     Symbolic tensor utility module
     ==============================
 
-    Defines useful functions to deal with `Sympy`_ symbolic tensors.
-
-    .. _Sympy: https://www.sympy.org/
+    Defines useful functions to deal with |Sympy| symbolic tensors.
 
 """
 
@@ -17,9 +15,7 @@ from sympy import tensorproduct, tensorcontraction
 def symbolic_tensordot(a, b, axes=2):
     """Compute tensor dot product along specified axes of two sympy symbolic arrays
 
-    This is based on `Numpy`_ :meth:`~numpy.tensordot` .
-
-    .. _Numpy: https://numpy.org/
+    This is based on |Numpy| :meth:`~numpy.tensordot` .
 
     Parameters
     ----------
@@ -74,7 +70,7 @@ def remove_dic_zeros(dic):
 
 
 def get_coords_from_index(dic_index, ndim, shape_len):
-    """Get the coordinates of a `Sympy`_ sparse tensor entry along each axis, given its private dictionary index.
+    """Get the coordinates of a |Sympy| sparse tensor entry along each axis, given its private dictionary index.
 
     Notes
     -----
@@ -82,7 +78,7 @@ def get_coords_from_index(dic_index, ndim, shape_len):
 
     Warnings
     --------
-    Assumes that the private dictionary has a certain indexing rationale, which may change over time in `Sympy`_
+    Assumes that the private dictionary has a certain indexing rationale, which may change over time in |Sympy|
 
     Parameters
     ----------
@@ -93,7 +89,6 @@ def get_coords_from_index(dic_index, ndim, shape_len):
     shape_len: int
         Rank of the tensor.
 
-    .. _Sympy: https://www.sympy.org/
     """
     idx = list()
     svv = dic_index * ndim
@@ -106,11 +101,11 @@ def get_coords_from_index(dic_index, ndim, shape_len):
 
 
 def get_coords_and_values_from_tensor(tensor, output='tuple'):
-    """Get the coordinates and values of a `Sympy`_ sparse tensor, as a coordinates-values list.
+    """Get the coordinates and values of a |Sympy| sparse tensor, as a coordinates-values list.
 
     Warnings
     --------
-    This a function implemented to compensate for the lack of such feature in `Sympy`_, and which might need to be
+    This a function implemented to compensate for the lack of such feature in |Sympy|, and which might need to be
     reimplemented or replaced in the future.
 
     Parameters
@@ -120,7 +115,7 @@ def get_coords_and_values_from_tensor(tensor, output='tuple'):
     output: str
         The kind of output. Can be:
 
-        * `numpy`: return the list as a `Numpy`_ array.
+        * `numpy`: return the list as a |Numpy| array.
         * `list`: return the list as nested Python lists.
         * `tuple`: return the list as a list of tuples.
 
@@ -130,8 +125,6 @@ def get_coords_and_values_from_tensor(tensor, output='tuple'):
     list(list) or list(tuple) or ~numpy.ndarray
         The coordinates-values list.
 
-    .. _Numpy: https://numpy.org/
-    .. _Sympy: https://www.sympy.org/
     """
     ndim = tensor.shape[0]
     shape_len = len(tensor.shape)

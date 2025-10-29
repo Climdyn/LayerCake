@@ -282,8 +282,6 @@ def fourier_functions(wave_number, n, coordinate_system):
     ~sympy.core.expr.Expr
         Symbolic expression of the mode.
 
-    .. _Sympy: https://www.sympy.org/
-
     """
     mode_eq = None
     x = coordinate_system.coordinates_symbol['x']

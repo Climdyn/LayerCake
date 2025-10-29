@@ -27,7 +27,7 @@ class Variable(ABC):
     name: str
         Name of the variable.
     symbol: ~sympy.core.symbol.Symbol
-        A `Sympy`_ symbol to represent the variable in symbolic expressions.
+        A |Sympy| symbol to represent the variable in symbolic expressions.
     units: str, optional
         The units of the variable.
         Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
@@ -50,7 +50,6 @@ class Variable(ABC):
     latex: str
         Latex string representing the variable.
 
-    .. _Sympy: https://www.sympy.org/
     """
 
     def __init__(self, name, symbol, units=None, latex=None, dynamical=False):
@@ -94,7 +93,7 @@ class VariablesArray(np.ndarray):
     name: str
         General name of the variables.
     symbol: str or ~sympy.core.symbol.Symbol
-        A `Sympy`_ symbol to represent the variables in symbolic expressions.
+        A |Sympy| symbol to represent the variables in symbolic expressions.
     units: str, optional
         The units of the provided value. Used to compute the conversion between dimensional and nondimensional
         value. Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
@@ -105,7 +104,6 @@ class VariablesArray(np.ndarray):
     dynamical: bool, optional
         Whether the variables are varying over time. Default to `False`.
 
-    .. _Sympy: https://www.sympy.org/
     """
 
     def __new__(cls, values, name, symbol, units="", latex=None, dynamical=False):

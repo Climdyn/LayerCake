@@ -4,9 +4,7 @@
     Commutativity utility module
     ============================
 
-    Defines useful functions to deal with enabling or disabling commutativity in `Sympy`_ expressions.
-
-    .. _Sympy: https://www.sympy.org/
+    Defines useful functions to deal with enabling or disabling commutativity in |Sympy| expressions.
 
 """
 
