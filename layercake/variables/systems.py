@@ -19,18 +19,25 @@ from sympy import symbols, Symbol, pi, cos, S
 
 
 class CoordinateSystem(object):
+    """Base class to define a coordinate system.
+
+    Parameters
+    ----------
+    coordinates: list(~variable.Coordinate)
+        List of coordinates on which the basis is defined.
+    name: str, optional
+        Optional name for the coordinate system.
+
+    Attributes
+    ----------
+    coordinates: list(~variable.Coordinate)
+        List of coordinates on which the basis is defined.
+    name: str
+        Optional name for the coordinate system.
+    """
 
     def __init__(self, coordinates, name=""):
-        """
-        Base class to define a coordinate system.
 
-        Parameters
-        ----------
-        coordinates: list(~variable.Coordinate)
-            List of coordinates on which the basis is defined.
-        name: str, optional
-            Optional name for the coordinate system.
-        """
         self.name = name
         self.coordinates = coordinates
 
@@ -65,17 +72,16 @@ class CoordinateSystem(object):
 
 
 class PlanarCartesianCoordinateSystem(CoordinateSystem):
+    """Class to define a planar Cartesian coordinate system.
+    Coordinates are :math:`x` and :math:`y`.
+
+    Parameters
+    ----------
+    extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol))
+        Defines the extent of the plane.
+    """
 
     def __init__(self, extent):
-        """
-        Class to define a planar Cartesian coordinate system.
-        Coordinates are :math:`x` and :math:`y`.
-
-        Parameters
-        ----------
-        extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol))
-            Defines the extent of the plane.
-        """
 
         xs, ys = symbols('x y')
         x = Coordinate("x", xs, extent=extent[0])
@@ -84,18 +90,22 @@ class PlanarCartesianCoordinateSystem(CoordinateSystem):
 
 
 class SphericalCoordinateSystem(CoordinateSystem):
-    """
-    Class to define a coordinate system on the sphere.
+    """Class to define a coordinate system on the sphere.
     Coordinates are the azimuth angle (longitude) :math:`\\lambda` and the
     elevation angle (latitude) :math:`\\varphi`.
 
     Parameters
     ----------
     radius: Variable or Parameter
-        The radius of the sphere
+        The radius of the sphere.
     extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol)), optional
         Defines the extent of the coordinates on the sphere.
         If not provided, the coordinate system covers the whole sphere.
+
+    Attributes
+    ----------
+    radius: Variable or Parameter
+        The radius of the sphere.
 
     """
 
@@ -112,3 +122,4 @@ class SphericalCoordinateSystem(CoordinateSystem):
         llambda = Coordinate('lambda', llambdas, extent=extent[0], infinitesimal_length=R * cos(phis))
         phi = Coordinate("phi", phis, extent=extent[1], infinitesimal_length=R)
         CoordinateSystem.__init__(self, coordinates=[llambda, phi], name='Spherical Coordinate System')
+        self.radius = radius

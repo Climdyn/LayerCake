@@ -31,8 +31,8 @@
     >>> s[0,0]
     0.1
 
-    Main class
-    ----------
+    Main classes
+    ------------
 """
 
 import warnings

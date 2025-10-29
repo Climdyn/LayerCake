@@ -59,7 +59,7 @@ To build the documentation, please run (with the conda environment activated): :
     make html
 
 
-You may need to install `make` if it is not already present on your system.
+You may need to install [make](https://www.gnu.org/software/make/) if it is not already present on your system.
 Once built, the documentation is available [here](./documentation/build/html/index.html).
 
 ## Examples
