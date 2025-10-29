@@ -550,6 +550,13 @@ class OperationOnTerms(ArithmeticTerms):
 
     @abstractmethod
     def _compute_rank(self):
+        """Routine to compute the rank of the inner products tensor, if not enforced by the user.
+
+        Returns
+        -------
+        int
+            The rank of the inner products tensor.
+        """
         pass
 
     @property
@@ -729,12 +736,18 @@ class OperationOnTerms(ArithmeticTerms):
     @abstractmethod
     def _create_inner_products_basis_list(self, basis):
         """Function defining the list of symbolic function basis specified in order to compute the inner products
-        for the operation on terms. Each basis in the list must correspond to one of the term.
+        for the operation on terms. Must be defined in subclasses.
 
         Parameters
         ----------
-        basis: list(SymbolicBasis)
-            List of symbolic function basis on which each element of the operation on the terms' inner products must be decomposed.
+        basis: SymbolicBasis
+            Basis to put on the left-hand side of the inner products.
+
+        Returns
+        -------
+        tuple(SymbolicBasis)
+            List of symbolic function basis used to compute the inner products.
+
         """
         pass
 
