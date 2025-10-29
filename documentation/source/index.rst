@@ -15,6 +15,8 @@ LayerCake is framework to design systems of partial differential equations (PDEs
    :maxdepth: 2
    :caption: Contents:
 
+   files/general_information
+
 
 Indices and tables
 ==================

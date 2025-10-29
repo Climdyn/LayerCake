@@ -116,3 +116,14 @@ autosectionlabel_prefix_document = True
 # bibtex config
 
 # bibtex_bibfiles = ['files/model/ref.bib']
+
+# -- Global links definition -----------------
+
+rst_epilog = """
+.. role:: raw-html(raw)
+   :format: html
+
+.. |Sympy| replace:: :raw-html:`<a href="https://www.sympy.org/">Sympy</a>`
+.. |Matplotlib| replace:: :raw-html:`<a href="https://matplotlib.org/">Matplotlib</a>`
+
+"""
