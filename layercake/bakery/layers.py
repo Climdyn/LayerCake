@@ -1,4 +1,18 @@
 
+"""
+
+    Layer definition module
+    =======================
+
+    This module defines the layer object, i.e. the collection of partial differential equations
+    (represented by :class:`~equation.Equation` objects) which governs the time evolution of
+    a given fluid/media layer of the system at hand.
+    It also computes and includes the ordinary differential equations representation of the
+    partial differential equations, when projected on a given basis (Galerkin procedure).
+
+"""
+
+
 import numpy as np
 from numpy.linalg import LinAlgError
 import sparse as sp
@@ -12,6 +26,17 @@ from layercake.utils.symbolic_tensor import symbolic_tensordot
 
 
 class Layer(object):
+    """Class to gather partial differential equations modelling
+    a given fluid/media layer of the system at hand.
+
+    Attributes
+    ----------
+    equations: list(~equation.Equation)
+        A list of the equation objects included in the layer.
+    tensor: sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
+        The tensor representing the ordinary differential equations tendencies.
+        Can be either a numerical or a symbolic representation, depending on the user's choice.
+    """
 
     def __init__(self):
 
@@ -35,12 +60,21 @@ class Layer(object):
             return None
 
     def add_equation(self, equation):
+        """Add an equation object to the layer.
+
+        Parameters
+        ----------
+        equation: ~equation.Equation
+            Equation object to add to the layer.
+        """
         self.equations.append(equation)
         equation._layer = self
         equation.field._layer = self
 
     @property
     def fields(self):
+        """list(~field.Field): Returns the list of dynamical fields of the layer, i.e. the fields whose time
+        evolution is provided by the partial differential equations of the layer."""
         fields_list = list()
         for eq in self.equations:
             fields_list.append(eq.field)
@@ -48,6 +82,8 @@ class Layer(object):
 
     @property
     def parameters(self):
+        """list(~parameter.Parameter): Returns the list of parameters of the layer, i.e. the explicit parameters
+        appearing in the partial differential equations of the layer."""
         parameters_list = list()
         for eq in self.equations:
             for param in eq.parameters:
@@ -66,6 +102,8 @@ class Layer(object):
 
     @property
     def parameters_symbols(self):
+        """list(~sympy.core.symbol.Symbol): List of parameter's symbols present in the layer
+        partial differential equations."""
         return [p.symbol for p in self.parameters]
 
     @property
@@ -80,6 +118,8 @@ class Layer(object):
 
     @property
     def ndim(self):
+        """int: Dimension of the full ordinary differential equations system of the layer, resulting from
+        the Galerkin expansion."""
         dim = 0
         for field in self.fields:
             dim += field.state.__len__()
@@ -87,26 +127,76 @@ class Layer(object):
 
     @property
     def number_of_equations(self):
+        """int: Number of partial differential equations in the layer."""
         return self.equations.__len__()
 
     @property
     def maximum_rank(self):
+        """int: Maximum over the ranks of the equations in the layer."""
         max_rank = 0
         for eq in self.equations:
             max_rank = max(max_rank, eq.maximum_rank)
         return max_rank
 
-    def compute_inner_products(self, numerical=True):
-        for field, eq in zip(self.fields, self.equations):
-            eq.lhs_term.compute_inner_products(field.basis, numerical=numerical)
-            for term in eq.terms:
-                term.compute_inner_products(field.basis, numerical=numerical)
+    def compute_inner_products(self, numerical=True, timeout=None, num_threads=None):
+        """Compute the inner products tensors, either symbolic or numerical ones, of all the terms
+        of the layer equations, including the left-hand side term.
+        Computations are parallelized on multiple CPUs.
 
-    def compute_tensor(self, numerical=True, compute_inner_products=False,
+        Parameters
+        ----------
+        numerical: bool, optional
+            Whether to compute numerical or symbolic inner products.
+            Default to `True` (numerical inner products as output).
+        timeout: int or bool or None, optional
+            TODO
+        num_threads: None or int, optional
+            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
+            Default to `None`.
+        """
+        for field, eq in zip(self.fields, self.equations):
+            eq.lhs_term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
+            for term in eq.terms:
+                term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
+
+    def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,
                        substitutions=None, basis_subs=False, parameters_subs=None):
+        """Compute the tensor of the symbolic or numerical representation of the ordinary differential
+        equations tendencies of the layer.
+        Results are stored in the :attr:`~Layer.tensor` attribute.
+
+
+        Parameters
+        ----------
+        numerical: bool, optional
+            Whether to compute the numerical or the symbolic tensor.
+            Default to `True` (numerical tensor as output).
+        compute_inner_products: bool, optional
+            Whether the inner products tensors of the layer equations' terms must be compute first.
+            Default to `False`. Please note that if the inner products are not computed firsthand, the tensor computation
+            will fail.
+        compute_inner_products_kwargs: dict, optional
+            Arguments to pass to the computation of the inner products.
+        substitutions: list(tuple), optional
+            List of 2-tuples containing extra symbolic substitutions to be made at the end of the tensor computation.
+            Only applies for the symbolic tendencies.
+            The 2-tuples contain first a `Sympy`_  expression and then the value to substitute.
+        basis_subs: bool, optional
+            Whether to substitute the parameters appearing in the definition of the basis of functions by
+            their numerical value.
+            Only applies for the symbolic tendencies.
+            Default to `False`.
+        parameters_subs: list(~parameter.Parameter), optional
+            List of model's parameters to substitute in the symbolic tendencies' tensor.
+            Only applies for the symbolic tendencies.
+
+        """
+
+        if compute_inner_products_kwargs is None:
+            compute_inner_products_kwargs = dict()
 
         if compute_inner_products:
-            self.compute_inner_products(numerical=numerical)
+            self.compute_inner_products(numerical=numerical, **compute_inner_products_kwargs)
 
         if self._cake is not None:
             shape = tuple([self.ndim + 1] + [self._cake.ndim + 1] * (self.maximum_rank - 1))
@@ -171,6 +261,7 @@ class Layer(object):
                 substitutions = list()
             if parameters_subs is not None:
                 p_subs = [(param.symbol, float(param)) for param in parameters_subs]
+                # TODO: Seems to not allow ParameterField to be substituted. To check.
             else:
                 p_subs = list()
             self.tensor = MutableSparseNDimArray(iterable={}, shape=shape)
