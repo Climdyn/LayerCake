@@ -24,7 +24,7 @@ from layercake.variables.systems import CoordinateSystem
 
 class D(Expr):
     """Symbolic differential operator acting on `Sympy`_ expression.
-    Inspired by `this post <https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy>`.
+    Inspired by `this post <https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy>`_.
 
     .. _Sympy: https://www.sympy.org/
 
