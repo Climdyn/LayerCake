@@ -94,6 +94,7 @@ class Cake(object):
                 res = True
                 break
         return res
+
     @property
     def parameters_symbols(self):
         """list(~sympy.core.symbol.Symbol): List of parameter's symbols present in all the layers'
@@ -306,7 +307,7 @@ class Cake(object):
         .. math:: \\dot{\\boldsymbol{x}} = \\boldsymbol{f}(\\boldsymbol{x})
 
         It returns also the linearized tendencies
-        :math:`\\boldsymbol{\\mathrm{J}} \\equiv \\boldsymbol{\mathrm{D}f} = \\frac{\partial \\boldsymbol{f}}{\partial \\boldsymbol{x}}`
+        :math:`\\boldsymbol{\\mathrm{J}} \\equiv \\boldsymbol{\\mathrm{D}f} = \\frac{\\partial \\boldsymbol{f}}{\\partial \\boldsymbol{x}}`
         (Jacobian matrix).
 
         Depending on whether the tendencies tensor is symbolic or numerical, it will return either
@@ -437,6 +438,9 @@ class Cake(object):
         ----------
         tensor_name: str, optional
             Specify the name to print beside the values of the tensor. Default to `Tensor`.
+        to_numerics: bool
+            Try to output a numerical value for the tensor entries, even if the tensor is a
+            symbolic one.
         """
         if not tensor_name:
             tensor_name = 'Tensor'
@@ -464,6 +468,9 @@ class Cake(object):
             The filename where to print the tensor.
         tensor_name: str, optional
             Specify the name to print beside the values of the tensor. Default to `Tensor`.
+        to_numerics: bool
+            Try to output a numerical value for the tensor entries, even if the tensor is a
+            symbolic one.
         """
         with open(filename, 'w') as f:
             with redirect_stdout(f):
@@ -476,6 +483,9 @@ class Cake(object):
         ----------
         tensor_name: str, optional
             Specify the name to print beside the values of the tensor. Default to `TensorJacobian`.
+        to_numerics: bool
+            Try to output a numerical value for the tensor entries, even if the tensor is a
+            symbolic one.
         """
         if not tensor_name:
             tensor_name = 'TensorJacobian'
@@ -503,6 +513,9 @@ class Cake(object):
             The filename where to print the tensor.
         tensor_name: str, optional
             Specify the name to print beside the values of the tensor. Default to `TensorJacobian`.
+        to_numerics: bool
+            Try to output a numerical value for the tensor entries, even if the tensor is a
+            symbolic one.
         """
         with open(filename, 'w') as f:
             with redirect_stdout(f):
