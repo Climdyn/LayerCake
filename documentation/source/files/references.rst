@@ -12,3 +12,4 @@ Documentation of the classes and functions of the models.
    technical/inner_products
    technical/formatters
    technical/basis
+   technical/bakery

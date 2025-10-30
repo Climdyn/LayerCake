@@ -33,7 +33,7 @@ class Layer(object):
     ----------
     equations: list(~equation.Equation)
         A list of the equation objects included in the layer.
-    tensor: sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
+    tensor: sparse.COO or ~sympy.tensor.array.ImmutableSparseNDimArray
         The tensor representing the ordinary differential equations tendencies.
         Can be either a numerical or a symbolic representation, depending on the user's choice.
     """

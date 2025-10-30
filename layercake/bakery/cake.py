@@ -5,7 +5,7 @@
     ======================
 
     This module defines the cake object, i.e. the collection of stacked layers
-    (represented by :class:`~layers.Layer` objects) of a given fluid/media of the system at hand.
+    (represented by :class:`~layercake.bakery.layers.Layer` objects) of a given fluid/media of the system at hand.
     A cake is thus a representation of a layered system defined by the user.
     It also computes and includes the ordinary differential equations representation of the
     partial differential equations contained in the layers, when projected on a given basis (Galerkin procedure).
@@ -281,12 +281,12 @@ class Cake(object):
 
         Parameters
         ----------
-        tensor: ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
+        tensor: ~sympy.tensor.array.ImmutableSparseNDimArray
             The system tensor.
 
         Returns
         -------
-        ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
+        ~sympy.tensor.array.ImmutableSparseNDimArray
             The Jacobian tensor.
         """
 
@@ -325,11 +325,11 @@ class Cake(object):
 
         Returns
         -------
-        f: callable or tuple(list(str), list(~sympy.core.symbol.Symbol))
+        f: callable or list(str), list(Symbol)
             If the tendencies tensor is numerical, the numba-jitted tendencies function.
             If the tendencies tensor is symbolic, the list of tendencies string in the selected target language,
             along with the list of parameters appearing in them.
-        Df: callable or tuple(list(str), list(~sympy.core.symbol.Symbol))
+        Df: callable or list(str), list(Symbol)
             If the tendencies tensor is numerical, the numba-jitted linearized tendencies function.
             If the tendencies tensor is symbolic, the list of linearized tendencies string in the selected target language,
             along with the list of parameters appearing in them.
