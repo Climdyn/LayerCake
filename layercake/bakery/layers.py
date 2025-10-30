@@ -5,7 +5,7 @@
     =======================
 
     This module defines the layer object, i.e. the collection of partial differential equations
-    (represented by :class:`~equation.Equation` objects) which governs the time evolution of
+    (represented by :class:`~layercake.arithmetic.equation.Equation` objects) which governs the time evolution of
     a given fluid/media layer of the system at hand.
     It also computes and includes the ordinary differential equations representation of the
     partial differential equations, when projected on a given basis (Galerkin procedure).

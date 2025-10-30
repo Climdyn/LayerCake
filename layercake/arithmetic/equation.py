@@ -1,9 +1,10 @@
 
 """
 
-    Main class to define partial differential equation in LayerCake
-    ===============================================================
+    Equation definition module
+    ==========================
 
+    Main class to define partial differential equation.
     This class is the workhorse of LayerCake to define and specify
     partial differential equation.
 

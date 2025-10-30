@@ -13,3 +13,4 @@ Documentation of the classes and functions of the models.
    technical/formatters
    technical/basis
    technical/bakery
+   technical/arithmetic
