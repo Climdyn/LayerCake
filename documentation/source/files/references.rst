@@ -10,3 +10,4 @@ Documentation of the classes and functions of the models.
    technical/variables
    technical/utils
    technical/inner_products
+   technical/formatters
