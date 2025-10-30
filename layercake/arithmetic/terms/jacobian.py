@@ -32,7 +32,7 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
         First field on which the Jacobian act (corresponds to the field :math:`\\psi` in the formula above).
     field2: ~field.Field or ~field.ParameterField
         Second field on which the Jacobian act (corresponds to the field :math:`\\phi` in the formula above).
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the model is defined.
     sign: int, optional
         Sign in front of the Jacobian term. Either +1 or -1.
@@ -78,7 +78,7 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
         First field, advected by the vorticity.
     field2: ~field.Field or ~field.ParameterField
         Second field with which the vorticity :math:`\\nabla^2` is computed.
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the model is defined.
     sign: int, optional
         Sign in front of the vorticity advection term. Either +1 or -1.

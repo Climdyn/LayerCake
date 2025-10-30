@@ -274,7 +274,7 @@ def fourier_functions(wave_number, n, coordinate_system):
         The wavenumber and type information of the mode to be returned.
     n: ~sympy.core.symbol.Symbol
         The aspect ratio symbol.
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
 
     Returns
@@ -303,7 +303,7 @@ class WaveNumber(object):
     * `'K'` for a function of the form :math:`F^K_{M,P} (x, y) =  2\\cos(M nx)\\, \\sin(P y) = 2\\cos(n_x\\,  n\\, x)\\, \\sin(n_y\\, y)`
     * `'L'` for a function of the form :math:`F^L_{H,P} (x, y) = 2\\sin(H nx)\\, \\sin(P y) = 2\\sin(n_x\\, n \\,x)\\, \\sin(n_y\\, y)`
 
-    where :math:`x` and :math:`y` are the nondimensional model's domain coordinates (see :ref:`files/model/oro_model:Projecting the equations on a set of basis functions`).
+    where :math:`x` and :math:`y` are the nondimensional model's domain coordinates.
 
     Parameters
     ----------

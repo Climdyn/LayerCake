@@ -199,7 +199,7 @@ def Nabla(coordinate_system):
 
     Parameters
     ----------
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system for which the :math:`\\nabla` operator must be returned.
 
     Returns
@@ -231,7 +231,7 @@ def Divergence(coordinate_system):
 
     Parameters
     ----------
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system for which the divergence operator must be returned.
 
     Returns
@@ -282,7 +282,7 @@ def Laplacian(coordinate_system):
 
     Parameters
     ----------
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system for which the Laplacian operator must be returned.
 
     Returns

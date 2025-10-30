@@ -10,13 +10,6 @@
     * :class:`Basis`: General base class.
     * :class:`SymbolicBasis`: Base class for symbolic functions basis.
 
-    Warnings
-    --------
-
-    These are `abstract base class`_, they must be subclassed to create new basis!
-
-    .. _abstract base class: https://docs.python.org/3/glossary.html#term-abstract-base-class
-
 """
 
 import sys
@@ -30,14 +23,14 @@ class Basis(ABC):
 
     Parameters
     ----------
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
 
     Attributes
     ----------
     functions: list
         List of functions of the basis.
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
     """
 
@@ -67,7 +60,7 @@ class SymbolicBasis(Basis):
 
     Parameters
     ----------
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
     parameters: dict(~parameter.Parameter)
         Dictionary holding the parameters appearing in the equations defining the basis.
@@ -77,7 +70,7 @@ class SymbolicBasis(Basis):
     substitutions: list(tuple)
         List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
         a |Sympy|  expression and then the value to substitute.
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
     parameters: list(~parameter.Parameter)
         Dictionary holding the parameters appearing in the equations defining the basis.

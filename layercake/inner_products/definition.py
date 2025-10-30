@@ -47,7 +47,7 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     Parameters
     ----------
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
     optimizer: None or callable, optional
         A function to optimize the computation of the integrals or the integrand.
@@ -55,7 +55,7 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     Attributes
     ----------
-    coordinate_system: ~coordinates.CoordinateSystem
+    coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
     optimizer: None or callable
         A function to optimize the computation of the integrals or the integrand.
