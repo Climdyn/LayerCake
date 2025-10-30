@@ -15,11 +15,11 @@ from sympy import tensorproduct, tensorcontraction
 def symbolic_tensordot(a, b, axes=2):
     """Compute tensor dot product along specified axes of two sympy symbolic arrays
 
-    This is based on |Numpy| :meth:`~numpy.tensordot` .
+    This is based on |Numpy| :func:`~numpy.tensordot` .
 
     Parameters
     ----------
-    a, b: ~sympy.tensor.array.DenseNDimArray or ~sympy.tensor.array.SparseNDimArray
+    a, b: ~sympy.tensor.array.ImmutableDenseNDimArray or ~sympy.tensor.array.MutableDenseNDimArray or ~sympy.tensor.array.ImmutableSparseNDimArray or ~sympy.tensor.array.MutableSparseNDimArray
         Arrays to take the dot product of.
 
     axes: int or 2-tuple
@@ -30,7 +30,7 @@ def symbolic_tensordot(a, b, axes=2):
 
     Returns
     -------
-    ~sympy.tensor.array.DenseNDimArray or ~sympy.tensor.array.SparseNDimArray
+    ~sympy.tensor.array.ImmutableDenseNDimArray or ~sympy.tensor.array.MutableDenseNDimArray or ~sympy.tensor.array.ImmutableSparseNDimArray or ~sympy.tensor.array.MutableSparseNDimArray
         The tensor dot product of the input.
 
     """
@@ -110,7 +110,7 @@ def get_coords_and_values_from_tensor(tensor, output='tuple'):
 
     Parameters
     ----------
-    tensor: ~sympy.tensor.array.SparseNDimArray
+    tensor: ~sympy.tensor.array.ImmutableSparseNDimArray or ~sympy.tensor.array.MutableSparseNDimArray
         The tensor from which to return the coordinates and values list.
     output: str
         The kind of output. Can be:

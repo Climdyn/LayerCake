@@ -1,8 +1,8 @@
 
-Utility module
-==============
+General utility module
+======================
 
-Module with various submodules with useful functions.
+Module with various submodules with useful functions used throughout the code.
 
 
 .. automodule:: layercake.utils.tensor
