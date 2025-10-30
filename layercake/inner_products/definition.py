@@ -6,7 +6,10 @@
     Module containing classes to define the `inner products`_ used by the model.
 
     .. _inner products: https://en.wikipedia.org/wiki/Inner_product_space
-    
+
+    Main classes
+    ------------
+
 """
 
 from abc import ABC, abstractmethod
@@ -96,8 +99,8 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         return TR10(TR8(expr))
 
     def integrate_over_domain(self, expr, symbolic_expr=False):
-        """Definition of the normalized integrals over the spatial domain used by the inner products:
-        :math:`\\frac{n}{2\\pi^2}\\int_0^\\pi\\int_0^{2\\pi/n} \\, \\mathrm{expr}(x, y) \\, \\mathrm{d} x \\, \\mathrm{d} y`.
+        """Definition of the integrals over the spatial domain used by the inner products:
+        :math:`\\int_a^b\\int_c^d \\, \\mathrm{expr}(x, y) \\, \\mathrm{d} x \\, \\mathrm{d} y`.
 
         Parameters
         ----------
@@ -122,7 +125,8 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     def inner_product(self, S, G, symbolic_expr=False, integrand=False):
         """Function defining the inner product to be computed symbolically:
-        :math:`(S, G) = \\frac{n}{2\\pi^2}\\int_0^\\pi\\int_0^{2\\pi/n} S(x,y)\\, G(x,y)\\, \\mathrm{d} x \\, \\mathrm{d} y`.
+        :math:`(S, G) = \\left(1 / \\mathcal{N}\\right) \\int_a^b\\int_c^d S(x,y)\\, G(x,y)\\, \\mathrm{d} x \\, \\mathrm{d} y` where
+        :math:`\\mathcal{N} = (b-a) \\, (d-c)` is the norm of the integrals.
 
         Parameters
         ----------
