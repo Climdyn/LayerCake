@@ -6,10 +6,7 @@
     Module containing classes to define the `inner products`_ used by the model.
 
     .. _inner products: https://en.wikipedia.org/wiki/Inner_product_space
-
-    Main classes
-    ------------
-
+    
 """
 
 from abc import ABC, abstractmethod
@@ -18,7 +15,8 @@ from sympy import integrate, Integral
 
 
 class InnerProductDefinition(ABC):
-    """Base class to define the model's basis inner products."""
+    """Base class to define the model's basis inner products.
+    """
 
     def __init__(self):
         pass
@@ -43,11 +41,11 @@ class InnerProductDefinition(ABC):
 
 
 class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
-    """Standard class to define symbolic inner products using |Sympy|.
+    """Standard class to define symbolic inner products using `Sympy`_.
 
     Parameters
     ----------
-    coordinate_system: ~systems.CoordinateSystem
+    coordinate_system: ~coordinates.CoordinateSystem
         Coordinate system on which the basis is defined.
     optimizer: None or callable, optional
         A function to optimize the computation of the integrals or the integrand.
@@ -55,11 +53,13 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     Attributes
     ----------
-    coordinate_system: ~systems.CoordinateSystem
+    coordinate_system: ~coordinates.CoordinateSystem
         Coordinate system on which the basis is defined.
     optimizer: None or callable
         A function to optimize the computation of the integrals or the integrand.
         If `None`, does not optimize the computation.
+
+    .. _Sympy: https://www.sympy.org/
 
     """
 
@@ -99,19 +99,19 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         return TR10(TR8(expr))
 
     def integrate_over_domain(self, expr, symbolic_expr=False):
-        """Definition of the integrals over the spatial domain used by the inner products:
-        :math:`\\int_a^b\\int_c^d \\, \\mathrm{expr}(x, y) \\, \\mathrm{d} x \\, \\mathrm{d} y`.
+        """Definition of the normalized integrals over the spatial domain used by the inner products:
+        :math:`\\frac{n}{2\\pi^2}\\int_0^\\pi\\int_0^{2\\pi/n} \\, \\mathrm{expr}(x, y) \\, \\mathrm{d} x \\, \\mathrm{d} y`.
 
         Parameters
         ----------
-        expr: ~sympy.core.expr.Expr
+        expr: Sympy expression
             The expression to integrate.
         symbolic_expr: bool, optional
             If `True`, return the integral as a symbolic expression object. Else, return the integral performed symbolically.
 
         Returns
         -------
-        ~sympy.core.expr.Expr
+        Sympy expression
             The result of the symbolic integration.
         """
         _x = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
@@ -125,14 +125,13 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     def inner_product(self, S, G, symbolic_expr=False, integrand=False):
         """Function defining the inner product to be computed symbolically:
-        :math:`(S, G) = \\left(1 / \\mathcal{N}\\right) \\int_a^b\\int_c^d S(x,y)\\, G(x,y)\\, \\mathrm{d} x \\, \\mathrm{d} y` where
-        :math:`\\mathcal{N} = (b-a) \\, (d-c)` is the norm of the integrals.
+        :math:`(S, G) = \\frac{n}{2\\pi^2}\\int_0^\\pi\\int_0^{2\\pi/n} S(x,y)\\, G(x,y)\\, \\mathrm{d} x \\, \\mathrm{d} y`.
 
         Parameters
         ----------
-        S: ~sympy.core.expr.Expr
+        S: Sympy expression
             Left-hand side function of the product.
-        G: ~sympy.core.expr.Expr
+        G: Sympy expression
             Right-hand side function of the product.
         symbolic_expr: bool, optional
             If `True`, return the integral as a symbolic expression object. Else, return the integral performed symbolically.
@@ -141,7 +140,7 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
         Returns
         -------
-        ~sympy.core.expr.Expr
+        Sympy expression
             The result of the symbolic integration
         """
         _x = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]

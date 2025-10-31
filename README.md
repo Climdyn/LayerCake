@@ -9,10 +9,8 @@
 LayerCake is framework to design models based on systems of partial differential equations (PDEs), 
 and convert them to ordinary differential equations (ODEs) via Galerkin-type expansions.
 
-LayerCake allows you to construct systems of PDEs, and to specify coordinate systems and basis functions to build
-the corresponding ODE systems.
-To build these systems, LayerCake relies heavily on [Sympy](https://www.sympy.org/) symbolic computation framework.
-The output of this procedure is either a [Numbaified](https://numba.pydata.org/) Python callable, 
+LayerCake allows you to construct systems of PDEs, and to specify coordinate systems and basis functions to compute
+the ODE systems. The output of this procedure is either a [Numbaified](https://numba.pydata.org/) Python callable, 
 or a list of symbolic ODE tendencies that can be integrated in any of the supported languages 
 (Fortran, Julia and Python for the moment). These two kind of output allow for the study of the computed models with 
 the modern tools available in all these languages.
@@ -29,7 +27,7 @@ See [LICENSE.txt](./LICENSE.txt) for license information.
 
 ### With pip
 
-Not yet available.
+Not yet avalialble.
 
 ### With Anaconda
 
@@ -50,17 +48,6 @@ You can then perform a test by running the script
     python examples/atmospheric/barotropic_one_layer.py
     
 to see if everything runs smoothly (this should take less than 5 minutes to run).
-
-## Documentation
-
-To build the documentation, please run (with the conda environment activated): ::
-
-    cd documentation
-    make html
-
-
-You may need to install [make](https://www.gnu.org/software/make/) if it is not already present on your system.
-Once built, the documentation is available [here](./documentation/build/html/index.html).
 
 ## Examples
 

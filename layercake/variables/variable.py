@@ -1,56 +1,10 @@
 
-"""
-
-    Variable definition module
-    ==========================
-
-    Variables are objects with a name, a symbol and units. They represent any formal quantity in the models.
-    
-    Description of the classes
-    --------------------------
-
-    * :class:`Variable`: Abstract base class to define variables in the models.
-    * :class:`VariablesArray`: Base class to define array of variables in the models.
-
-"""
-
 from abc import ABC
 from sympy import Symbol
 import numpy as np
 
 
 class Variable(ABC):
-    """Abstract base class to define variable object in the models.
-
-    Parameters
-    ----------
-    name: str
-        Name of the variable.
-    symbol: ~sympy.core.symbol.Symbol
-        A |Sympy| symbol to represent the variable in symbolic expressions.
-    units: str, optional
-        The units of the variable.
-        Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
-        Empty by default.
-    latex: str, optional
-        Latex string representing the variable.
-        Empty by default.
-    dynamical: bool, optional
-        Whether the variable can vary over time.
-        Default to `False`.
-
-    Attributes
-    ----------
-    name: str
-        Name of the variable.
-    symbol: ~sympy.core.symbol.Symbol
-        Symbol of the variable.
-    units: str
-        The units of the variable specified as atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
-    latex: str
-        Latex string representing the variable.
-
-    """
 
     def __init__(self, name, symbol, units=None, latex=None, dynamical=False):
 
@@ -79,7 +33,6 @@ class Variable(ABC):
 
     @property
     def dynamical(self):
-        """bool: Whether the variable can vary over time."""
         return self._dynamical
 
 
@@ -93,7 +46,7 @@ class VariablesArray(np.ndarray):
     name: str
         General name of the variables.
     symbol: str or ~sympy.core.symbol.Symbol
-        A |Sympy| symbol to represent the variables in symbolic expressions.
+        A `Sympy`_ symbol to represent the variables in symbolic expressions.
     units: str, optional
         The units of the provided value. Used to compute the conversion between dimensional and nondimensional
         value. Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
@@ -101,12 +54,25 @@ class VariablesArray(np.ndarray):
     latex: str, optional
         A latex string representing the variables. Used in plots.
         Empty by default.
+    scale_object: ScaleParams, optional
+        A scale parameters object to compute the conversion between dimensional and nondimensional value.
+        `None` by default. If `None`, cannot transform between dimensional and nondimentional value.
+    input_dimensional: bool, optional
+        Specify whether the value provided is dimensional or not. Default to `True`.
+    return_dimensional: bool, optional
+        Defined if the value returned by the variables is dimensional or not. Default to `False`.
     dynamical: bool, optional
         Whether the variables are varying over time. Default to `False`.
 
+    Warnings
+    --------
+    If no scale_object argument is provided, cannot transform between the dimensional and nondimensional value !
+
+    .. _Sympy: https://www.sympy.org/
     """
 
-    def __new__(cls, values, name, symbol, units="", latex=None, dynamical=False):
+    def __new__(cls, values, name, symbol, units="", latex=None, scale_object=None,
+                input_dimensional=False, return_dimensional=False, dynamical=False):
 
         if not isinstance(symbol, str):
             symbol = symbol.name
@@ -128,7 +94,10 @@ class VariablesArray(np.ndarray):
         arr._symbol = Symbol(symbol)
         arr._latex = latex
         arr._latexes = latexes
+        arr._input_dimensional = input_dimensional
+        arr._return_dimensional = return_dimensional
         arr._units = units
+        arr._scale_object = scale_object
         arr._dynamical = dynamical
 
         return arr
@@ -144,8 +113,27 @@ class VariablesArray(np.ndarray):
         self._symbol = getattr(arr, '_symbol', None)
         self._latex = getattr(arr, '_latex', None)
         self._latexes = getattr(arr, '_latexes', None)
+        self._input_dimensional = getattr(arr, '_input_dimensional', True)
         self._units = getattr(arr, '_units', "")
+        self._return_dimensional = getattr(arr, '_return_dimensional', False)
+        self._scale_object = getattr(arr, '_scale_object', None)
         self._dynamical = getattr(arr, '_dynamical', False)
+
+    @property
+    def dimensional_values(self):
+        """float: Returns the dimensional value."""
+        if self._return_dimensional:
+            return self
+        else:
+            return self / self._nondimensionalization
+
+    @property
+    def nondimensional_values(self):
+        """float: Returns the nondimensional value."""
+        if self._return_dimensional:
+            return self * self._nondimensionalization
+        else:
+            return self
 
     @property
     def symbol(self):
@@ -178,14 +166,52 @@ class VariablesArray(np.ndarray):
         return self._names
 
     @property
+    def input_dimensional(self):
+        """bool: Indicate if the provided value is dimensional or not."""
+        return self._input_dimensional
+
+    @property
+    def return_dimensional(self):
+        """bool: Indicate if the returned value is dimensional or not."""
+        return self._return_dimensional
+
+    @classmethod
+    def _conversion_factor(cls, units, scale_object):
+        factor = 1.
+
+        ul = units.split('][')
+        ul[0] = ul[0][1:]
+        ul[-1] = ul[-1][:-1]
+
+        for us in ul:
+            up = us.split('^')
+            if len(up) == 1:
+                up.append("1")
+
+            if up[0] == 'm':
+                factor *= scale_object.L ** (-int(up[1]))
+            elif up[0] == 's':
+                factor *= scale_object.f0 ** (int(up[1]))
+            elif up[0] == 'Pa':
+                factor *= scale_object.deltap ** (-int(up[1]))
+
+        return factor
+
+    @property
     def units(self):
         """str: The units of the dimensional values."""
         return self._units
 
     @property
     def dynamical(self):
-        """bool: Whether the variables can vary over time."""
         return self._dynamical
+
+    @property
+    def _nondimensionalization(self):
+        if self._scale_object is None:
+            return 1.
+        else:
+            return self._conversion_factor(self._units, self._scale_object)
 
     #   Not sure these operations will be needed.
     #

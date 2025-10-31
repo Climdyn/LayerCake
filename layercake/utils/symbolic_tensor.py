@@ -1,13 +1,3 @@
-
-"""
-
-    Symbolic tensor utility module
-    ==============================
-
-    Defines useful functions to deal with |Sympy| symbolic tensors.
-
-"""
-
 import numpy as np
 from sympy import tensorproduct, tensorcontraction
 
@@ -15,11 +5,13 @@ from sympy import tensorproduct, tensorcontraction
 def symbolic_tensordot(a, b, axes=2):
     """Compute tensor dot product along specified axes of two sympy symbolic arrays
 
-    This is based on |Numpy| :func:`~numpy.tensordot` .
+    This is based on `Numpy`_ :meth:`~numpy.tensordot` .
+
+    .. _Numpy: https://numpy.org/
 
     Parameters
     ----------
-    a, b: ~sympy.tensor.array.ImmutableDenseNDimArray or ~sympy.tensor.array.MutableDenseNDimArray or ~sympy.tensor.array.ImmutableSparseNDimArray or ~sympy.tensor.array.MutableSparseNDimArray
+    a, b: ~sympy.tensor.array.DenseNDimArray or ~sympy.tensor.array.SparseNDimArray
         Arrays to take the dot product of.
 
     axes: int or 2-tuple
@@ -30,7 +22,7 @@ def symbolic_tensordot(a, b, axes=2):
 
     Returns
     -------
-    ~sympy.tensor.array.ImmutableDenseNDimArray or ~sympy.tensor.array.MutableDenseNDimArray or ~sympy.tensor.array.ImmutableSparseNDimArray or ~sympy.tensor.array.MutableSparseNDimArray
+    output: Sympy tensor
         The tensor dot product of the input.
 
     """
@@ -54,11 +46,11 @@ def remove_dic_zeros(dic):
     Parameters
     ----------
     dic: dict
-        Dictionary which could include zeroes in values to remove.
+        dictionary which could include 0 in values
     Returns
     -------
     dict
-        Dictionary with same keys and values as input, but keys with zero value are removed.
+        dictionary with same keys and values as input, but keys with value of 0 are removed
     """
 
     non_zero_dic = dict()
@@ -70,26 +62,6 @@ def remove_dic_zeros(dic):
 
 
 def get_coords_from_index(dic_index, ndim, shape_len):
-    """Get the coordinates of a |Sympy| sparse tensor entry along each axis, given its private dictionary index.
-
-    Notes
-    -----
-    Assumes that every axis has the same length `ndim`.
-
-    Warnings
-    --------
-    Assumes that the private dictionary has a certain indexing rationale, which may change over time in |Sympy|
-
-    Parameters
-    ----------
-    dic_index: int
-        Index of the sought entry in the sparse tensor private dictionary.
-    ndim: int
-        The length of the axes.
-    shape_len: int
-        Rank of the tensor.
-
-    """
     idx = list()
     svv = dic_index * ndim
     for _ in range(shape_len - 1):
@@ -101,31 +73,6 @@ def get_coords_from_index(dic_index, ndim, shape_len):
 
 
 def get_coords_and_values_from_tensor(tensor, output='tuple'):
-    """Get the coordinates and values of a |Sympy| sparse tensor, as a coordinates-values list.
-
-    Warnings
-    --------
-    This a function implemented to compensate for the lack of such feature in |Sympy|, and which might need to be
-    reimplemented or replaced in the future.
-
-    Parameters
-    ----------
-    tensor: ~sympy.tensor.array.ImmutableSparseNDimArray or ~sympy.tensor.array.MutableSparseNDimArray
-        The tensor from which to return the coordinates and values list.
-    output: str
-        The kind of output. Can be:
-
-        * `numpy`: return the list as a |Numpy| array.
-        * `list`: return the list as nested Python lists.
-        * `tuple`: return the list as a list of tuples.
-
-        Default to `tuple`.
-    Returns
-    -------
-    list(list) or list(tuple) or ~numpy.ndarray
-        The coordinates-values list.
-
-    """
     ndim = tensor.shape[0]
     shape_len = len(tensor.shape)
     if output == 'numpy':
@@ -148,18 +95,6 @@ def get_coords_and_values_from_tensor(tensor, output='tuple'):
 
 
 def compute_jacobian_permutations(shape):
-    """Return the axes permutations needed to compute the Jacobian tensor associated to the symbolic models tendencies' tensor.
-
-    Parameters
-    ----------
-    shape: tuple
-        The shape of the tendencies' tensor.
-
-    Returns
-    -------
-    list(list(int))
-        The list of permutations of the axes needed to compute the models Jacobian matrix.
-    """
     n_perm = len(shape) - 2
     permutations = list()
     for i in range(1, n_perm+1):

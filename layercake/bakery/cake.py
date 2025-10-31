@@ -1,18 +1,4 @@
 
-"""
-
-    Cake definition module
-    ======================
-
-    This module defines the cake object, i.e. the collection of stacked layers
-    (represented by :class:`~layercake.bakery.layers.Layer` objects) of a given fluid/media of the system at hand.
-    A cake is thus a representation of a layered system defined by the user.
-    It also computes and includes the ordinary differential equations representation of the
-    partial differential equations contained in the layers, when projected on a given basis (Galerkin procedure).
-
-"""
-
-
 from contextlib import redirect_stdout
 import numpy as np
 import sparse as sp
@@ -29,27 +15,12 @@ real_eps = np.finfo(np.float64).eps
 
 
 class Cake(object):
-    """Class to gather layers of a given fluid/media of the system at hand.
-
-    Attributes
-    ----------
-    layers: list(~layers.Layer)
-        A list of the layer objects included in the cake.
-
-    """
 
     def __init__(self):
 
         self.layers = list()
 
     def add_layer(self, layer):
-        """Add a layer object to the cake.
-
-        Parameters
-        ----------
-        layer: ~layers.Layer
-            Layer object to add to the cake.
-        """
         layer._cake_order = len(self.layers)
         self.layers.append(layer)
         layer._cake = self
@@ -59,8 +30,6 @@ class Cake(object):
 
     @property
     def ndim(self):
-        """int: Dimension of the full ordinary differential equations system of the cake, resulting from
-        the Galerkin expansions of the layers."""
         dim = 0
         for layer in self.layers:
             dim += layer.ndim
@@ -68,8 +37,6 @@ class Cake(object):
 
     @property
     def fields(self):
-        """list(~field.Field): Returns the list of dynamical fields of the cake, i.e. the fields whose time
-        evolution is provided by the partial differential equations of all the layers."""
         fields_list = list()
         for layer in self.layers:
             fields_list += layer.fields
@@ -77,8 +44,6 @@ class Cake(object):
 
     @property
     def parameters(self):
-        """list(~parameter.Parameter): Returns the list of parameters of the cake, i.e. the explicit parameters
-        appearing in the partial differential equations of all the layers."""
         parameters_list = list()
         for layer in self.layers:
             for param in layer.parameters:
@@ -94,17 +59,12 @@ class Cake(object):
                 res = True
                 break
         return res
-
     @property
     def parameters_symbols(self):
-        """list(~sympy.core.symbol.Symbol): List of parameter's symbols present in all the layers'
-        partial differential equations."""
         return [p.symbol for p in self.parameters]
 
     @property
     def fields_tensor_extent(self):
-        """dict(tuple(int)): A dictionary of 2-tuples giving for each dynamical field of the model its entries range in the
-        tensor of tendencies."""
         extent = dict()
         n = 1
         for layer in self.layers:
@@ -116,53 +76,17 @@ class Cake(object):
 
     @property
     def number_of_layers(self):
-        """int: Number of layers in the cake."""
         return self.layers.__len__()
 
-    def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,
+    def compute_tensor(self, numerical=True, compute_inner_products=False,
                        substitutions=None, basis_subs=False, parameters_subs=None):
-        """Compute the tensor of the symbolic or numerical representation of the ordinary differential
-        equations tendencies of all the layers.
-        Arguments are passed to the layer :meth:`~Layer.compute_tensor` method.
-
-        Parameters
-        ----------
-        numerical: bool, optional
-            Whether to compute the numerical or the symbolic tensor.
-            Default to `True` (numerical tensor as output).
-        compute_inner_products: bool, optional
-            Whether the inner products tensors of the layer equations' terms must be compute first.
-            Default to `False`. Please note that if the inner products are not computed firsthand, the tensor computation
-            will fail.
-        compute_inner_products_kwargs: dict, optional
-            Arguments to pass to the computation of the inner products.
-        substitutions: list(tuple), optional
-            List of 2-tuples containing extra symbolic substitutions to be made at the end of the tensor computation.
-            Only applies for the symbolic tendencies.
-            The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
-        basis_subs: bool, optional
-            Whether to substitute the parameters appearing in the definition of the basis of functions by
-            their numerical value.
-            Only applies for the symbolic tendencies.
-            Default to `False`.
-        parameters_subs: list(~parameter.Parameter), optional
-            List of model's parameters to substitute in the symbolic tendencies' tensor.
-            Only applies for the symbolic tendencies.
-
-        """
 
         for layer in self.layers:
-            layer.compute_tensor(numerical=numerical,
-                                 compute_inner_products=compute_inner_products,
-                                 compute_inner_products_kwargs=compute_inner_products_kwargs,
-                                 substitutions=substitutions,
-                                 basis_subs=basis_subs,
-                                 parameters_subs=parameters_subs
-                                 )
+            layer.compute_tensor(numerical, compute_inner_products,
+                                 substitutions, basis_subs, parameters_subs)
 
     @property
     def maximum_rank(self):
-        """int: Maximum over the ranks of the equations over all the layers."""
         max_rank = 0
         for layer in self.layers:
             max_rank = max(max_rank, layer.maximum_rank)
@@ -170,8 +94,6 @@ class Cake(object):
 
     @property
     def _layers_first_index(self):
-        """list(int): A list giving for each dynamical field of the model the first index of its entries range in the
-        tensor of tendencies."""
         idx = [1]
         for layer in self.layers[:-1]:
             idx.append(idx[-1] + layer.ndim)
@@ -179,8 +101,6 @@ class Cake(object):
 
     @property
     def _layers_last_index(self):
-        """list(int): A list giving for each dynamical field of the model the last index of its entries range in the
-        tensor of tendencies."""
         idx = list()
         for i, layer in enumerate(self.layers):
             if i == 0:
@@ -191,10 +111,6 @@ class Cake(object):
 
     @property
     def tensor(self):
-        """sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray: Return the tensor
-        representing the ordinary differential equations tendencies of the whole cake.
-        Can be either a numerical or a symbolic representation, depending on the user's choice for the inner products.
-        """
         shape = tuple([self.ndim + 1] * self.maximum_rank)
         if isinstance(self.layers[0].tensor, sp.COO):
             numerical = True
@@ -239,10 +155,6 @@ class Cake(object):
 
     @property
     def jacobian_tensor(self):
-        """sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray: Return the tensor
-        representing the Jacobian matrix of the ordinary differential equations tendencies of the whole cake.
-        Can be either a numerical or a symbolic representation, depending on the user's choice for the inner products.
-        """
         tensor = self.tensor
         if isinstance(tensor, sp.COO):
             return self._jacobian_from_numerical_tensor(tensor)
@@ -281,12 +193,12 @@ class Cake(object):
 
         Parameters
         ----------
-        tensor: ~sympy.tensor.array.ImmutableSparseNDimArray
+        tensor: ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
             The system tensor.
 
         Returns
         -------
-        ~sympy.tensor.array.ImmutableSparseNDimArray
+        ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
             The Jacobian tensor.
         """
 
@@ -300,40 +212,6 @@ class Cake(object):
         return jacobian_tensor
 
     def compute_tendencies(self, language='python', lang_translation=None):
-        """Function handling the tendencies tensor to create a tendencies function for the whole cake.
-        Returns the tendencies function :math:`\\boldsymbol{f}` determining the model's ordinary differential
-        equations:
-
-        .. math:: \\dot{\\boldsymbol{x}} = \\boldsymbol{f}(\\boldsymbol{x})
-
-        It returns also the linearized tendencies
-        :math:`\\boldsymbol{\\mathrm{J}} \\equiv \\boldsymbol{\\mathrm{D}f} = \\frac{\\partial \\boldsymbol{f}}{\\partial \\boldsymbol{x}}`
-        (Jacobian matrix).
-
-        Depending on whether the tendencies tensor is symbolic or numerical, it will return either
-        `Numbafied <https://numba.pydata.org/>`_ callable for the functions :math:`\\boldsymbol{f}` and :math:`J`,
-        or list of strings defining each tendency in a computing language selected by the user.
-
-        Parameters
-        ----------
-        language: str, optional
-            String defining in which computing language the tendencies lists must be returned.
-            Currently, it can be `'python'`, `'fortran'` or `'julia`'.
-        lang_translation: dict(str)
-            Additional language translation mapping provided by the user, mapping replacements for converting
-            Sympy symbolic output strings to the target language.
-
-        Returns
-        -------
-        f: callable or list(str), list(Symbol)
-            If the tendencies tensor is numerical, the numba-jitted tendencies function.
-            If the tendencies tensor is symbolic, the list of tendencies string in the selected target language,
-            along with the list of parameters appearing in them.
-        Df: callable or list(str), list(Symbol)
-            If the tendencies tensor is numerical, the numba-jitted linearized tendencies function.
-            If the tendencies tensor is symbolic, the list of linearized tendencies string in the selected target language,
-            along with the list of parameters appearing in them.
-        """
         if self.tensor is not None:
 
             if isinstance(self.tensor, sp.COO):
@@ -438,9 +316,6 @@ class Cake(object):
         ----------
         tensor_name: str, optional
             Specify the name to print beside the values of the tensor. Default to `Tensor`.
-        to_numerics: bool
-            Try to output a numerical value for the tensor entries, even if the tensor is a
-            symbolic one.
         """
         if not tensor_name:
             tensor_name = 'Tensor'
@@ -468,9 +343,6 @@ class Cake(object):
             The filename where to print the tensor.
         tensor_name: str, optional
             Specify the name to print beside the values of the tensor. Default to `Tensor`.
-        to_numerics: bool
-            Try to output a numerical value for the tensor entries, even if the tensor is a
-            symbolic one.
         """
         with open(filename, 'w') as f:
             with redirect_stdout(f):
@@ -483,9 +355,6 @@ class Cake(object):
         ----------
         tensor_name: str, optional
             Specify the name to print beside the values of the tensor. Default to `TensorJacobian`.
-        to_numerics: bool
-            Try to output a numerical value for the tensor entries, even if the tensor is a
-            symbolic one.
         """
         if not tensor_name:
             tensor_name = 'TensorJacobian'
@@ -513,9 +382,6 @@ class Cake(object):
             The filename where to print the tensor.
         tensor_name: str, optional
             Specify the name to print beside the values of the tensor. Default to `TensorJacobian`.
-        to_numerics: bool
-            Try to output a numerical value for the tensor entries, even if the tensor is a
-            symbolic one.
         """
         with open(filename, 'w') as f:
             with redirect_stdout(f):
@@ -523,7 +389,6 @@ class Cake(object):
 
     @staticmethod
     def _string_format(func, symbol, indices, value):
-        """String formatting for the numerical tensor printing."""
         if abs(value) >= real_eps:
             s = symbol
             for i in indices:
@@ -533,7 +398,6 @@ class Cake(object):
 
     @staticmethod
     def _string_format_symbolic(func, symbol, indices, value):
-        """String formatting for the symbolic tensor printing."""
         if abs(value) >= real_eps:
             s = symbol
             for i in indices:

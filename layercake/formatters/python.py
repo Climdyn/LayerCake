@@ -1,37 +1,8 @@
 
-"""
-
-    Classes for formatting symbolic equations output in Python
-    ==========================================================
-
-    Defines classes to format tendencies and Jacobian symbolic equations output in Python.
-
-    Description of the classes
-    --------------------------
-
-    * :class:`PythonEquationFormatter`: Class for symbolic equations formatting in Python.
-    * :class:`PythonJacobianEquationFormatter`: Class for symbolic Jacobian equations formatting in Python.
-
-"""
-
 from layercake.formatters.base import EquationFormatter, JacobianEquationFormatter
 
 
 class PythonEquationFormatter(EquationFormatter):
-    """Class for symbolic equations formatting in Python.
-
-    Parameters
-    ----------
-    lang_translation: dict(str)
-        Language translation mapping dictionary, mapping replacements for converting
-        Sympy symbolic output strings to the Python language.
-
-    Attributes
-    ----------
-    lang_translation: dict(str)
-        Language translation mapping dictionary, mapping replacements for converting
-        Sympy symbolic output strings to the Python language.
-    """
 
     def __init__(self, lang_translation=None):
         EquationFormatter.__init__(self, lang_translation=lang_translation)
@@ -42,30 +13,14 @@ class PythonEquationFormatter(EquationFormatter):
 
     @property
     def opening_character(self):
-        """str: Character opening the arrays specification index in the Python language."""
         return '['
 
     @property
     def closing_character(self):
-        """str: Character closing the arrays specification index in the Python language."""
         return ']'
 
 
 class PythonJacobianEquationFormatter(JacobianEquationFormatter):
-    """Class for symbolic Jacobian equations formatting in Python.
-
-    Parameters
-    ----------
-    lang_translation: dict(str)
-        Language translation mapping dictionary, mapping replacements for converting
-        Sympy symbolic output strings to the Python language.
-
-    Attributes
-    ----------
-    lang_translation: dict(str)
-        Language translation mapping dictionary, mapping replacements for converting
-        Sympy symbolic output strings to the Python language.
-    """
 
     def __init__(self, lang_translation=None):
         JacobianEquationFormatter.__init__(self, lang_translation=lang_translation)
@@ -76,10 +31,8 @@ class PythonJacobianEquationFormatter(JacobianEquationFormatter):
 
     @property
     def opening_character(self):
-        """str: Character opening the arrays specification index in the Python language."""
         return '['
 
     @property
     def closing_character(self):
-        """str: Character closing the arrays specification index in the Python language."""
         return ']'
