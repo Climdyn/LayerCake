@@ -402,5 +402,5 @@ class Layer(object):
         plt.figure(figsize=(8, 2 * self.number_of_equations))
         plt.axis('off')
         for i, s in enumerate(latex_string_list):
-            plt.text(-0.1, (i + 1) / (len(latex_string_list) + 1), '$%s$' % s)
+            plt.text(-0.1, (self.number_of_equations - i) / (self.number_of_equations + 1), '$%s$' % s)
         plt.show()
