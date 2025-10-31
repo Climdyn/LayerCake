@@ -15,6 +15,7 @@
 
 import numpy as np
 from numpy.linalg import LinAlgError
+import matplotlib.pyplot as plt
 import sparse as sp
 from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray
 from sympy import zeros as sympy_zeros
@@ -340,3 +341,66 @@ class Layer(object):
                 lhs_order += ndim
             self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1))
                            .subs(b_subs).subs(p_subs).subs(substitutions))
+
+    def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
+        """Generate the LaTeX strings representing the layer's equations mathematically.
+
+        Parameters
+        ----------
+        enclose_lhs: bool, optional
+            Whether to enclose the left-hand side term of the equations inside parenthesis.
+            Default to `True`.
+        drop_first_lhs_char: bool, optional
+            Whether to drop the first two character of the left-hand side latex string of the equations.
+            Useful to drop the sign in front of it.
+            Default to `True`.
+        drop_first_rhs_char: bool, optional
+            Whether to drop the first two character of the right-hand side latex string of the equations.
+            Useful to drop the sign in front of it.
+            Default to `False`.
+
+        Returns
+        -------
+        list(str)
+            The LaTeX strings representing the layer's equations.
+        """
+
+        latex_string_list = list()
+
+        for eq in self.equations:
+            latex_string_list.append(eq.to_latex(enclose_lhs=enclose_lhs,
+                                                 drop_first_lhs_char=drop_first_lhs_char,
+                                                 drop_first_rhs_char=drop_first_rhs_char
+                                                 )
+                                     )
+
+        return latex_string_list
+
+    def show_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
+        """Show the LaTeX string representing the layer's equations mathematically rendered in a window.
+
+        Parameters
+        ----------
+        enclose_lhs: bool, optional
+            Whether to enclose the left-hand side term of the equations inside parenthesis.
+            Default to `True`.
+        drop_first_lhs_char: bool, optional
+            Whether to drop the first two character of the left-hand side latex string of the equations.
+            Useful to drop the sign in front of it.
+            Default to `True`.
+        drop_first_rhs_char: bool, optional
+            Whether to drop the first two character of the right-hand side latex string of the equations.
+            Useful to drop the sign in front of it.
+            Default to `False`.
+        """
+
+        latex_string_list = self.to_latex(enclose_lhs=enclose_lhs,
+                                          drop_first_lhs_char=drop_first_lhs_char,
+                                          drop_first_rhs_char=drop_first_rhs_char
+                                          )
+
+        plt.figure(figsize=(8, 2 * self.number_of_equations))
+        plt.axis('off')
+        for i, s in enumerate(latex_string_list):
+            plt.text(-0.1, (i + 1) / (len(latex_string_list) + 1), '$%s$' % s)
+        plt.show()
