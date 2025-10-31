@@ -15,7 +15,7 @@ from layercake.arithmetic.utils import sproduct
 
 
 class LinearTerm(SingleArithmeticTerm):
-    """Linear term in a partial differential equation, of the form :math:`a \\psi(u_1, u_2)`,
+    """Linear term in a partial differential equation, of the form :math:`\\pm \\, a \\, \\psi(u_1, u_2)`,
     where :math:`u_1, u_2` are the coordinates of the model, :math:`a` is a prefactor, and where :math:`\\psi` is
     a field of the equation.
 
@@ -27,7 +27,7 @@ class LinearTerm(SingleArithmeticTerm):
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: parameter.Parameter, optional
+    prefactor: ~parameter.Parameter, optional
         Prefactor in front of the term.
         Must be specified as a model parameter.
     name: str, optional
@@ -49,7 +49,7 @@ class LinearTerm(SingleArithmeticTerm):
         Set initially to `None` (not computed).
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
-    prefactor: parameter.Parameter
+    prefactor: ~parameter.Parameter
         Prefactor in front of the term.
     """
 

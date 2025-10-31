@@ -30,7 +30,7 @@ class Equation(object):
     lhs_term: ~arithmetic.terms.base.ArithmeticTerms
         Term on the left-hand side of the equation.
         Must be a single term, possibly a combination
-        through :class:`~arithmetic.terms.base.OperationOnTerms` operations.
+        through :class:`~layercake.arithmetic.terms.base.OperationOnTerms` operations.
 
     Attributes
     ----------
@@ -102,7 +102,7 @@ class Equation(object):
 
     @property
     def parameters(self):
-        """list(~field.Parameter): List of parameters present in the equation."""
+        """list(~parameter.Parameter): List of parameters present in the equation."""
         parameters_list = list()
         for term in self.terms + [self.lhs_term]:
             if issubclass(term.__class__, OperationOnTerms):

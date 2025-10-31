@@ -12,7 +12,7 @@
     --------------------------
 
     * :class:`OperatorTerm`: Operator term in a partial differential equation, acting on fields of the equation.
-    * :class:`ComposedOperatorsTerm`:
+    * :class:`ComposedOperatorsTerm`: Term representing the composition of multiple operators, acting on fields of the equation.
 
 """
 
@@ -22,7 +22,7 @@ from layercake.arithmetic.utils import sproduct
 
 class OperatorTerm(SingleArithmeticTerm):
     """Operator term in a partial differential equation, acting on fields of the equation,
-    and of the form :math:`a H \\psi(u_1, u_2)`, where :math:`H` is the operator,
+    and of the form :math:`\\pm \\, a \\, H \\psi(u_1, u_2)`, where :math:`H` is the operator,
     :math:`u_1, u_2` are the coordinates of the model, :math:`a` is a prefactor,
     and :math:`\\psi` is a field of the equation.
 
@@ -41,7 +41,7 @@ class OperatorTerm(SingleArithmeticTerm):
         to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: parameter.Parameter, optional
+    prefactor: ~parameter.Parameter, optional
         Prefactor in front of the operator.
         Must be specified as a model parameter.
     name: str, optional
@@ -64,7 +64,7 @@ class OperatorTerm(SingleArithmeticTerm):
         Set initially to `None` (not computed).
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
-    prefactor: parameter.Parameter
+    prefactor: ~parameter.Parameter
         Prefactor in front of the operator.
     """
 
@@ -118,7 +118,7 @@ class OperatorTerm(SingleArithmeticTerm):
 class ComposedOperatorsTerm(SingleArithmeticTerm):
     """Term representing the composition :math:`\\circ` of multiple operators :math:`H_i`
     acting on fields of a partial differential equation, and of the form
-    :math:`a H_1 \\circ H_2 \\ldots \\circ H_n \\psi(u_1, u_2)`, where :math:`u_1, u_2` are
+    :math:`\\pm \\, a \\, H_1 \\circ H_2 \\ldots \\circ H_n \\psi(u_1, u_2)`, where :math:`u_1, u_2` are
     the coordinates of the model, :math:`a` is a prefactor, and :math:`\\psi` is a field of the equation.
 
     Parameters
@@ -136,7 +136,7 @@ class ComposedOperatorsTerm(SingleArithmeticTerm):
         to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: parameter.Parameter, optional
+    prefactor: ~parameter.Parameter, optional
         Prefactor in front of the operators.
         Must be specified as a model parameter.
     name: str, optional
@@ -160,7 +160,7 @@ class ComposedOperatorsTerm(SingleArithmeticTerm):
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute
         the term representation on a given function basis.
-    prefactor: parameter.Parameter
+    prefactor: ~parameter.Parameter
         Prefactor in front of the operator.
     """
 

@@ -6,7 +6,7 @@
 
     This module defines a function to compute the terms for the Jacobian of fields
     in partial differential equations.
-    A function to compute a usage of the Jacobian like the vorticity advection is
+    A function to compute derived forms of the Jacobian like the vorticity advection is
     provided.
 
 """
@@ -16,12 +16,10 @@ from layercake.arithmetic.symbolic.operators import Laplacian, D
 
 
 def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None)):
-    """Function returning a list of :class:`ProductOfTerms` components of
+    """Function returning a list of :class:`~layercake.arithmetic.terms.operations.ProductOfTerms` components of
     the partial differential equation's Jacobian:
 
-    .. math:
-
-        J(\\psi, \\phi) = \\partial_{u_1} \\psi \\partial_{u_2} \\phi - \\partial_{u_1} \\phi \\partial_{u_2} \\psi
+    .. math:: J(\\psi, \\phi) = \\partial_{u_1} \\psi \\, \\partial_{u_2} \\phi - \\partial_{u_1} \\phi \\, \\partial_{u_2} \\psi
 
     where :math:`\\phi` and :math:`\\psi` are two fields defined on the model's domain,
     and :math:`u_1, u_2` are the coordinates of the model.
@@ -63,14 +61,15 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
 
 
 def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(None, None)):
-    """Function returning a list of :class:`ProductOfTerms` components of
+    """Function returning a list of :class:`~layercake.arithmetic.terms.operations.ProductOfTerms` components of
     the vorticity advection in the partial differential equation,
     provided by the expression :math:`J(\\psi, \\nabla^2 \\phi)`,
-    where :math:`J` is the partial differential equation's Jacobian :func:`~jacobian.Jacobian`:
+    where :math:`J` is the partial differential equation's Jacobian :func:`~layercake.arithmetic.terms.jacobian.Jacobian`:
 
-    .. math:
+    .. math:: J(\\psi, \\nabla^2 \\phi) = \\partial_{u_1} \\psi \\, \\partial_{u_2} \\nabla^2 \\phi - \\partial_{u_1} \\nabla^2 \\phi \\, \\partial_{u_2} \\psi
 
-        J(\\psi, \\nabla^2 \\phi) = \\partial_{u_1} \\psi \\partial_{u_2} \\nabla^2 \\phi - \\partial_{u_1} \\nabla^2 \\phi \\partial_{u_2} \\psi
+    where :math:`\\phi` and :math:`\\psi` are two fields defined on the model's domain,
+    and :math:`u_1, u_2` are the coordinates of the model.
 
     Parameters
     ----------

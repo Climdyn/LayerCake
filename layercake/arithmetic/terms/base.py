@@ -39,7 +39,7 @@ class ArithmeticTerms(ABC):
     """General base class for partial differential equation arithmetic term(s).
     Holds the symbolic representation of (possibly multiple) term(s) and his(their) decomposition(s) on a given function basis.
 
-    More precisely, models a term :math:`\\pm T(u_1, u_2)` in the partial differential equation, where
+    More precisely, models a term :math:`\\pm \\, T(u_1, u_2)` in the partial differential equation, where
     :math:`u_1, u_2` are the coordinates of the model.
     Upon decomposition on function basis, it can be represented as a tensor :math:`\\mathcal{T}_{i_1, \\ldots, i_r}` where :math:`r`
     is the tensor (and term(s)) rank.
@@ -288,15 +288,13 @@ class SingleArithmeticTerm(ArithmeticTerms):
     """Base class for single arithmetic terms (singleton) involving the field over which the partial differential equation acts.
     Holds the symbolic representation of the term and his decomposition on given function basis.
 
-    More precisely, models a term in the partial differential equation as a linear functional :math:`\\pm T[\\psi](u_1, u_2)`,
+    More precisely, models a term in the partial differential equation as a linear functional :math:`\\pm \\, T[\\psi](u_1, u_2)`,
     where :math:`\\psi` is the field solution of the equation, and the :math:`u_1, u_2` are the coordinates of the model.
     Upon decomposition on function basis, it can be represented as a tensor
 
-    .. math:
+    .. math:: \\mathcal{T}_{i_1, i_2} = \\left\\langle \\phi_{i_1} , \\pm \\, T[\\eta_{i_2}] \\right\\rangle
 
-        \\mathcal{T}_{i_1, i_2} = \\left\\langle \\phi_{i_1} , \\pm T[\\eta_{i_2}] \\right\\rangle
-
-    where the :math:`\\phi_i` are basis functions provided by the user, and the :math:`\\eta_i`` are basis functions on which
+    where the :math:`\\phi_i`'s are basis functions provided by the user, and the :math:`\\eta_i`'s are basis functions on which
     the field :math:`\\psi` is decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
     The rank :math:`r` of this kind of term (and its tensor rank) is thus always 2.
 
@@ -308,7 +306,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: parameter.Parameter, optional
+    prefactor: ~parameter.Parameter, optional
         Prefactor in front of the single term.
         Must be specified as a model parameter.
     name: str, optional
@@ -330,7 +328,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
         Set initially to `None` (not computed).
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
-    prefactor: parameter.Parameter
+    prefactor: ~parameter.Parameter
         Prefactor in front of the single term.
     """
     def __init__(self, field, inner_product_definition=None, prefactor=None, name='', sign=1):
@@ -454,24 +452,23 @@ class OperationOnTerms(ArithmeticTerms):
     Holds the symbolic representation of the result and his decomposition on a given function basis.
 
     More precisely, models a term in the partial differential equation as a provided operation noted :math:`\\wedge`, acting
-    on multiple multilinear functional terms :math:`\\pm T(u_1, u_2) = \\bigwedge_{i=1}^k T_i[\\psi^i_1,\\ldots, \\psi^i_{j_i}}] (u_1, u_2)`,
-    where the :math:`\\psi^i_k` are the :math:`j_i` fields (possibly the same) on which the functional :math:`T_i` are acting,
+    on multiple multilinear functional terms :math:`\\pm \\, T(u_1, u_2) = \\bigwedge_{i=1}^k T_i[\\psi^i_1, \\ldots, \\psi^i_{j_i}] (u_1, u_2)`,
+    where the :math:`\\psi^i_k`'s are the :math:`j_i` fields (possibly the same) on which the functional :math:`T_i` are acting,
     and the :math:`u_1, u_2` are the coordinates of the model.
     Upon decomposition on function basis, it can be represented as a tensor
 
-    .. math:
+    .. math:: \\mathcal{T}_{j, k_{1,1}, \\ldots, k_{1,j_1}, \\ldots, k_{l,1}, \\ldots, k_{l,{j_l}}} = \\left\\langle \\phi_{j} , \\pm \\, \\bigwedge_{i=1}^l T_i\\left[\\left(\\eta^i_1\\right)_{k_{i,1}}, \\ldots, \\left(\\eta^i_{j_i}\\right)_{k_{i,j_i}}\\right] \\right\\rangle
 
-        \\mathcal{T}_{j, k_{1,1}, \\ldots, k_{1,j_1}, \\ldots, k_{l,1}, \\ldots, k_{l,{j_l}}} = \\left\\langle \\phi_{j} , \\pm \\bigwedge_{i=1}^l T_i\\left[\\left(\\eta^i_1\\right)_{k_{i,1}}, \\ldots, \\left(\\eta^i_{j_i}\\right)_{k_{i,j_i}}\\right] \\right\\rangle
-
-    where the :math:`\\phi_j` are basis functions provided by the user, and the :math:`\\left(\\eta^i_j\\right)_k`` are basis functions on which
-    the fields :math:`\\psi^i_j` are decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
+    where the :math:`\\phi_j`'s are basis functions provided by the user, and the :math:`\\left(\\eta^i_j\\right)_k`'s are basis functions on which
+    the fields :math:`\\psi^i_j`'s are decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
     The rank :math:`r` of this kind of term (and its tensor rank) is thus :math:`1+\\sum_{i=1}^l j_i`.
+
     Parameters
     ----------
     *terms: ArithmeticTerms
         The terms over which the operation is applied.
     **continuation_kwargs:
-        Additional arguments passed to the object, see list below.
+        Additional arguments passed to the object, see list below:
 
     Other Parameters
     ----------------
