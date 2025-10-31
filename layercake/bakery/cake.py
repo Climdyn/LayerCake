@@ -15,6 +15,7 @@
 
 from contextlib import redirect_stdout
 import numpy as np
+import matplotlib.pyplot as plt
 import sparse as sp
 from numba import njit
 from layercake.utils.tensor import sparse_mul, jsparse_mul
@@ -74,6 +75,11 @@ class Cake(object):
         for layer in self.layers:
             fields_list += layer.fields
         return fields_list
+
+    @property
+    def number_of_equations(self):
+        """int: Total number of equations composing the cake."""
+        return len(self.fields)
 
     @property
     def parameters(self):
@@ -520,6 +526,80 @@ class Cake(object):
         with open(filename, 'w') as f:
             with redirect_stdout(f):
                 self.print_jacobian_tensor(tensor_name, to_numerics)
+
+    def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
+        """Generate the LaTeX strings representing the cake's equations mathematically.
+
+        Parameters
+        ----------
+        enclose_lhs: bool, optional
+            Whether to enclose the left-hand side term of the equations inside parenthesis.
+            Default to `True`.
+        drop_first_lhs_char: bool, optional
+            Whether to drop the first two character of the left-hand side latex string of the equations.
+            Useful to drop the sign in front of it.
+            Default to `True`.
+        drop_first_rhs_char: bool, optional
+            Whether to drop the first two character of the right-hand side latex string of the equations.
+            Useful to drop the sign in front of it.
+            Default to `False`.
+
+        Returns
+        -------
+        dict(list(str))
+            The LaTeX strings representing the cake's equations.
+            It is a dictionary with one entry per cake's layer.
+        """
+
+        latex_string_dict = dict()
+
+        for i, layer in enumerate(self.layers):
+            latex_string_list = layer.to_latex(enclose_lhs=enclose_lhs,
+                                               drop_first_lhs_char=drop_first_lhs_char,
+                                               drop_first_rhs_char=drop_first_rhs_char
+                                               )
+
+            latex_string_dict[i] = latex_string_list
+
+        return latex_string_dict
+
+    def show_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
+        """Show the LaTeX string representing the cake's equations mathematically rendered in a window.
+
+        Parameters
+        ----------
+        enclose_lhs: bool, optional
+            Whether to enclose the left-hand side term of the equations inside parenthesis.
+            Default to `True`.
+        drop_first_lhs_char: bool, optional
+            Whether to drop the first two character of the left-hand side latex string of the equations.
+            Useful to drop the sign in front of it.
+            Default to `True`.
+        drop_first_rhs_char: bool, optional
+            Whether to drop the first two character of the right-hand side latex string of the equations.
+            Useful to drop the sign in front of it.
+            Default to `False`.
+        """
+
+        latex_string_dict = self.to_latex(enclose_lhs=enclose_lhs,
+                                          drop_first_lhs_char=drop_first_lhs_char,
+                                          drop_first_rhs_char=drop_first_rhs_char
+                                          )
+
+        plt.figure(figsize=(8, self.number_of_equations))
+        plt.axis('off')
+        k = 0
+        number_of_lines = self.number_of_equations + self.number_of_layers
+        for i in latex_string_dict:
+            if self.layers[i].name:
+                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i} ({self.layers[i].name}):')
+            else:
+                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i}:')
+            k += 1
+            for s in latex_string_dict[i]:
+                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), '$%s$' % s)
+                k += 1
+        plt.show()
 
     @staticmethod
     def _string_format(func, symbol, indices, value):

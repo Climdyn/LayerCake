@@ -317,11 +317,11 @@ ocean_temperature_equation.add_rhs_term(Cot)
 #
 # --------------------------------
 
-atmospheric_layer = Layer()
+atmospheric_layer = Layer(name='Atmosphere')
 atmospheric_layer.add_equation(barotropic_equation)
 atmospheric_layer.add_equation(baroclinic_equation)
 
-oceanic_layer = Layer()
+oceanic_layer = Layer(name='Ocean')
 oceanic_layer.add_equation(oceanic_equation)
 oceanic_layer.add_equation(ocean_temperature_equation)
 

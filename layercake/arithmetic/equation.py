@@ -11,8 +11,8 @@
 """
 
 from sympy import Symbol, S, Eq
-from layercake.arithmetic.terms.base import ArithmeticTerms, OperationOnTerms
 import matplotlib.pyplot as plt
+from layercake.arithmetic.terms.base import ArithmeticTerms, OperationOnTerms
 
 
 class Equation(object):
@@ -31,6 +31,8 @@ class Equation(object):
         Term on the left-hand side of the equation.
         Must be a single term, possibly a combination
         through :class:`~layercake.arithmetic.terms.base.OperationOnTerms` operations.
+    name: str, optional
+        Optional name for the equation.
 
     Attributes
     ----------
@@ -40,17 +42,20 @@ class Equation(object):
         List of additive terms in the right-hand side of the equation.
     lhs_term: ~arithmetic.terms.base.ArithmeticTerms
         Term on the left-hand side of the equation.
+    name: str
+        Optional name for the equation.
     """
 
     _t = Symbol('t')
 
-    def __init__(self, field, lhs_term):
+    def __init__(self, field, lhs_term, name=''):
 
         self.field = field
         self.field._equation = self
         self.terms = list()
         self.lhs_term = lhs_term
         self.lhs_term.field = self.field
+        self.name = name
         self._layer = None
         self._cake = None
 
@@ -237,6 +242,11 @@ class Equation(object):
             Whether to drop the first two character of the right-hand side latex string.
             Useful to drop the sign in front of it.
             Default to `False`.
+
+        Returns
+        -------
+        str
+            The LaTeX string representing the equation.
         """
         lhs = self.lhs_term.terms[0].latex
         if drop_first_lhs_char:
@@ -273,10 +283,12 @@ class Equation(object):
             Useful to drop the sign in front of it.
             Default to `False`.
         """
+
         latex_string = self.to_latex(enclose_lhs=enclose_lhs,
                                      drop_first_lhs_char=drop_first_lhs_char,
                                      drop_first_rhs_char=drop_first_rhs_char
                                      )
+
         plt.figure(figsize=(8, 2))
         plt.axis('off')
         plt.text(-0.1, 0.5, '$%s$' % latex_string)
