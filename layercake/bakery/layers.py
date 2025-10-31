@@ -30,6 +30,11 @@ class Layer(object):
     """Class to gather partial differential equations modelling
     a given fluid/media layer of the system at hand.
 
+    Parameters
+    ----------
+    name: str, optional
+        Optional name for the layer.
+
     Attributes
     ----------
     equations: list(~equation.Equation)
@@ -37,12 +42,15 @@ class Layer(object):
     tensor: sparse.COO or ~sympy.tensor.array.ImmutableSparseNDimArray
         The tensor representing the ordinary differential equations tendencies.
         Can be either a numerical or a symbolic representation, depending on the user's choice.
+    name: str
+        Optional name for the layer.
     """
 
-    def __init__(self):
+    def __init__(self, name=''):
 
         self.equations = list()
         self.tensor = None
+        self.name = name
         self._cake = None
         self._cake_order = 0
 
@@ -399,7 +407,7 @@ class Layer(object):
                                           drop_first_rhs_char=drop_first_rhs_char
                                           )
 
-        plt.figure(figsize=(8, 2 * self.number_of_equations))
+        plt.figure(figsize=(8, self.number_of_equations))
         plt.axis('off')
         for i, s in enumerate(latex_string_list):
             plt.text(-0.1, (self.number_of_equations - i) / (self.number_of_equations + 1), '$%s$' % s)

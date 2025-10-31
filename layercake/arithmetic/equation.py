@@ -31,6 +31,8 @@ class Equation(object):
         Term on the left-hand side of the equation.
         Must be a single term, possibly a combination
         through :class:`~layercake.arithmetic.terms.base.OperationOnTerms` operations.
+    name: str, optional
+        Optional name for the equation.
 
     Attributes
     ----------
@@ -40,17 +42,20 @@ class Equation(object):
         List of additive terms in the right-hand side of the equation.
     lhs_term: ~arithmetic.terms.base.ArithmeticTerms
         Term on the left-hand side of the equation.
+    name: str
+        Optional name for the equation.
     """
 
     _t = Symbol('t')
 
-    def __init__(self, field, lhs_term):
+    def __init__(self, field, lhs_term, name=''):
 
         self.field = field
         self.field._equation = self
         self.terms = list()
         self.lhs_term = lhs_term
         self.lhs_term.field = self.field
+        self.name = name
         self._layer = None
         self._cake = None
 

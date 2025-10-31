@@ -586,12 +586,15 @@ class Cake(object):
                                           drop_first_rhs_char=drop_first_rhs_char
                                           )
 
-        plt.figure(figsize=(8, 2 * self.number_of_equations))
+        plt.figure(figsize=(8, self.number_of_equations))
         plt.axis('off')
         k = 0
         number_of_lines = self.number_of_equations + self.number_of_layers
         for i in latex_string_dict:
-            plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i}:')
+            if self.layers[i].name:
+                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i} ({self.layers[i].name}):')
+            else:
+                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i}:')
             k += 1
             for s in latex_string_dict[i]:
                 plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), '$%s$' % s)
