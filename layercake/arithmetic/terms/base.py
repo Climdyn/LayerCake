@@ -1,4 +1,22 @@
 
+"""
+
+    Arithmetic terms definition module
+    ==================================
+
+    This module defines base classes for partial differential equation arithmetic terms.
+    The corresponding objects hold the symbolic representation of the terms and their decomposition
+    on given function basis.
+
+    Description of the classes
+    --------------------------
+
+    * :class:`ArithmeticTerms`: General base class for partial differential equation arithmetic terms.
+    * :class:`SingleArithmeticTerm`: Base class for single arithmetic terms (singleton) involving the field over which the partial differential equation acts.
+    * :class:`OperationOnTerms`: Base class for operations on arithmetic terms. Perform the same operation on multiple terms.
+
+"""
+
 from abc import ABC, abstractmethod
 import sparse as sp
 from pebble import ProcessPool as Pool
@@ -18,7 +36,34 @@ from layercake.utils.symbolic_tensor import remove_dic_zeros
 
 
 class ArithmeticTerms(ABC):
-    """Base class for arithmetic terms"""
+    """General base class for partial differential equation arithmetic term(s).
+    Holds the symbolic representation of (possibly multiple) term(s) and his(their) decomposition(s) on a given function basis.
+
+    More precisely, models a term :math:`\\pm \\, T(u_1, u_2)` in the partial differential equation, where
+    :math:`u_1, u_2` are the coordinates of the model.
+    Upon decomposition on function basis, it can be represented as a tensor :math:`\\mathcal{T}_{i_1, \\ldots, i_r}` where :math:`r`
+    is the tensor (and term(s)) rank.
+
+    Parameters
+    ----------
+    name: str, optional
+        Name of the term(s). Must be defined in subclasses.
+    sign: int, optional
+        Sign in front of the term(s). Either +1 or -1.
+        Default to +1.
+
+    Attributes
+    ----------
+    name: str, optional
+        Name of the term(s). Must be defined in subclasses.
+    sign: int, optional
+        Sign in front of the term(s). Either +1 or -1.
+    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)
+        The inner products tensor of the term(s).
+        Set initially to `None` (not computed).
+    inner_product_definition: InnerProductDefinition
+        Object defining the integral representation of the inner product that is used to compute the term(s) representation on a given function basis.
+    """
     def __init__(self, name='', sign=1):
 
         self.sign = sign
@@ -29,6 +74,7 @@ class ArithmeticTerms(ABC):
 
     @property
     def rank(self):
+        """int: Rank of the tensor storing the term(s) decomposition on the provided function basis."""
         if self.inner_products is not None:
             return self.inner_products.shape.__len__()
         else:
@@ -37,6 +83,7 @@ class ArithmeticTerms(ABC):
     @property
     @abstractmethod
     def terms(self):
+        """list(ArithmeticTerms): List of the terms."""
         pass
 
     @property
@@ -62,21 +109,26 @@ class ArithmeticTerms(ABC):
     @property
     @abstractmethod
     def symbolic_expression(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the term(s). Only contains symbols."""
         pass
 
     @property
     @abstractmethod
     def numerical_expression(self):
+        """~sympy.core.expr.Expr: The numeric expression of the term(s), with parameters replaced by their numerical value."""
         pass
 
     @property
     @abstractmethod
     def symbolic_function(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the term(s), but as a symbolic functional. Only contains symbols."""
         pass
 
     @property
     @abstractmethod
     def numerical_function(self):
+        """~sympy.core.expr.Expr: The numeric expression of the term(s), as a symbolic functional,
+        but with parameters replaced by their numerical value."""
         pass
 
     @staticmethod
@@ -84,6 +136,8 @@ class ArithmeticTerms(ABC):
         return enable_commutativity(evaluate_expr(func))
 
     def _integrations(self, *basis, inner_product=None, numerical=False):
+        """Returns the list of all the integrations to be computed to get the full tensor of inner products related to the term(s).
+        Elements of the list includes indices locating the inner products in the tensor, inner product Sympy expression, and inner products integral arguments."""
         if len(basis) == 1:
             nmod = len(basis[0])
             nmodr = (range(nmod),) * self._rank
@@ -101,13 +155,74 @@ class ArithmeticTerms(ABC):
 
     @abstractmethod
     def _inner_product_arguments(self, basis, indices, numerical=False):
+        """Returns the tuple of all the arguments of the inner products integral for a given element of the tensor of
+        inner products related to the term(s).
+        To be implemented in subclasses.
+
+        Parameters
+        ----------
+        basis: SymbolicBasis
+            Symbolic function basis on which the term(s) must be decomposed.
+        indices: list(int)
+            Indices of the element in tensor for which to return the arguments of the inner products integrals.
+        numerical: bool, optional
+            Whether to provide numerical (with parameters' symbols replaced by their values)
+            or symbolic basis function expressions in the output.
+            Default to `False` (symbolic basis function expressions).
+
+        Returns
+        -------
+        tuple(~sympy.core.expr.Expr)
+            The tuple containing the arguments of the inner products integrals.
+        """
         pass
 
     @abstractmethod
     def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        """Compute the inner products tensor :math:`\\mathcal{T}_{i_1, \\ldots, i_r}`, either symbolic or numerical ones,
+        representing the term(s) decomposed on a given function basis.
+        Computations are parallelized on multiple CPUs.
+        Results are stored in the :attr:`~ArithmeticTerms.inner_products` attribute.
+
+        Parameters
+        ----------
+        basis: SymbolicBasis or list(SymbolicBasis)
+            Symbolic basis function or list of symbolic function basis on which each element of the term(s) inner products must be decomposed.
+        numerical: bool, optional
+            Whether to compute numerical or symbolic inner products.
+            Default to `False` (symbolic inner products as output).
+        timeout: int or bool or None, optional
+            TODO
+        num_threads: None or int, optional
+            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
+            Default to `None`.
+        permute: bool, optional
+            If `True`, applies all the possible permutations to the tensor indices
+            from 1 to the rank of the tensor.
+            Default to `False`, i.e. no permutation is applied.
+        """
         pass
 
     def _compute_inner_products(self, *basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        """Internal function to handle the computation of the inner products, used by any subclasses.
+
+        Parameters
+        ----------
+        *basis: SymbolicBasis
+            Symbolic function basis on which each element of the term's inner products must be decomposed.
+        numerical: bool, optional
+            Whether to compute numerical (with parameters replaced with their values) or symbolic inner products.
+            Default to `False` (symbolic inner products as output).
+        timeout: int or bool or None, optional
+            TODO
+        num_threads: None or int, optional
+            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
+            Default to `None`.
+        permute: bool, optional
+            If `True`, applies all the possible permutations to the tensor indices
+            from 1 to the rank of the tensor.
+            Default to `False`, i.e. no permutation is applied.
+        """
 
         if num_threads is None:
             num_threads = cpu_count()
@@ -147,6 +262,12 @@ class ArithmeticTerms(ABC):
         else:
             self.inner_products = res.to_coo()
 
+    @property
+    @abstractmethod
+    def latex(self):
+        """str: Return a LaTeX representation of the term(s)."""
+        return None
+
     def __repr__(self):
         return self.symbolic_expression.__str__()
 
@@ -154,6 +275,7 @@ class ArithmeticTerms(ABC):
         return self.__repr__()
 
     def copy(self):
+        """ArithmeticTerms: Return a copy of the term(s) object."""
         return deepcopy(self)
 
     def __neg__(self):
@@ -163,11 +285,56 @@ class ArithmeticTerms(ABC):
 
 
 class SingleArithmeticTerm(ArithmeticTerms):
-    """Base class for single arithmetic terms"""
+    """Base class for single arithmetic terms (singleton) involving the field over which the partial differential equation acts.
+    Holds the symbolic representation of the term and his decomposition on given function basis.
+
+    More precisely, models a term in the partial differential equation as a linear functional :math:`\\pm \\, T[\\psi](u_1, u_2)`,
+    where :math:`\\psi` is the field solution of the equation, and the :math:`u_1, u_2` are the coordinates of the model.
+    Upon decomposition on function basis, it can be represented as a tensor
+
+    .. math:: \\mathcal{T}_{i_1, i_2} = \\left\\langle \\phi_{i_1} , \\pm \\, T[\\eta_{i_2}] \\right\\rangle
+
+    where the :math:`\\phi_i`'s are basis functions provided by the user, and the :math:`\\eta_i`'s are basis functions on which
+    the field :math:`\\psi` is decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
+    The rank :math:`r` of this kind of term (and its tensor rank) is thus always 2.
+
+    Parameters
+    ----------
+    field: ~field.Field or ~field.ParameterField
+        A field appearing in the partial differential equation.
+    inner_product_definition: InnerProductDefinition, optional
+        Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
+        If not provided, it will use the inner product definition found in the `field` object.
+        Default to using the inner product definition found in the `field` object.
+    prefactor: ~parameter.Parameter, optional
+        Prefactor in front of the single term.
+        Must be specified as a model parameter.
+    name: str, optional
+        Name of the term. Must be defined in subclasses.
+    sign: int, optional
+        Sign in front of the term(s). Either +1 or -1.
+        Default to +1.
+
+    Attributes
+    ----------
+    field: ~field.Field or ~field.ParameterField
+        The field appearing in the partial differential equation.
+    name: str
+        Name of the term. Must be defined in subclasses.
+    sign: int
+        Sign in front of the term. Either +1 or -1.
+    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)
+        The inner products tensor of the term.
+        Set initially to `None` (not computed).
+    inner_product_definition: InnerProductDefinition
+        Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
+    prefactor: ~parameter.Parameter
+        Prefactor in front of the single term.
+    """
     def __init__(self, field, inner_product_definition=None, prefactor=None, name='', sign=1):
 
         ArithmeticTerms.__init__(self, name, sign)
-        self._rank = 2
+        self._rank = 2  # usual value for this kind of terms, can be changed in subclasses if needed
         self.field = field
         self.prefactor = prefactor
         if inner_product_definition is not None:
@@ -177,6 +344,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
 
     @property
     def terms(self):
+        """list(ArithmeticTerms): List of the terms. Here a single term is returned in the list."""
         return [self]
 
     @property
@@ -197,12 +365,14 @@ class SingleArithmeticTerm(ArithmeticTerms):
 
     @property
     def symbolic_function(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the term(s), but as a symbolic functional. Only contains symbols."""
         foo = disable_commutativity(self.symbolic_expression)
         ss = disable_commutativity(self.field.symbol)
         return Lambda(ss, foo)
 
     @property
     def numerical_function(self):
+        """~sympy.core.expr.Expr: The numeric expression of the term(s), as a symbolic functional, but with parameters replaced by their numerical value."""
         foo = disable_commutativity(self.numerical_expression)
         ss = disable_commutativity(self.field.symbol)
         return Lambda(ss, foo)
@@ -212,6 +382,26 @@ class SingleArithmeticTerm(ArithmeticTerms):
         return enable_commutativity(evaluate_expr(func))
 
     def _inner_product_arguments(self, basis, indices, numerical=False):
+        """Returns the tuple of all the arguments of the inner products integral for a given element of the tensor of
+        inner products related to the term.
+
+        Parameters
+        ----------
+        basis: list(SymbolicBasis)
+            List of symbolic function basis on which each element of the argument tuple must be decomposed.
+        indices: list(int)
+            Indices of the element in tensor for which to return the arguments of the inner products integrals.
+        numerical: bool, optional
+            Whether to provide numerical (with parameters' symbols replaced by their values)
+            or symbolic basis function expressions in the output.
+            Default to `False` (symbolic basis function expressions).
+
+        Returns
+        -------
+        tuple(~sympy.core.expr.Expr)
+            The tuple containing the arguments of the inner products integrals.
+
+        """
         if numerical:
             funcs_list = self._numerical_functions_list
         else:
@@ -232,12 +422,81 @@ class SingleArithmeticTerm(ArithmeticTerms):
         return tuple(res)
 
     def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        """Compute the inner products tensor, either symbolic or numerical ones, representing the term decomposed on a given function basis.
+        Computations are parallelized on multiple CPUs.
+        Results are stored in the :attr:`~SingleArithmeticTerm.inner_products` attribute.
+
+        Parameters
+        ----------
+        basis: SymbolicBasis
+            Symbolic function basis on which the term must be decomposed, i.e integrated with the term's field's function basis.
+        numerical: bool, optional
+            Whether to compute numerical or symbolic inner products.
+            Default to `False` (symbolic inner products as output).
+        timeout: int or bool or None, optional
+            TODO
+        num_threads: None or int, optional
+            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
+            Default to `None`.
+        permute: bool, optional
+            If `True`, applies all the possible permutations to the tensor indices
+            from 1 to the rank of the tensor.
+            Default to `False`, i.e. no permutation is applied.
+        """
         basis_list = (basis, self.field.basis)
         self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
 
 
 class OperationOnTerms(ArithmeticTerms):
-    """Base class for operations on arithmetic terms"""
+    """Base class for operations on arithmetic terms. Perform the same operation on multiple terms.
+    Holds the symbolic representation of the result and his decomposition on a given function basis.
+
+    More precisely, models a term in the partial differential equation as a provided operation noted :math:`\\wedge`, acting
+    on multiple multilinear functional terms :math:`\\pm \\, T(u_1, u_2) = \\bigwedge_{i=1}^k T_i[\\psi^i_1, \\ldots, \\psi^i_{j_i}] (u_1, u_2)`,
+    where the :math:`\\psi^i_k`'s are the :math:`j_i` fields (possibly the same) on which the functional :math:`T_i` are acting,
+    and the :math:`u_1, u_2` are the coordinates of the model.
+    Upon decomposition on function basis, it can be represented as a tensor
+
+    .. math:: \\mathcal{T}_{j, k_{1,1}, \\ldots, k_{1,j_1}, \\ldots, k_{l,1}, \\ldots, k_{l,{j_l}}} = \\left\\langle \\phi_{j} , \\pm \\, \\bigwedge_{i=1}^l T_i\\left[\\left(\\eta^i_1\\right)_{k_{i,1}}, \\ldots, \\left(\\eta^i_{j_i}\\right)_{k_{i,j_i}}\\right] \\right\\rangle
+
+    where the :math:`\\phi_j`'s are basis functions provided by the user, and the :math:`\\left(\\eta^i_j\\right)_k`'s are basis functions on which
+    the fields :math:`\\psi^i_j`'s are decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
+    The rank :math:`r` of this kind of term (and its tensor rank) is thus :math:`1+\\sum_{i=1}^l j_i`.
+
+    Parameters
+    ----------
+    *terms: ArithmeticTerms
+        The terms over which the operation is applied.
+    **continuation_kwargs:
+        Additional arguments passed to the object, see list below:
+
+    Other Parameters
+    ----------------
+    inner_product_definition: InnerProductDefinition, optional
+        Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
+        If not provided, it will use the inner product definition found in the `field` object.
+        Default to using the inner product definition found in the `field` object.
+    name: str, optional
+        Name of the term(s). Must be defined in subclasses.
+    sign: int, optional
+        Sign in front of the term(s). Either +1 or -1.
+        Default to +1.
+    rank: int, optional
+        Can be used to force the rank of the term, i.e. force the rank of the tensor storing the term(s) decomposition on the provided function basis.
+        Compute the rank automatically if not provided.
+
+    Attributes
+    ----------
+    name: str
+        Name of the term. Must be defined in subclasses.
+    sign: int
+        Sign in front of the term. Either +1 or -1.
+    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)
+        The inner products tensor of the term.
+        Set initially to `None` (not computed).
+    inner_product_definition: InnerProductDefinition
+        Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
+    """
     def __init__(self, *terms, **kwargs):
 
         if len(terms) < 2:
@@ -283,26 +542,53 @@ class OperationOnTerms(ArithmeticTerms):
 
     @property
     def terms(self):
+        """list(ArithmeticTerms): List of the terms on which the operation acts."""
         return self._terms
 
     @abstractmethod
     def _compute_rank(self):
+        """Routine to compute the rank of the inner products tensor, if not enforced by the user.
+
+        Returns
+        -------
+        int
+            The rank of the inner products tensor.
+        """
         pass
 
     @property
     def number_of_terms(self):
+        """int: Number of the terms on which the operation acts."""
         return self._terms.__len__()
 
     @abstractmethod
     def operation(self, *terms, evaluate=False):
+        """Operation acting on the terms. Must be defined in subclasses.
+
+        Parameters
+        ----------
+        *terms: ArithmeticTerms
+            Terms on which the operation must be applied.
+        evaluate: bool
+            Whether to let |Sympy| evaluate the operation or not.
+            Default to `False`.
+
+        Returns
+        -------
+        ~sympy.core.expr.Expr
+            The result of the operation on the terms, as a |Sympy| symbolic expression.
+
+        """
         pass
 
     @property
     def symbolic_expression(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the result of the operation on the terms. Only contains symbols."""
         return sproduct(self.sign, self.operation(*self._symbolic_expressions_list))
 
     @property
     def numerical_expression(self):
+        """~sympy.core.expr.Expr: The numerical expression of the result of the operation on the terms, with parameters replaced by their numerical value."""
         return sproduct(self.sign, self.operation(*self._numerical_expressions_list))
 
     @property
@@ -331,6 +617,8 @@ class OperationOnTerms(ArithmeticTerms):
 
     @property
     def symbolic_function_dummy(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the result of the operation on the terms, but as a symbolic
+        functional and with dummy symbols. Only contains symbols."""
         ss = symbols(" ".join(['x'+str(i) for i in range(self.number_of_terms)]))
         ssdc = list()
         for s in ss:
@@ -345,6 +633,8 @@ class OperationOnTerms(ArithmeticTerms):
 
     @property
     def symbolic_function(self):
+        """~sympy.core.expr.Expr: The symbolic expression of the result of the operation on the terms, but as a symbolic functional.
+        Only contains symbols."""
         ss = self._fields_list
         ssdc = list()
         for s in ss:
@@ -361,6 +651,8 @@ class OperationOnTerms(ArithmeticTerms):
 
     @property
     def numerical_function_dummy(self):
+        """~sympy.core.expr.Expr: The numerical expression of the result of the operation on the terms,
+        as a symbolic functional with dummy symbols, and with parameters replaced by their numerical value."""
         ss = symbols(" ".join(['x'+str(i) for i in range(self.number_of_terms)]))
         ssdc = list()
         for s in ss:
@@ -375,6 +667,8 @@ class OperationOnTerms(ArithmeticTerms):
 
     @property
     def numerical_function(self):
+        """~sympy.core.expr.Expr: The numerical expression of the result of the operation on the terms, as a symbolic functional,
+        and with parameters replaced by their numerical value."""
         ss = self._fields_list
         ssdc = list()
         for s in ss:
@@ -390,6 +684,26 @@ class OperationOnTerms(ArithmeticTerms):
         return Lambda(tuple(ssdc), sproduct(self.sign, foo))
 
     def _inner_product_arguments(self, basis, indices, numerical=False):
+        """Returns the tuple of all the arguments of the inner products integral for a given element of the tensor of
+        inner products related to operation on the terms.
+
+        Parameters
+        ----------
+        basis: list(SymbolicBasis)
+            List of symbolic function basis on which each element of the argument tuple must be decomposed.
+        indices: list(int)
+            Indices of the element in tensor for which to return the arguments of the inner products integrals.
+        numerical: bool, optional
+            Whether to provide numerical (with parameters' symbols replaced by their values)
+            or symbolic basis function expressions in the output.
+            Default to `False` (symbolic basis function expressions).
+
+        Returns
+        -------
+        tuple(~sympy.core.expr.Expr)
+            The tuple containing the arguments of the inner products integrals.
+
+        """
         if numerical:
             funcs_list = self._numerical_functions_list
         else:
@@ -417,14 +731,50 @@ class OperationOnTerms(ArithmeticTerms):
 
     @abstractmethod
     def _create_inner_products_basis_list(self, basis):
+        """Function defining the list of symbolic function basis specified in order to compute the inner products
+        for the operation on terms. Must be defined in subclasses.
+
+        Parameters
+        ----------
+        basis: SymbolicBasis
+            Basis to put on the left-hand side of the inner products.
+
+        Returns
+        -------
+        tuple(SymbolicBasis)
+            List of symbolic function basis used to compute the inner products.
+
+        """
         pass
 
     def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        """Compute the inner products tensor, either symbolic or numerical ones, representing the term(s) decomposed on a given function basis.
+        Computations are parallelized on multiple CPUs.
+        Results are stored in the :attr:`~OperationOnTerms.inner_products` attribute.
+
+        Parameters
+        ----------
+        basis: list(SymbolicBasis)
+            List of symbolic function basis on which each term of the operation on the terms must be decomposed.
+        numerical: bool, optional
+            Whether to compute numerical or symbolic inner products.
+            Default to `False` (symbolic inner products as output).
+        timeout: int or bool or None, optional
+            TODO
+        num_threads: None or int, optional
+            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
+            Default to `None`.
+        permute: bool, optional
+            If `True`, applies all the possible permutations to the tensor indices
+            from 1 to the rank of the tensor.
+            Default to `False`, i.e. no permutation is applied.
+        """
         basis_list = self._create_inner_products_basis_list(basis)
         self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
         self.inner_products = self.sign * self.inner_products
 
 
+# TODO: maybe move the two apply functions below in a separate module and make them public
 def _apply(ls):
     return ls[0], ls[1](*ls[2])
 
@@ -476,6 +826,7 @@ def _num_apply(ls):
         return ls[0], res[0]
 
 
+# TODO: move the functions below in a separate dedicated 'parallel" module and make it public
 def _parallel_compute(pool, args_list, subs, destination, timeout, permute=False, symbolic_int=False):
     if destination is None:
         return_dict = True

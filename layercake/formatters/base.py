@@ -1,10 +1,39 @@
 
+"""
+
+    Base classes for formatting symbolic equations output
+    =====================================================
+
+    Defines base classes to format tendencies and Jacobian symbolic equations output.
+
+    Description of the classes
+    --------------------------
+
+    * :class:`EquationFormatter`: Base class for symbolic equations formatting.
+    * :class:`JacobianEquationFormatter`: Base class for symbolic Jacobian equations formatting.
+
+"""
+
 from sympy import ImmutableSparseNDimArray
 from abc import ABC, abstractmethod
 from layercake.utils.symbolic_tensor import get_coords_from_index
 
 
 class EquationFormatter(ABC):
+    """Base class for symbolic equations formatting.
+
+    Parameters
+    ----------
+    lang_translation: dict(str)
+        Language translation mapping dictionary, mapping replacements for converting
+        Sympy symbolic output strings to the target language.
+
+    Attributes
+    ----------
+    lang_translation: dict(str)
+        Language translation mapping dictionary, mapping replacements for converting
+        Sympy symbolic output strings to the target language.
+    """
 
     def __init__(self, lang_translation=None):
 
@@ -14,6 +43,20 @@ class EquationFormatter(ABC):
             self.lang_translation.update(lang_translation)
 
     def __call__(self, tensor, variable='U', tendencies='F'):
+        """Convert a model symbolic tendencies terms tensor to a list of symbolic equations in
+        string format.
+
+        Parameters
+        ----------
+        tensor: ~sympy.tensor.array.ImmutableSparseNDimArray
+            Symbolic tendencies terms tensor to convert.
+        variable: str
+            Name of the state variable to use for the output equations strings.
+            Default to `'U'`.
+        tendencies: str
+            Name of the tendencies variable to use for the output equations strings.
+            Default to `'F`.
+        """
         if not isinstance(tensor, ImmutableSparseNDimArray):
             raise ValueError('Only symbolic tensor can be converted to symbolic equations.')
 
@@ -45,20 +88,52 @@ class EquationFormatter(ABC):
     @property
     @abstractmethod
     def opening_character(self):
+        """str: Character opening the arrays specification index in the target language.
+        Must be defined in the subclasses."""
         pass
 
     @property
     @abstractmethod
     def closing_character(self):
+        """str: Character closing the arrays specification index in the target language.
+        Must be defined in the subclasses."""
         pass
 
 
 class JacobianEquationFormatter(EquationFormatter):
+    """Base class for symbolic Jacobian equations formatting.
+
+    Parameters
+    ----------
+    lang_translation: dict(str)
+        Language translation mapping dictionary, mapping replacements for converting
+        Sympy symbolic output strings to the target language.
+
+    Attributes
+    ----------
+    lang_translation: dict(str)
+        Language translation mapping dictionary, mapping replacements for converting
+        Sympy symbolic output strings to the target language.
+    """
 
     def __init__(self, lang_translation=None):
         EquationFormatter.__init__(self, lang_translation=lang_translation)
 
     def __call__(self, tensor, variable='U', tendencies='J'):
+        """Convert a model Jacobian symbolic tendencies terms tensor to a list of symbolic equations in
+        string format.
+
+        Parameters
+        ----------
+        tensor: ~sympy.tensor.array.ImmutableSparseNDimArray
+            Jacobian symbolic tendencies terms tensor to convert.
+        variable: str
+            Name of the state variable to use for the output equations strings.
+            Default to `'U'`.
+        tendencies: str
+            Name of the tendencies variable to use for the output equations strings.
+            Default to `'F`.
+        """
         if not isinstance(tensor, ImmutableSparseNDimArray):
             raise ValueError('Only symbolic tensor can be converted to symbolic equations.')
 

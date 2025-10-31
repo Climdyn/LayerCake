@@ -31,8 +31,8 @@
     >>> s[0,0]
     0.1
 
-    Main class
-    ----------
+    Main classes
+    ------------
 """
 
 import warnings
@@ -59,25 +59,27 @@ class Parameter(float):
     description: str, optional
         String describing the parameter.
     symbol: ~sympy.core.symbol.Symbol, optional
-        A `Sympy`_ symbol to represent the parameter in symbolic expressions.
+        A |Sympy| symbol to represent the parameter in symbolic expressions.
+    latex: str, optional
+        A latex string to define the parameter in the latex equations.
     symbolic_expression: ~sympy.core.expr.Expr, optional
-        A `Sympy`_ expression to represent a relationship to other parameters.
+        A |Sympy| expression to represent a relationship to other parameters.
 
     Notes
     -----
     Parameter is immutable. Once instantiated, it cannot be altered. To create a new parameter, one must
     re-instantiate it.
 
-    .. _Sympy: https://www.sympy.org/
     """
 
-    def __new__(cls, value, units="", description="", symbol=None, symbolic_expression=None):
+    def __new__(cls, value, units="", description="", symbol=None, latex=None, symbolic_expression=None):
 
         f = float.__new__(cls, value)
         f._units = units
         f._description = description
         f._symbol = symbol
         f._symbolic_expression = symbolic_expression
+        f._latex = latex
 
         return f
 
@@ -85,6 +87,11 @@ class Parameter(float):
     def symbol(self):
         """~sympy.core.symbol.Symbol: Returns the symbol of the parameter."""
         return self._symbol
+
+    @property
+    def latex(self):
+        """str: A latex string defining the parameter in the latex equations."""
+        return self._latex
 
     @property
     def symbolic_expression(self):
@@ -438,13 +445,12 @@ class ParametersArray(np.ndarray):
         String or an iterable of strings, describing the parameters.
         If an iterable, should have the same length or shape as `values`.
     symbols ~sympy.core.symbol.Symbol or list(~sympy.core.symbol.Symbol) or ~numpy.ndarray(~sympy.core.symbol.Symbol), optional
-        A `Sympy`_ symbol or an iterable of symbols, to represent the parameters in symbolic expressions.
+        A |Sympy| symbol or an iterable of symbols, to represent the parameters in symbolic expressions.
         If an iterable, should have the same length or shape as `values`.
     symbolic_expressions: ~sympy.core.expr.Expr or list(~sympy.core.expr.Expr) or ~numpy.ndarray(~sympy.core.expr.Expr), optional
-        A `Sympy`_ expression or an iterable of expressions, to represent a relationship to other parameters.
+        A |Sympy| expression or an iterable of expressions, to represent a relationship to other parameters.
         If an iterable, should have the same length or shape as `values`.
 
-    .. _Sympy: https://www.sympy.org/
     """
 
     def __new__(cls, values, units="", description="", symbols=None, symbolic_expressions=None):

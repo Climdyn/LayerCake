@@ -1,4 +1,13 @@
 
+"""
+
+    Sparse tensor utility module
+    ============================
+
+    Defines useful functions to deal with sparse tensors, defined by a coordinates-values list provided as a |Numpy| array.
+
+"""
+
 import numpy as np
 from numba import njit
 

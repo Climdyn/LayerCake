@@ -57,7 +57,7 @@ barotropic_equation.add_rhs_terms(advection_term)
 # adding an orographic term
 g = 0.1
 gamma = symbols(u'γ')
-gammap = Parameter(g, symbol=gamma)
+gammap = Parameter(g, symbol=gamma, latex=r'\gamma')
 hh = np.zeros(len(b))
 hh[1] = 1.
 h = ParameterField('h', u'h', hh, b, s)
@@ -68,7 +68,7 @@ barotropic_equation.add_rhs_terms(orographic_term)
 
 # adding the beta term
 betaa = symbols(u'β')
-beta = Parameter(0.20964969238375256, symbol=betaa)
+beta = Parameter(0.20964969238375256, symbol=betaa, latex=r'\beta')
 betaterm = OperatorTerm(psi, D, x, prefactor=beta, sign=-1)
 
 barotropic_equation.add_rhs_term(betaterm)
@@ -84,7 +84,7 @@ Cdd = symbols('C')
 Cd = Parameter(0.05, symbol=Cdd)
 rr = np.zeros(len(b))
 rr[0] = 0.3
-C = ParameterField('eta', u'η', rr, b, s)
+C = ParameterField('eta', u'η', rr, b, s, latex=r'\eta')
 CT = OperatorTerm(C, Laplacian, b.coordinate_system, prefactor=Cd)
 
 barotropic_equation.add_rhs_term(CT)
