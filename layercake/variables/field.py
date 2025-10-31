@@ -1,3 +1,18 @@
+
+"""
+    Field definition module
+    =======================
+
+    This module defines spatial fields in the models.
+
+    Description of the classes
+    --------------------------
+
+    * :class:`Field`: Class defining the spatial fields.
+    * :class:`ParameterField`: Class defining static spatial field that can be viewed as models' parameters.
+
+"""
+
 import numpy as np
 from sympy import Symbol, Function
 from layercake.variables.variable import Variable, VariablesArray
@@ -5,6 +20,54 @@ from layercake.variables.parameter import ParametersArray
 
 
 class Field(Variable):
+    """ Class defining the spatial fields in the models.
+
+    Parameters
+    ----------
+    name: str
+        Name of the field.
+    symbol: ~sympy.core.symbol.Symbol
+        A |Sympy| symbol to represent the field in symbolic expressions.
+    basis: SymbolicBasis
+        A symbolic basis of functions on which the Galerkin expansion of the field is performed.
+    inner_product_definition: InnerProductDefinition
+        Inner product definition object used to compute the inner products between the elements of the basis.
+    units: str, optional
+        The units of the variable.
+        Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
+        Empty by default.
+    latex: str, optional
+        Latex string representing the variable.
+        Empty by default.
+    state: VariablesArray
+        Field state array: array containing the coefficient of the field's Galerkin expansion.
+    state_kwargs: dict
+        Used to create the field state array if `state` is not a :class:`VariableArray`.
+        Passed to the :class:`VariableArray` constructor.
+
+    Attributes
+    ----------
+    name: str
+        Name of the field.
+    symbol: ~sympy.core.symbol.Symbol
+        The |Sympy| symbol representing the field in symbolic expressions.
+    basis: SymbolicBasis
+        The symbolic basis of functions on which the Galerkin expansion of the field is performed.
+    inner_product_definition: InnerProductDefinition
+        The inner product definition object used to compute the inner products between the elements of the basis.
+    units: str, optional
+        The units of the variable.
+        Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
+    latex: str, optional
+        Latex string representing the variable.
+    state: VariablesArray
+        Field state array: array containing the coefficient of the field's Galerkin expansion.
+    coordinate_system: CoordinateSystem
+        Coordinate system on which the basis of functions and the inner product are defined.
+    function: ~sympy.core.expr.Expr
+        A Sympy symbolic representation of the field as a function of space and time.
+
+    """
 
     def __init__(self, name, symbol, basis, inner_product_definition=None, units=None, latex=None, state=None, **state_kwargs):
 
@@ -36,6 +99,51 @@ class Field(Variable):
 
 
 class ParameterField(Variable):
+    """ Class defining a static spatial fields in the models.
+    Can be viewed as a model parameter.
+
+    Parameters
+    ----------
+    name: str
+        Name of the field.
+    symbol: ~sympy.core.symbol.Symbol
+        A |Sympy| symbol to represent the field in symbolic expressions.
+    basis: SymbolicBasis
+        A symbolic basis of functions on which the Galerkin expansion of the field is performed.
+    inner_product_definition: InnerProductDefinition
+        Inner product definition object used to compute the inner products between the elements of the basis.
+    units: str, optional
+        The units of the variable.
+        Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
+        Empty by default.
+    latex: str, optional
+        Latex string representing the variable.
+        Empty by default.
+    parameters_array: ParametersArray
+        Array containing the coefficients of the field Galerkin expansion.
+    parameters_array_kwargs: dict
+        Used to create the field state if `parameters_array` is not a :class:`ParametersArray` object.
+        Passed to the :class:`ParametersArray` class constructor.
+
+    Attributes
+    ----------
+    name: str
+        Name of the field.
+    symbol: ~sympy.core.symbol.Symbol
+        The |Sympy| symbol representing the field in symbolic expressions.
+    basis: SymbolicBasis
+        The symbolic basis of functions on which the Galerkin expansion of the field is performed.
+    inner_product_definition: InnerProductDefinition
+        The inner product definition object used to compute the inner products between the elements of the basis.
+    units: str
+        The units of the variable.
+        Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
+    latex: str, optional
+        Latex string representing the variable.
+    parameters: ParametersArray
+        Array containing the coefficients of the field Galerkin expansion.
+
+    """
 
     def __init__(self, name, symbol, parameters_array, basis,
                  inner_product_definition=None, units="", latex=None, **parameters_array_kwargs):
