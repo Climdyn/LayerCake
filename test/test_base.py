@@ -36,15 +36,15 @@ class TestQgsBase(ABC, unittest.TestCase):
     def save_layercake(self, s):
         self.layercake_values.append(s)
 
-    def check_lists_flt(self):
-        self.qgs_outputs()
-        self.layercake_outputs()
+    def check_lists_flt(self, func_qgs, func_layercake):
+        func_qgs()
+        func_layercake()
         for v, r in zip(list(reversed(sorted(self.qgs_values))), list(reversed(sorted(self.layercake_values)))):
             self.assertTrue(self.match_flt(v, r), msg=v + ' != ' + r + ' !!!')
 
-    def check_lists(self, cmax=1):
-        self.qgs_outputs()
-        self.layercake_outputs()
+    def check_lists(self, func_qgs, func_layercake, cmax=1):
+        func_qgs()
+        func_layercake()
         for v, r in zip(list(reversed(sorted(self.qgs_values))), list(reversed(sorted(self.layercake_values)))):
             self.assertTrue(self.match_str(v, r, cmax), msg=v + ' != ' + r + ' !!!')
 

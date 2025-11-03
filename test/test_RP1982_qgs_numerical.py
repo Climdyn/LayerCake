@@ -36,10 +36,20 @@ from test.test_base import TestQgsBase
 real_eps = 10 * np.finfo(np.float64).eps
 
 
+class State:
+
+    qgs_tensor = None
+    layercake_cake = None
+
+
 class TestRP1982QgsNumerical(TestQgsBase):
 
     def test_against_qgs(self):
-        self.check_lists()
+        self.__class__.state = State()
+        self.check_lists(self.qgs_outputs, self.layercake_outputs)
+
+    def test_jacobian_against_qgs(self):
+        self.check_lists(self.qgs_jacobian_outputs, self.layercake_jacobian_outputs)
 
     def qgs_outputs(self, output_func=None):
 
@@ -61,9 +71,20 @@ class TestRP1982QgsNumerical(TestQgsBase):
 
         aip = analytic.AtmosphericAnalyticInnerProducts(params)
 
-        tensor = QgsTensor(params=params, atmospheric_inner_products=aip)
+        self.state.qgs_tensor = QgsTensor(params=params, atmospheric_inner_products=aip)
 
-        for coo, val in zip(tensor.tensor.coords.T, tensor.tensor.data):
+        for coo, val in zip(self.state.qgs_tensor.tensor.coords.T, self.state.qgs_tensor.tensor.data):
+            _string_format(tfunc, 'tensor', coo, val)
+
+    def qgs_jacobian_outputs(self, output_func=None):
+
+        if output_func is None:
+            self.qgs_values.clear()
+            tfunc = self.save_qgs
+        else:
+            tfunc = output_func
+
+        for coo, val in zip(self.state.qgs_tensor.jacobian_tensor.coords.T, self.state.qgs_tensor.jacobian_tensor.data):
             _string_format(tfunc, 'tensor', coo, val)
 
     def layercake_outputs(self, output_func=None):
@@ -274,7 +295,22 @@ class TestRP1982QgsNumerical(TestQgsBase):
 
         cake.compute_tensor(True, True
                             )
+
+        self.state.layercake_cake = cake
         tensor = cake.tensor
+
+        for coo, val in zip(tensor.coords.T, tensor.data):
+            _string_format(tfunc, 'tensor', coo, val)
+
+    def layercake_jacobian_outputs(self, output_func=None):
+
+        if output_func is None:
+            self.layercake_values.clear()
+            tfunc = self.save_layercake
+        else:
+            tfunc = output_func
+
+        tensor = self.state.layercake_cake.jacobian_tensor
 
         for coo, val in zip(tensor.coords.T, tensor.data):
             _string_format(tfunc, 'tensor', coo, val)
