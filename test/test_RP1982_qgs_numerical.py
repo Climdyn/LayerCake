@@ -2,13 +2,6 @@
 import sys
 import os
 
-path = os.path.abspath('./')
-base = os.path.basename(path)
-if base == 'test':
-    sys.path.extend([os.path.abspath('../')])
-else:
-    sys.path.extend([path])
-
 import unittest
 import numpy as np
 from sympy import symbols, Symbol
@@ -16,6 +9,14 @@ from sympy import symbols, Symbol
 from qgs.params.params import QgParams
 from qgs.inner_products import analytic
 from qgs.tensors.qgtensor import QgsTensor
+
+
+path = os.path.abspath('./')
+base = os.path.basename(path)
+if base == 'test':
+    sys.path.extend([os.path.abspath('../')])
+else:
+    sys.path.extend([path])
 
 from layercake.basis.planar_fourier import contiguous_channel_basis
 from layercake.variables.parameter import Parameter
