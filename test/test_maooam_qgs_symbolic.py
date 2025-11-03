@@ -4,11 +4,12 @@ import os
 
 import unittest
 import numpy as np
-from sympy import symbols, Symbol
+from sympy import symbols, Symbol, N
 
 from qgs.params.params import QgParams
 from qgs.inner_products import analytic
 from qgs.tensors.qgtensor import QgsTensor
+
 
 path = os.path.abspath('./')
 base = os.path.basename(path)
@@ -29,6 +30,7 @@ from layercake.arithmetic.equation import Equation
 from layercake.arithmetic.symbolic.operators import Laplacian, D
 from layercake.bakery.layers import Layer
 from layercake.bakery.cake import Cake
+from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor
 
 from test.test_base import TestQgsBase
 
@@ -42,7 +44,7 @@ class State:
     layercake_cake = None
 
 
-class TestMaooamQgsNumerical(TestQgsBase):
+class TestMaooamQgsSymbolic(TestQgsBase):
 
     def test_against_qgs(self):
         self.__class__.state = State()
@@ -171,7 +173,7 @@ class TestMaooamQgsNumerical(TestQgsBase):
         parameters = [n]
         atmospheric_basis = contiguous_channel_basis(2, 2, parameters)
         oceanic_basis = contiguous_basin_basis(2, 4, parameters)
-        s = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system)
+        s = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system, optimizer='trig', kwargs={'conds': 'none'})
         # coordinates
         x = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[0]
         y = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[1]
@@ -408,14 +410,20 @@ class TestMaooamQgsNumerical(TestQgsBase):
         #
         # --------------------------------
 
-        cake.compute_tensor(True, True
+        cake.compute_tensor(False,
+                            True,
+                            basis_subs=True,
+                            parameters_subs=cake.parameters
                             )
 
         self.state.layercake_cake = cake
         tensor = cake.tensor
 
-        for coo, val in zip(tensor.coords.T, tensor.data):
-            _string_format(tfunc, 'tensor', coo, val)
+        coords_val = get_coords_and_values_from_tensor(tensor, 'tuple')
+        for coo_val in coords_val:
+            coo = coo_val[:-1]
+            val = coo_val[-1]
+            _string_format(tfunc, 'tensor', coo, N(val))
 
     def layercake_jacobian_outputs(self, output_func=None):
 
@@ -427,8 +435,11 @@ class TestMaooamQgsNumerical(TestQgsBase):
 
         tensor = self.state.layercake_cake.jacobian_tensor
 
-        for coo, val in zip(tensor.coords.T, tensor.data):
-            _string_format(tfunc, 'tensor', coo, val)
+        coords_val = get_coords_and_values_from_tensor(tensor, 'tuple')
+        for coo_val in coords_val:
+            coo = coo_val[:-1]
+            val = coo_val[-1]
+            _string_format(tfunc, 'tensor', coo, N(val))
 
 
 def _string_format(func, symbol, indices, value):
