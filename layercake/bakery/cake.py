@@ -614,9 +614,8 @@ class Cake(object):
     @staticmethod
     def _string_format_symbolic(func, symbol, indices, value):
         """String formatting for the symbolic tensor printing."""
-        if abs(value) >= real_eps:
-            s = symbol
-            for i in indices:
-                s += "["+str(i)+"]"
-            s += f" = {value}"
-            func(s)
+        s = symbol
+        for i in indices:
+            s += "["+str(i)+"]"
+        s += f" = {value}"
+        func(s)
