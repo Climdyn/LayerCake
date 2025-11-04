@@ -11,10 +11,10 @@ and convert them to ordinary differential equations (ODEs) via Galerkin-type exp
 
 LayerCake allows you to construct systems of PDEs, and to specify coordinate systems and basis functions to build
 the corresponding ODE systems.
-To build these systems, LayerCake relies heavily on [Sympy](https://www.sympy.org/) symbolic computation framework.
+To build these systems, LayerCake relies heavily on the [Sympy](https://www.sympy.org/) symbolic computation framework.
 The output of this procedure is either a [Numbaified](https://numba.pydata.org/) Python callable, 
 or a list of symbolic ODE tendencies that can be integrated in any of the supported languages 
-(Fortran, Julia and Python for the moment). These two kind of output allow for the study of the computed models with 
+(Fortran, Julia and Python for the moment). These two kinds of output allow for the study of the computed models with 
 the modern tools available in all these languages.
 
 LayerCake has been designed with geophysics in mind, although it may be useful for other applications.
