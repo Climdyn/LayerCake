@@ -19,4 +19,5 @@ dependencies:
   - pip
   - pip:
       - sphinxcontrib-bibtex
+      - qgs
 
