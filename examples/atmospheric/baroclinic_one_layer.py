@@ -10,18 +10,13 @@ if os.path.basename(os.getcwd()) == 'LayerCake':
 else:
     sys.path.extend([os.path.abspath('../..')])
 
+# importing all that is needed to create the cake
+from layercake import *
+
+# importing specific modules to create the model basis of functions
 from layercake.basis.planar_fourier import contiguous_channel_basis
-from layercake.variables.parameter import Parameter
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
-from layercake.variables.field import Field, ParameterField
-from layercake.arithmetic.terms.jacobian import vorticity_advection, Jacobian
-from layercake.arithmetic.terms.operators import OperatorTerm
-from layercake.arithmetic.terms.operations import AdditionOfTerms
-from layercake.arithmetic.terms.linear import LinearTerm
-from layercake.arithmetic.equation import Equation
-from layercake.arithmetic.symbolic.operators import Laplacian, D
-from layercake.bakery.layers import Layer
-from layercake.bakery.cake import Cake
+
 
 ##############################################################################################
 #
