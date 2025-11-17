@@ -38,7 +38,13 @@ class PlanarChannelFourierBasis(SymbolicBasis):
 
     Attributes
     ----------
-
+    substitutions: list(tuple)
+        List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
+        a |Sympy|  expression and then the value to substitute.
+    coordinate_system: ~systems.CoordinateSystem
+        Coordinate system on which the basis is defined.
+    parameters: list(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
     length: float or ~parameter.Parameter or None
         Length of the domain along the :math:`x` coordinate: :math:`L_x` .
         `None` for the default length of :math:`2 \\pi / n`.
@@ -126,10 +132,17 @@ class PlanarBasinFourierBasis(SymbolicBasis):
 
     Attributes
     ----------
-
+    substitutions: list(tuple)
+        List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
+        a |Sympy|  expression and then the value to substitute.
+    coordinate_system: ~systems.CoordinateSystem
+        Coordinate system on which the basis is defined.
+    parameters: list(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
     length: float or None
         Length of the domain along the :math:`x` coordinate: :math:`L_x` .
         `None` for the default length of :math:`2 \\pi / n`.
+
     """
 
     def __init__(self, parameters, spectral_blocks, length=None):

@@ -1,14 +1,47 @@
+"""
+    Spherical Harmonics Basis definition module
+    ===========================================
 
+    Classes defining `Spherical Harmonics`_ basis of functions on a plane.
+
+    .. _Spherical Harmonics: https://en.wikipedia.org/wiki/Spherical_harmonics
+
+"""
 from sympy import assoc_legendre, exp, I, sin, cos, sqrt, pi
 from math import factorial
 
 from layercake.basis.base import SymbolicBasis
 from layercake.variables.systems import SphericalCoordinateSystem
 
-from layercake.variables.parameter import Parameter
-
 
 class SphericalHarmonicsBasis(SymbolicBasis):
+    """ Complex or real spherical harmonics basis defined on a sphere
+    with a given radius :math:`R`.
+
+    Parameters
+    ----------
+    parameters: list(~parameter.Parameter)
+        List holding the parameters appearing in the equations defining the basis.
+    truncation_parameter: dict
+        Dictionary of parameter associated with the specified truncature.
+    complex: bool, optional
+        Whether the spherical harmonics are defined using complex functions.
+        Default to `False`.
+    truncation: str
+        Type of truncation to use.
+        Default to `"T"` for a triangular truncature.
+
+    Attributes
+    ----------
+    substitutions: list(tuple)
+        List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
+        a |Sympy|  expression and then the value to substitute.
+    coordinate_system: ~systems.CoordinateSystem
+        Coordinate system on which the basis is defined.
+    parameters: list(~parameter.Parameter)
+        Dictionary holding the parameters appearing in the equations defining the basis.
+
+    """
 
     def __init__(self, parameters, truncation_parameter, complex=False, truncation='T'):
 
@@ -53,6 +86,29 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
         else:
             raise NotImplementedError("Only triangular ('T') truncation is implemented for the moment.")
+
+    def set_parameters(self, parameters):
+        """Setter for the parameters' dictionary.
+
+        Attributes
+        ----------
+        parameters: list(~parameter.Parameter)
+            List holding the parameters appearing in the equations defining the basis.
+        """
+
+        for param in parameters:
+            if str(param.symbol) == 'R':
+                break
+        else:
+            raise ValueError("Parameter 'R' (sphere radius) should be present in the provided parameters")
+
+        radius = float(param)
+        coordinate_system = SphericalCoordinateSystem(param)
+        self.coordinate_system = coordinate_system
+
+        self._R = param.symbol
+        self.substitutions = list()
+        self.substitutions.append((self._R, radius))
 
 
 if __name__ == "__main__":
