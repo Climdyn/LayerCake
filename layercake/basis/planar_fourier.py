@@ -27,8 +27,8 @@ class PlanarChannelFourierBasis(SymbolicBasis):
 
     Parameters
     ----------
-    parameters: dict(~parameter.Parameter)
-        Dictionary holding the parameters appearing in the equations defining the basis.
+    parameters: list(~parameter.Parameter)
+        List holding the parameters appearing in the equations defining the basis.
     spectral_blocks: ~numpy.ndarray(int)
         Spectral blocks detailing the modes :math:`x`- and :math:`y`-wavenumber.
         Array of shape (`nblocks`, 2), where `nblocks` is the number of spectral blocks.
@@ -79,12 +79,12 @@ class PlanarChannelFourierBasis(SymbolicBasis):
                 self.functions.append(mode_eq)
 
     def set_parameters(self, parameters):
-        """Setter for the parameters dictionary.
+        """Setter for the parameters' dictionary.
 
         Attributes
         ----------
-        parameters: dict(~parameter.Parameter)
-            Dictionary holding the parameters appearing in the equations defining the basis.
+        parameters: list(~parameter.Parameter)
+            List holding the parameters appearing in the equations defining the basis.
         """
 
         for param in parameters:
@@ -115,8 +115,8 @@ class PlanarBasinFourierBasis(SymbolicBasis):
 
     Parameters
     ----------
-    parameters: dict(~parameter.Parameter)
-        Dictionary holding the parameters appearing in the equations defining the basis.
+    parameters: list(~parameter.Parameter)
+        List holding the parameters appearing in the equations defining the basis.
     spectral_blocks: ~numpy.ndarray(int)
         Spectral blocks detailing the modes :math:`x`- and :math:`y`-wavenumber.
         Array of shape (`nblocks`, 2), where `nblocks` is the number of spectral blocks.
@@ -167,12 +167,12 @@ class PlanarBasinFourierBasis(SymbolicBasis):
                 self.functions.append(mode_eq)
 
     def set_parameters(self, parameters):
-        """Setter for the parameters dictionary.
+        """Setter for the parameters' dictionary.
 
         Attributes
         ----------
-        parameters: dict(~parameter.Parameter)
-            Dictionary holding the parameters appearing in the equations defining the basis.
+        parameters: list(~parameter.Parameter)
+            List holding the parameters appearing in the equations defining the basis.
         """
 
         for param in parameters:
@@ -206,8 +206,8 @@ def contiguous_basin_basis(nxmax, nymax, parameters, length=None):
         Maximum x-wavenumber to fill the spectral block up to.
     nymax: int
         Maximum :math:`y`-wavenumber to fill the spectral block up to.
-    parameters: dict(~parameter.Parameter)
-        Dictionary holding the parameters appearing in the equations defining the basis.
+    parameters: list(~parameter.Parameter)
+        List holding the parameters appearing in the equations defining the basis.
     length: float or ~parameter.Parameter, optional
         Length of the domain along the :math:`x` coordinate: :math:`L_x` .
         Default to `None` for the default length of :math:`2 \\pi / n`.
@@ -238,8 +238,8 @@ def contiguous_channel_basis(nxmax, nymax, parameters, length=None):
         Maximum x-wavenumber to fill the spectral block up to.
     nymax: int
         Maximum :math:`y`-wavenumber to fill the spectral block up to.
-    parameters: dict(~parameter.Parameter)
-        Dictionary holding the parameters appearing in the equations defining the basis.
+    parameters: list(~parameter.Parameter)
+        List holding the parameters appearing in the equations defining the basis.
     length: float or ~parameter.Parameter, optional
         Length of the domain along the :math:`x` coordinate: :math:`L_x` .
         Default to `None` for the default length of :math:`2 \\pi / n`.
