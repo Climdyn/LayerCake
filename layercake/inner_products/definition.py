@@ -54,6 +54,10 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         If a string, specifies pre-defined optimizers:
         * `'trig'`: Optimizer specifically designed for trigonometric functions.
         If `None`, does not optimize.
+    complex: bool, optional
+        Whether to compute the inner products with complex conjugate expression
+        for the second term.
+        Default to `False`, i.e. real inner products.
     kwargs: dict
         Specific keywords arguments to pass to the |Sympy| integrals,
         see :func:`~sympy.integrals.integrals.integrate` and
@@ -69,10 +73,11 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     """
 
-    def __init__(self, coordinate_system, optimizer=None, kwargs=None):
+    def __init__(self, coordinate_system, optimizer=None, complex=False, kwargs=None):
 
         InnerProductDefinition.__init__(self)
         self.coordinate_system = coordinate_system
+        self.complex = complex
 
         if optimizer is None:
             self.optimizer = self._no_optimizer
@@ -157,8 +162,12 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         _extent_u = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
         _extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
         norm = ((_extent_u[1] - _extent_u[0]) * (_extent_v[1] - _extent_v[0]))
-        expr = (S * conjugate(G)) / norm
+        if self.complex:
+            expr = (S * conjugate(G)) / norm
+        else:
+            expr = (S * G) / norm
         if integrand:
             return expr * _u_elem * _v_elem,  (_u, *_extent_u), (_v, *_extent_v)
         else:
             return self.integrate_over_domain(self.optimizer(expr * _u_elem * _v_elem), symbolic_expr=symbolic_expr)
+
