@@ -14,7 +14,7 @@
 
 from abc import ABC, abstractmethod
 from sympy.simplify.fu import TR8, TR10
-from sympy import integrate, Integral
+from sympy import integrate, Integral, conjugate
 
 
 class InnerProductDefinition(ABC):
@@ -49,9 +49,19 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
     ----------
     coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
-    optimizer: None or callable, optional
+    optimizer: None or callable or str, optional
         A function to optimize the computation of the integrals or the integrand.
+        If a string, specifies pre-defined optimizers:
+        * `'trig'`: Optimizer specifically designed for trigonometric functions.
         If `None`, does not optimize.
+    complex: bool, optional
+        Whether to compute the inner products with complex conjugate expression
+        for the second term.
+        Default to `False`, i.e. real inner products.
+    kwargs: dict
+        Specific keywords arguments to pass to the |Sympy| integrals,
+        see :func:`~sympy.integrals.integrals.integrate` and
+        :class:`~sympy.integrals.integrals.Integral`.
 
     Attributes
     ----------
@@ -63,10 +73,11 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     """
 
-    def __init__(self, coordinate_system, optimizer=None, kwargs=None):
+    def __init__(self, coordinate_system, optimizer=None, complex=False, kwargs=None):
 
         InnerProductDefinition.__init__(self)
         self.coordinate_system = coordinate_system
+        self.complex = complex
 
         if optimizer is None:
             self.optimizer = self._no_optimizer
@@ -114,14 +125,14 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         ~sympy.core.expr.Expr
             The result of the symbolic integration.
         """
-        _x = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
-        _y = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
-        _extent_x = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
-        _extent_y = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
+        _u = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
+        _v = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
+        _extent_u = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
+        _extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
         if symbolic_expr:
-            return Integral(expr, (_x, *_extent_x), (_y, *_extent_y), **self.kwargs)
+            return Integral(expr, (_u, *_extent_u), (_v, *_extent_v), **self.kwargs)
         else:
-            return integrate(expr, (_x, *_extent_x), (_y, *_extent_y), **self.kwargs)
+            return integrate(expr, (_u, *_extent_u), (_v, *_extent_v), **self.kwargs)
 
     def inner_product(self, S, G, symbolic_expr=False, integrand=False):
         """Function defining the inner product to be computed symbolically:
@@ -144,13 +155,19 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         ~sympy.core.expr.Expr
             The result of the symbolic integration
         """
-        _x = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
-        _y = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
-        _extent_x = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
-        _extent_y = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
-        norm = ((_extent_x[1] - _extent_x[0]) * (_extent_y[1] - _extent_y[0]))
-        expr = (S * G) / norm
-        if integrand:
-            return expr,  (_x, *_extent_x), (_y, *_extent_y)
+        _u = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
+        _v = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
+        _u_elem = self.coordinate_system.coordinates[0].infinitesimal_length
+        _v_elem = self.coordinate_system.coordinates[1].infinitesimal_length
+        _extent_u = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
+        _extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
+        norm = ((_extent_u[1] - _extent_u[0]) * (_extent_v[1] - _extent_v[0]))
+        if self.complex:
+            expr = (S * conjugate(G)) / norm
         else:
-            return self.integrate_over_domain(self.optimizer(expr), symbolic_expr=symbolic_expr)
+            expr = (S * G) / norm
+        if integrand:
+            return expr * _u_elem * _v_elem,  (_u, *_extent_u), (_v, *_extent_v)
+        else:
+            return self.integrate_over_domain(self.optimizer(expr * _u_elem * _v_elem), symbolic_expr=symbolic_expr)
+
