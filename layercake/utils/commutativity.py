@@ -8,8 +8,7 @@
 
 """
 
-from sympy import Symbol, Add, Mul
-from sympy.core.numbers import One
+from sympy import Symbol
 
 
 def enable_commutativity(expr):
@@ -44,39 +43,3 @@ def disable_commutativity(expr):
     """
     replacements = {s: Symbol(s.name, commutative=False) for s in expr.free_symbols}
     return expr.xreplace(replacements)
-
-
-class NonCommutativeOne(One):
-    """Dummy class for a non-commuting one (1)."""
-
-    def __init__(self):
-        One.__init__(self)
-        self.is_commutative = False
-        # self._op_priority = 11.
-
-    @property
-    def latex(self):
-        return ""
-
-
-def expand_and_deal_with_constant(expr):
-
-    expanded = expr.expand()
-    if isinstance(expanded, Add):
-        new_args = list()
-        for arg in expanded.args:
-            if arg.is_constant():
-                new_args.append(Mul(arg, NonCommutativeOne(), evaluate=False))
-            else:
-                new_args.append(arg)
-
-        new_expr = new_args[0]
-        for arg in new_args[1:]:
-            new_expr = new_expr + arg
-        return new_expr
-    elif expr.is_constant():
-        new_expr = Mul(expr, NonCommutativeOne(), evaluate=False)
-        return new_expr
-
-    else:
-        return expr.expand()

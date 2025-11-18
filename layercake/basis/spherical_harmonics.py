@@ -12,7 +12,6 @@ from math import factorial
 
 from layercake.basis.base import SymbolicBasis
 from layercake.variables.systems import SphericalCoordinateSystem
-from layercake.utils.commutativity import expand_and_deal_with_constant
 
 
 class SphericalHarmonicsBasis(SymbolicBasis):
@@ -85,8 +84,6 @@ class SphericalHarmonicsBasis(SymbolicBasis):
                         else:
                             mode_eq = (2 * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m)))
                                        * assoc_legendre(n, m, sin(phi)) * cos(m * llambda))
-
-                    mode_eq = expand_and_deal_with_constant(mode_eq)
 
                     if mode_eq is not None:
                         self.functions.append(mode_eq)

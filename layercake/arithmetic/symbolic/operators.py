@@ -13,8 +13,9 @@
 from sympy.core.decorators import call_highest_priority
 from sympy import Expr, Matrix, Mul, Add, diff
 from sympy.core.numbers import Zero
+from sympy import Derivative
 
-from layercake.utils.commutativity import enable_commutativity, NonCommutativeOne, expand_and_deal_with_constant
+from layercake.utils.commutativity import enable_commutativity
 from layercake.variables.systems import CoordinateSystem
 
 # courtesy of https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy
@@ -113,8 +114,6 @@ def _diff(expr, *variables):
         for i, elem in enumerate(expr):
             expr_copy[i] = diff(elem, *variables)
         return expr_copy
-    if isinstance(expr, NonCommutativeOne):
-        return Zero()
     return diff(expr, *variables)
 
 
@@ -126,8 +125,6 @@ def _evaluate_mul(expr):
                 cte = expr.args[0]
                 return Zero()
             end = -1
-        if isinstance(expr.args[-1], NonCommutativeOne):
-            return Zero()
     for i in range(len(expr.args)-1+end, -1, -1):
         arg = expr.args[i]
         if isinstance(arg, Add):
@@ -175,14 +172,46 @@ def evaluate_expr(expr):
             elem = elem.expand()
             expr[i] = evaluate_expr(elem)
         return enable_commutativity(expr)
-    expr = expand_and_deal_with_constant(expr)
+    expr = expr.expand()
     if isinstance(expr, Mul):
         expr = _evaluate_mul(expr)
     elif isinstance(expr, Add):
         expr = _evaluate_add(expr)
     elif isinstance(expr, D):
         expr = Zero()
-    return expr
+
+    constant = False
+    for arg in expr.expand().args:
+        if arg.args:
+            for argg in arg.args:
+                if isinstance(argg, Derivative):
+                    constant = True
+
+    if constant:
+        new_arg_list = list()
+        for arg in expr.expand().args:
+            delete_arg = False
+            if arg.args:
+                for argg in arg.args:
+                    if isinstance(argg, Derivative) or isinstance(argg, D):
+                        delete_arg = True
+                        break
+            else:
+                if isinstance(argg, Derivative) or isinstance(argg, D):
+                    delete_arg = True
+            if not delete_arg:
+                new_arg_list.append(arg)
+
+        if new_arg_list:
+            new_expr = new_arg_list[0]
+            for arg in new_arg_list[1:]:
+                new_expr = new_expr + arg
+        else:
+            new_expr = Zero()
+    else:
+        new_expr = expr
+
+    return new_expr
 
 
 def _latex_repr(r):
