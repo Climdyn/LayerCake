@@ -863,7 +863,7 @@ def _parallel_compute(pool, args_list, subs, destination, timeout, permute=False
                 num_args_list.append(args_list[i] + [subs])
             i += 1
     else:
-        num_args_list = [args + [subs] for args in args_list]
+        num_args_list = [list(args) + [subs] for args in args_list]
 
     future = pool.map(_num_apply, num_args_list)
     results = future.result()

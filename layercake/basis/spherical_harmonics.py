@@ -12,6 +12,7 @@ from math import factorial
 
 from layercake.basis.base import SymbolicBasis
 from layercake.variables.systems import SphericalCoordinateSystem
+from layercake.utils.commutativity import expand_and_deal_with_constant
 
 
 class SphericalHarmonicsBasis(SymbolicBasis):
@@ -24,6 +25,8 @@ class SphericalHarmonicsBasis(SymbolicBasis):
         List holding the parameters appearing in the equations defining the basis.
     truncation_parameter: dict
         Dictionary of parameter associated with the specified truncature.
+        For example, for the default triangular truncation, it expects an entry `'M'`
+        in the dictionary, determining the level of truncation `TM`.
     complex: bool, optional
         Whether the spherical harmonics are defined using complex functions.
         Default to `False`.
@@ -57,6 +60,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
         self._R = param.symbol
         self.substitutions.append((self._R, radius))
+        self._map_mn = dict()
 
         llambda = coordinate_system.coordinates_symbol['lambda']
         phi = coordinate_system.coordinates_symbol['phi']
@@ -69,7 +73,8 @@ class SphericalHarmonicsBasis(SymbolicBasis):
                 for n in range(abs(m), M):
 
                     if complex:
-                        mode_eq = sqrt(2) * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m))) * assoc_legendre(n, m, sin(phi)) * exp(I * m * (llambda))
+                        mode_eq = (sqrt(2) * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m)))
+                                   * assoc_legendre(n, m, sin(phi)) * exp(I * m * (llambda)))
                     else:
                         if m < 0:
                             mode_eq = (2 * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n + m)/factorial(n - m)))
@@ -81,11 +86,36 @@ class SphericalHarmonicsBasis(SymbolicBasis):
                             mode_eq = (2 * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m)))
                                        * assoc_legendre(n, m, sin(phi)) * cos(m * llambda))
 
+                    mode_eq = expand_and_deal_with_constant(mode_eq)
+
                     if mode_eq is not None:
                         self.functions.append(mode_eq)
+                        if n not in self._map_mn:
+                            self._map_mn[n] = dict()
+                        if m not in self._map_mn[n]:
+                            self._map_mn[n][m] = len(self.functions) - 1
 
         else:
             raise NotImplementedError("Only triangular ('T') truncation is implemented for the moment.")
+
+    def find_functions(self, n, m):
+        """Function which returns the index of the basis function of given n, m indices in the basis list.
+
+        Parameters
+        ----------
+        m, n: int
+            Spectral indices of the sought function.
+
+        Returns
+        -------
+        int:
+            The index of the basis function in the list.
+        """
+        if n in self._map_mn:
+            if m in self._map_mn[n]:
+                return self._map_mn[n][m]
+
+        raise ValueError(f'Basis function for indices n={n} and m={m} not found.')
 
     def set_parameters(self, parameters):
         """Setter for the parameters' dictionary.

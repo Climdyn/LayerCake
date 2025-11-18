@@ -14,7 +14,7 @@ from sympy.core.decorators import call_highest_priority
 from sympy import Expr, Matrix, Mul, Add, diff
 from sympy.core.numbers import Zero
 
-from layercake.utils.commutativity import enable_commutativity
+from layercake.utils.commutativity import enable_commutativity, NonCommutativeOne, expand_and_deal_with_constant
 from layercake.variables.systems import CoordinateSystem
 
 # courtesy of https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy
@@ -113,6 +113,8 @@ def _diff(expr, *variables):
         for i, elem in enumerate(expr):
             expr_copy[i] = diff(elem, *variables)
         return expr_copy
+    if isinstance(expr, NonCommutativeOne):
+        return Zero()
     return diff(expr, *variables)
 
 
@@ -124,6 +126,8 @@ def _evaluate_mul(expr):
                 cte = expr.args[0]
                 return Zero()
             end = -1
+        if isinstance(expr.args[-1], NonCommutativeOne):
+            return Zero()
     for i in range(len(expr.args)-1+end, -1, -1):
         arg = expr.args[i]
         if isinstance(arg, Add):
@@ -171,7 +175,7 @@ def evaluate_expr(expr):
             elem = elem.expand()
             expr[i] = evaluate_expr(elem)
         return enable_commutativity(expr)
-    expr = expr.expand()
+    expr = expand_and_deal_with_constant(expr)
     if isinstance(expr, Mul):
         expr = _evaluate_mul(expr)
     elif isinstance(expr, Add):
@@ -247,7 +251,8 @@ def Divergence(coordinate_system):
     derivative_list = list()
     volume = coordinate_system.infinitesimal_volume
     for coord in coordinate_system.coordinates:
-        derivative_list.append(Mul(volume**(-1), Mul(D(coord.symbol), volume, evaluate=False), evaluate=False))
+        derivative_list.append(Mul(volume**(-1), Mul(D(coord.symbol), volume / coord.infinitesimal_length,
+                                   evaluate=False), evaluate=False))
 
     mat = Matrix([derivative_list])
     mat.latex = r'\nabla \cdot'
