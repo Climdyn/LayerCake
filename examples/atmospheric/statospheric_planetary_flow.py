@@ -54,9 +54,8 @@ sin_func = basis.find_functions(1, 0)
 rr = np.zeros(len(basis))
 rr[sin_func] = np.sqrt(np.pi / 3)
 sin_theta = ParameterField('2 sin phi', u'sin ϕ', rr, basis, s, latex=r'2 \sin \phi')
-rotation = LinearTerm(sin_theta, s, omega)
 
-rotation_advection_terms = Jacobian(psi, rotation, basis.coordinate_system, sign=-1)
+rotation_advection_terms = Jacobian(psi, sin_theta, basis.coordinate_system, sign=-1, prefactors=(omega, omega))
 
 planetary_equation.add_rhs_terms(rotation_advection_terms)
 
