@@ -260,7 +260,8 @@ class Layer(object):
                                 increment = np.tensordot(increment, params, ((1,), (0,)))
                                 args[1] = 0
                     args = tuple(args)
-                    self.tensor[args] = self.tensor[args] + increment
+                    if np.any(increment != 0):
+                        self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
             self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
 
