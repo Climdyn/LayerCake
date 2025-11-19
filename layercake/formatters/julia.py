@@ -31,6 +31,9 @@ class JuliaEquationFormatter(EquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Julia language.
+
+    index_offset: int
+        Number that accesses the first element in an array. In Julia the index base is 1.
     """
 
     def __init__(self, lang_translation=None):
@@ -39,6 +42,8 @@ class JuliaEquationFormatter(EquationFormatter):
                                         '**': '^',
                                         'conjugate': 'conj'
                                      })
+        
+        self.index_offset = 1
 
     @property
     def opening_character(self):
@@ -65,6 +70,9 @@ class JuliaJacobianEquationFormatter(JacobianEquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Julia language.
+
+    index_offset: int
+        Number that accesses the first element in an array. In Julia the index base is 1.
     """
 
     def __init__(self, lang_translation=None):
@@ -73,6 +81,8 @@ class JuliaJacobianEquationFormatter(JacobianEquationFormatter):
             '**': '^',
             'conjugate': 'conj'
         })
+
+        self.index_offset = 1
 
     @property
     def opening_character(self):
