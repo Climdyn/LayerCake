@@ -153,6 +153,23 @@ def _evaluate_add(expr):
     return Add(*newargs)
 
 
+def _test_if_derivative_in_expr(expr, subs):
+
+    status = False
+    for arg in expr.args:
+
+        if isinstance(arg, Derivative) or isinstance(arg, D):
+            if arg not in subs:
+                subs.append(arg)
+            status = True
+        if hasattr(arg, 'args'):
+            res = _test_if_derivative_in_expr(arg, subs)
+            if res:
+                status = True
+
+    return status
+
+
 def evaluate_expr(expr):
     """Evaluate a given |Sympy| expression.
 
@@ -180,38 +197,20 @@ def evaluate_expr(expr):
     elif isinstance(expr, D):
         expr = Zero()
 
-    constant = False
-    for arg in expr.expand().args:
-        if arg.args:
-            for argg in arg.args:
-                if isinstance(argg, Derivative):
-                    constant = True
-
-    if constant:
-        new_arg_list = list()
-        for arg in expr.expand().args:
-            delete_arg = False
-            if arg.args:
-                for argg in arg.args:
-                    if isinstance(argg, Derivative) or isinstance(argg, D):
-                        delete_arg = True
-                        break
-            else:
-                if isinstance(argg, Derivative) or isinstance(argg, D):
-                    delete_arg = True
-            if not delete_arg:
-                new_arg_list.append(arg)
-
-        if new_arg_list:
-            new_expr = new_arg_list[0]
-            for arg in new_arg_list[1:]:
-                new_expr = new_expr + arg
+    constant = True
+    while constant:
+        repl = list()
+        constant = _test_if_derivative_in_expr(expr, repl)
+        if constant:
+            new_expr = expr.replace(repl[0], Zero())
+            for rep in repl[1:]:
+                new_expr = new_expr.replace(rep, Zero())
         else:
-            new_expr = Zero()
-    else:
-        new_expr = expr
+            new_expr = expr
 
-    return new_expr
+        expr = new_expr
+
+    return expr
 
 
 def _latex_repr(r):

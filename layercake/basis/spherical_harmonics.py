@@ -29,9 +29,12 @@ class SphericalHarmonicsBasis(SymbolicBasis):
     complex: bool, optional
         Whether the spherical harmonics are defined using complex functions.
         Default to `False`.
-    truncation: str
+    truncation: str, optional
         Type of truncation to use.
         Default to `"T"` for a triangular truncature.
+    exclude_constant_term: bool, optional
+        Whether the spherical harmonics corresponding to a constant should be discarded.
+        Default to `True`.
 
     Attributes
     ----------
@@ -45,7 +48,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
     """
 
-    def __init__(self, parameters, truncation_parameter, complex=False, truncation='T'):
+    def __init__(self, parameters, truncation_parameter, complex=False, truncation='T', exclude_constant_term=True):
 
         for param in parameters:
             if str(param.symbol) == 'R':
@@ -72,9 +75,15 @@ class SphericalHarmonicsBasis(SymbolicBasis):
                 for n in range(abs(m), M):
 
                     if complex:
+                        if exclude_constant_term:
+                            if n == 0 and m == 0:
+                                continue
                         mode_eq = (sqrt(2) * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m)))
                                    * assoc_legendre(n, m, sin(phi)) * exp(I * m * (llambda)))
                     else:
+                        if exclude_constant_term:
+                            if n == 0 and m == 0:
+                                continue
                         if m < 0:
                             mode_eq = (2 * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n + m)/factorial(n - m)))
                                        * assoc_legendre(n, -m, sin(phi)) * sin(-m * llambda))
