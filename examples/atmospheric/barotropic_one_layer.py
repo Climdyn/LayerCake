@@ -56,7 +56,7 @@ gamma = symbols(u'γ')
 gammap = Parameter(g, symbol=gamma, latex=r'\gamma')
 hh = np.zeros(len(b))
 hh[1] = 1.
-h = ParameterField('h', u'h', hh, b, s)
+h = ParameterField('h', u'h', hh, b)
 
 orographic_term = Jacobian(psi, h, b.coordinate_system, sign=-1, prefactors=(gammap, gammap))
 
@@ -80,7 +80,7 @@ Cdd = symbols('C')
 Cd = Parameter(0.05, symbol=Cdd)
 rr = np.zeros(len(b))
 rr[0] = 0.3
-C = ParameterField('eta', u'η', rr, b, s, latex=r'\eta')
+C = ParameterField('eta', u'η', rr, b, latex=r'\eta')
 CT = OperatorTerm(C, Laplacian, b.coordinate_system, prefactor=Cd)
 
 barotropic_equation.add_rhs_term(CT)

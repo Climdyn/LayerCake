@@ -162,12 +162,12 @@ class TestRP1982QgsSymbolic(TestQgsBase):
 
         hh = np.zeros(len(atmospheric_basis))
         hh[1] = 0.2
-        h = ParameterField('h', u'h', hh, atmospheric_basis, s)
+        h = ParameterField('h', u'h', hh, atmospheric_basis)
 
         # Equilibrium temperature
         rr = np.zeros(len(atmospheric_basis))
         rr[0] = 0.1
-        Tf = ParameterField('T', u'T', rr, atmospheric_basis, s)
+        Tf = ParameterField('T', u'T', rr, atmospheric_basis)
 
         # Defining the fields
         #######################

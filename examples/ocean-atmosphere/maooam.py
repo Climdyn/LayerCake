@@ -124,12 +124,12 @@ LSBpa = 8 * eps * sb * T0a ** 3 / (gamma_a * f0)
 # In the ocean
 Cov = np.zeros(len(atmospheric_basis))
 Cov[0] = 310
-Cpo = ParameterField("Co'", Symbol("Co'"), Cov / (gamma_o * f0) * rr / (f0 ** 2 * L ** 2), atmospheric_basis, s)
+Cpo = ParameterField("Co'", Symbol("Co'"), Cov / (gamma_o * f0) * rr / (f0 ** 2 * L ** 2), atmospheric_basis)
 
 # In the atmosphere
 Cav = np.zeros(len(atmospheric_basis))
 Cav[0] = 310./3.
-Cpa = ParameterField("Ca'", Symbol("Ca'"), a * Cav / (gamma_a * f0) * rr / (f0 ** 2 * L ** 2) / 2, atmospheric_basis, s)
+Cpa = ParameterField("Ca'", Symbol("Ca'"), a * Cav / (gamma_a * f0) * rr / (f0 ** 2 * L ** 2) / 2, atmospheric_basis)
 
 # Defining the fields
 #######################
