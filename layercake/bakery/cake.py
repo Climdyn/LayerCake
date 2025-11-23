@@ -22,7 +22,7 @@ from layercake.utils.tensor import sparse_mul, jsparse_mul
 from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor, compute_jacobian_permutations
 from layercake.formatters.fortran import FortranJacobianEquationFormatter, FortranEquationFormatter
 from layercake.formatters.python import PythonJacobianEquationFormatter, PythonEquationFormatter
-from layercake.formatters.python import JuliaJacobianEquationFormatter, JuliaEquationFormatter
+from layercake.formatters.julia import JuliaJacobianEquationFormatter, JuliaEquationFormatter
 from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
 from sympy import simplify, N
 from sympy.tensor.array import permutedims
