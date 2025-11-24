@@ -22,6 +22,7 @@ from layercake.utils.tensor import sparse_mul, jsparse_mul
 from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor, compute_jacobian_permutations
 from layercake.formatters.fortran import FortranJacobianEquationFormatter, FortranEquationFormatter
 from layercake.formatters.python import PythonJacobianEquationFormatter, PythonEquationFormatter
+from layercake.formatters.julia import JuliaJacobianEquationFormatter, JuliaEquationFormatter
 from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
 from sympy import simplify, N
 from sympy.tensor.array import permutedims
@@ -371,7 +372,8 @@ class Cake(object):
                     formatter = FortranEquationFormatter(lang_translation)
                     jacobian_formatter = FortranJacobianEquationFormatter(lang_translation)
                 elif language == 'julia':
-                    raise NotImplementedError('Julia language is not yet implemented. Stay tuned !')
+                    formatter = JuliaEquationFormatter(lang_translation)
+                    jacobian_formatter = JuliaJacobianEquationFormatter(lang_translation)
                 elif isinstance(language, (tuple, list)):
                     formatter = language[0]
                     jacobian_formatter = language[1]
