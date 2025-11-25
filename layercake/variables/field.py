@@ -284,9 +284,10 @@ class FunctionField(Variable):
         Variable.__init__(self, name, self.symbolic_expression, self.units, latex)
 
         self.parameters = None
-        self._compute_expansion(**parameters_array_kwargs)
-        if self.parameters.__len__() != len(basis):
-            raise ValueError('The number of parameters provided does not match the number of modes in the provided basis.')
+        if self.inner_product_definition is not None:
+            self._compute_expansion(timeout=True, num_threads=None, extra_substitutions=extra_substitutions, **parameters_array_kwargs)
+            if self.parameters.__len__() != len(basis):
+                raise ValueError('The number of parameters provided does not match the number of modes in the provided basis.')
 
     @property
     def dimensional_values(self):
@@ -363,6 +364,12 @@ class FunctionField(Variable):
             num_threads = cpu_count()
 
         substitutions = self.basis.substitutions
+        if self.expression_parameters is None:
+            expr_parameters = list()
+        else:
+            expr_parameters = self.expression_parameters
+        for param in expr_parameters:
+            substitutions.append((param.symbol, float(param)))
         if extra_substitutions is not None:
             substitutions += extra_substitutions
 
@@ -374,12 +381,30 @@ class FunctionField(Variable):
             output = parallel_integration(pool, args_list, substitutions, None, timeout,
                                           symbolic_int=False, permute=False)
 
-        res = np.array(len(self.basis), dtype=float)
+        res = np.zeros(len(self.basis), dtype=float)
         for i in output:
-            if isinstance(output[i], float):
+            if isinstance(output[i], (float, int)):
                 res[i] = output[i]
             else:
                 res[i] = output[i].subs(substitutions)
 
         self.parameters = ParametersArray(res, units=self.units, symbols=self.symbolic_expression, **parameters_array_kwargs)
+
+
+if __name__ == "__main__":
+    from layercake import Parameter
+    from layercake.basis.spherical_harmonics import SphericalHarmonicsBasis
+    from sympy import symbols, sin
+    from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
+    _R = symbols('R')
+    R = Parameter(1., symbol=_R)
+    parameters = [R]
+    basis = SphericalHarmonicsBasis(parameters, {'M': 4})
+    s = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer=None)
+
+    cs = s.coordinate_system
+    phi = cs.coordinates_symbol_as_list[1]
+
+    ff = FunctionField('ff', basis, sin(phi), inner_product_definition=s, latex=r'\sin \phi')
+
 
