@@ -353,4 +353,3 @@ res = solve_ivp(f, (0., 1000000.), ic)
 # plotting
 plt.plot(res.y[21], res.y[29])
 plt.show()
-

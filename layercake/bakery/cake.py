@@ -326,6 +326,7 @@ class Cake(object):
         language: str, optional
             String defining in which computing language the tendencies lists must be returned.
             Currently, it can be `'python'`, `'fortran'` or `'julia`'.
+            Default to `'python'`.
         lang_translation: dict(str)
             Additional language translation mapping provided by the user, mapping replacements for converting
             Sympy symbolic output strings to the target language.
