@@ -31,11 +31,15 @@ class FortranEquationFormatter(EquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Fortran language.
+
+    index_offset: int
+        Number that accesses the first element in an array. In Fortran the base index is 1.
     """
 
     def __init__(self, lang_translation=None):
         EquationFormatter.__init__(self, lang_translation=lang_translation)
         self.lang_translation.update({'conjugate': 'CONJG', })
+        self.index_offset = 1
 
     @property
     def opening_character(self):
@@ -62,11 +66,15 @@ class FortranJacobianEquationFormatter(JacobianEquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Fortran language.
+
+    index_offset: int
+        Number that accesses the first element in an array. In Fortran the base index is 1.
     """
 
     def __init__(self, lang_translation=None):
         JacobianEquationFormatter.__init__(self, lang_translation=lang_translation)
         self.lang_translation.update({'conjugate': 'CONJG', })
+        self.index_offset = 1
 
     @property
     def opening_character(self):
