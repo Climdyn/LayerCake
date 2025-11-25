@@ -13,10 +13,14 @@
 
 """
 
+from pebble import ProcessPool as Pool
+from multiprocessing import cpu_count
 import numpy as np
 from sympy import Symbol, Function
+
 from layercake.variables.variable import Variable, VariablesArray
 from layercake.variables.parameter import ParametersArray
+from layercake.utils.parallel import parallel_integration
 
 
 class Field(Variable):
@@ -235,6 +239,9 @@ class FunctionField(Variable):
     latex: str, optional
         Latex string representing the variable.
         Empty by default.
+    extra_substitutions: list(tuple)
+        List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.
+        The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
     **parameters_array_kwargs: dict, optional
         Used to create the field state :class:`ParametersArray` object.
         Passed to the :class:`ParametersArray` class constructor.
@@ -266,7 +273,7 @@ class FunctionField(Variable):
     """
 
     def __init__(self, name, basis, symbolic_expression, expression_parameters=None,
-                 inner_product_definition=None, units="", latex=None, **parameters_array_kwargs):
+                 inner_product_definition=None, units="", latex=None, extra_substitutions=None, **parameters_array_kwargs):
 
         self.basis = basis
         self.inner_product_definition = inner_product_definition
@@ -277,7 +284,7 @@ class FunctionField(Variable):
         Variable.__init__(self, name, self.symbolic_expression, self.units, latex)
 
         self.parameters = None
-        self.compute_expansion(**parameters_array_kwargs)
+        self._compute_expansion(**parameters_array_kwargs)
         if self.parameters.__len__() != len(basis):
             raise ValueError('The number of parameters provided does not match the number of modes in the provided basis.')
 
@@ -322,15 +329,57 @@ class FunctionField(Variable):
     def __repr__(self):
         return self.__str__()
 
-    def compute_expansion(self, **parameters_array_kwargs):
+    def _compute_expansion(self, timeout=None, num_threads=None, extra_substitutions=None, **parameters_array_kwargs):
         """Compute the Galerkin expansion and store the result.
 
         Parameters
         ----------
+        timeout: None or bool or int
+            Control the switch from symbolic to numerical integration.
+            In the end, all results are converted to numerical expressions, but
+            by default, `parallel_integration` workers will try first to integrate
+            |Sympy| expressions symbolically. However a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
+        num_threads: None or int, optional
+            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
+            Default to `None`.
+        extra_substitutions: list(tuple)
+            List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.
+            The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
         **parameters_array_kwargs: dict, optional
             Used to create the field state :class:`ParametersArray` object.
             Passed to the :class:`ParametersArray` class constructor.
 
         """
-        pass
+        if num_threads is None:
+            num_threads = cpu_count()
+
+        substitutions = self.basis.substitutions
+        if extra_substitutions is not None:
+            substitutions += extra_substitutions
+
+        args_list = [(idx, self.inner_product_definition.inner_product,
+                      (self.basis[idx].subs(substitutions), self.symbolic_expression.subs(substitutions)))
+                     for idx in range(len(self.basis))]
+
+        with Pool(max_workers=num_threads) as pool:
+            output = parallel_integration(pool, args_list, substitutions, None, timeout,
+                                          symbolic_int=False, permute=False)
+
+        res = np.array(len(self.basis), dtype=float)
+        for i in output:
+            if isinstance(output[i], float):
+                res[i] = output[i]
+            else:
+                res[i] = output[i].subs(substitutions)
+
+        self.parameters = ParametersArray(res, units=self.units, symbols=self.symbolic_expression, **parameters_array_kwargs)
 
