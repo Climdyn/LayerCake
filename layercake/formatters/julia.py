@@ -31,7 +31,6 @@ class JuliaEquationFormatter(EquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Julia language.
-
     index_offset: int
         Number that accesses the first element in an array. In Julia the index base is 1.
     """
@@ -70,7 +69,6 @@ class JuliaJacobianEquationFormatter(JacobianEquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Julia language.
-
     index_offset: int
         Number that accesses the first element in an array. In Julia the index base is 1.
     """

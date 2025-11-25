@@ -33,9 +33,8 @@ class EquationFormatter(ABC):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the target language.
-
     index_offset: int
-        Number that accesses the first element in an array. Defulats to 0.
+        Number that accesses the first element in an array. Defaults to 0.
     """
 
     def __init__(self, lang_translation=None):
@@ -119,6 +118,8 @@ class JacobianEquationFormatter(EquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the target language.
+    index_offset: int
+        Number that accesses the first element in an array. Defaults to 0.
     """
 
     def __init__(self, lang_translation=None):
@@ -154,7 +155,9 @@ class JacobianEquationFormatter(EquationFormatter):
                 coords = get_coords_from_index(n, ndim, shape_len-1)
                 j = coords[0]
                 if equations_matrix[i][j] is None:
-                    equations_matrix[i][j] = f'{tendencies}{self.opening_character}{i + self.index_offset - 1},{j + self.index_offset - 1}{self.closing_character} = '
+                    equations_matrix[i][j] = f'{tendencies}{self.opening_character}' \
+                                             f'{i + self.index_offset - 1},' \
+                                             f'{j + self.index_offset - 1}{self.closing_character} = '
                 new_term = f'{val} '
                 if new_term[0] != '-':
                     new_term = '+' + new_term

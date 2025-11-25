@@ -31,6 +31,8 @@ class PythonEquationFormatter(EquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Python language.
+    index_offset: int
+        Number that accesses the first element in an array. In Python the index base is 0.
     """
 
     def __init__(self, lang_translation=None):
@@ -65,6 +67,8 @@ class PythonJacobianEquationFormatter(JacobianEquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Python language.
+    index_offset: int
+        Number that accesses the first element in an array. In Python the index base is 0.
     """
 
     def __init__(self, lang_translation=None):

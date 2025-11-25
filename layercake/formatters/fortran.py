@@ -31,7 +31,6 @@ class FortranEquationFormatter(EquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Fortran language.
-
     index_offset: int
         Number that accesses the first element in an array. In Fortran the base index is 1.
     """
@@ -66,7 +65,6 @@ class FortranJacobianEquationFormatter(JacobianEquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the Fortran language.
-
     index_offset: int
         Number that accesses the first element in an array. In Fortran the base index is 1.
     """
