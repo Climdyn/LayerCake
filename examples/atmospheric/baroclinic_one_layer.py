@@ -250,4 +250,3 @@ res = solve_ivp(f, (0., 20000.), ic)
 # plotting
 plt.plot(res.y.T)
 plt.show()
-
