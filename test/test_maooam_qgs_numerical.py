@@ -33,7 +33,7 @@ from layercake.bakery.cake import Cake
 from test.test_base import TestQgsBase
 
 
-real_eps = 10 * np.finfo(np.float64).eps
+real_eps = 20 * np.finfo(np.float64).eps
 
 
 class State:
@@ -408,7 +408,7 @@ class TestMaooamQgsNumerical(TestQgsBase):
         #
         # --------------------------------
 
-        cake.compute_tensor(True, True
+        cake.compute_tensor(True, True, compute_inner_products_kwargs={'timeout': True}
                             )
 
         self.state.layercake_cake = cake

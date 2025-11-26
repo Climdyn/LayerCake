@@ -294,7 +294,7 @@ class TestRP1982QgsNumerical(TestQgsBase):
         #
         # --------------------------------
 
-        cake.compute_tensor(True, True
+        cake.compute_tensor(True, True, compute_inner_products_kwargs={'timeout': True}
                             )
 
         self.state.layercake_cake = cake
