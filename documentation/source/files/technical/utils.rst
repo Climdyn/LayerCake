@@ -13,3 +13,6 @@ Module with various submodules with useful functions used throughout the code.
 
 .. automodule:: layercake.utils.commutativity
     :members:
+
+.. automodule:: layercake.utils.parallel
+    :members:

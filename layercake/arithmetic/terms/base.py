@@ -190,7 +190,17 @@ class ArithmeticTerms(ABC):
             Whether to compute numerical or symbolic inner products.
             Default to `False` (symbolic inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
@@ -212,7 +222,17 @@ class ArithmeticTerms(ABC):
             Whether to compute numerical (with parameters replaced with their values) or symbolic inner products.
             Default to `False` (symbolic inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
@@ -432,7 +452,17 @@ class SingleArithmeticTerm(ArithmeticTerms):
             Whether to compute numerical or symbolic inner products.
             Default to `False` (symbolic inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
@@ -758,7 +788,17 @@ class OperationOnTerms(ArithmeticTerms):
             Whether to compute numerical or symbolic inner products.
             Default to `False` (symbolic inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.

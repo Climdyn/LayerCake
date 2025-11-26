@@ -6,6 +6,10 @@
 
     Defines functions to deal with parallel computation tasks.
 
+    Warnings
+    --------
+    Those are low-level computation routines which are not user-friendly.
+    Usage must be thoroughly tested.
 
 """
 
@@ -32,9 +36,10 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
     substitutions: list(tuple)
         List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.
         The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
-    destination: None or dict
-        Place where to store the output. If a dictionary is provided, it will append the output of the integrations to it.
+    destination: None or sparse.DOK or ~numpy.ndarray
+        Place where to store the output. If an array is provided, it will append the output of the integrations to it.
         If `None`, it will create a new dictionary and return it.
+        If `symbolic_int` is `True`, then `destination` should be `None`.
     timeout: None or bool or int
         Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
         |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
