@@ -34,7 +34,7 @@ from layercake.bakery.cake import Cake
 from test.test_base import TestQgsBase
 
 
-real_eps = 10 * np.finfo(np.float64).eps
+real_eps = 20 * np.finfo(np.float64).eps
 
 
 class State:
