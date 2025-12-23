@@ -41,9 +41,9 @@ class OperatorTerm(SingleArithmeticTerm):
         to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: ~parameter.Parameter, optional
+    prefactor: ~parameter.Parameter or ~field.FunctionField, optional
         Prefactor in front of the operator.
-        Must be specified as a model parameter.
+        Must be specified as a model parameter or a function field.
     name: str, optional
         Name of the term.
     sign: int, optional
@@ -64,7 +64,7 @@ class OperatorTerm(SingleArithmeticTerm):
         Set initially to `None` (not computed).
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
-    prefactor: ~parameter.Parameter
+    prefactor: ~parameter.Parameter or ~field.FunctionField, optional
         Prefactor in front of the operator.
     """
 
@@ -89,7 +89,10 @@ class OperatorTerm(SingleArithmeticTerm):
         if self.prefactor is None:
             return sproduct(self.sign * self._operator, self.field.symbol)
         else:
-            return sproduct(self.sign * self.prefactor, self._operator, self.field.symbol)
+            if hasattr(self.prefactor, 'numerical_expression'):
+                return sproduct(self.sign * self.prefactor.numerical_expression, self._operator, self.field.symbol)
+            else:
+                return sproduct(self.sign * self.prefactor, self._operator, self.field.symbol)
 
     @property
     def latex(self):
@@ -136,9 +139,9 @@ class ComposedOperatorsTerm(SingleArithmeticTerm):
         to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: ~parameter.Parameter, optional
-        Prefactor in front of the operators.
-        Must be specified as a model parameter.
+    prefactor: ~parameter.Parameter or ~field.FunctionField, optional
+        Prefactor in front of the operator.
+        Must be specified as a model parameter or a function field.
     name: str, optional
         Name of the term.
     sign: int, optional
@@ -160,7 +163,7 @@ class ComposedOperatorsTerm(SingleArithmeticTerm):
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute
         the term representation on a given function basis.
-    prefactor: ~parameter.Parameter
+    prefactor: ~parameter.Parameter or ~field.FunctionField, optional
         Prefactor in front of the operator.
     """
 
@@ -191,7 +194,10 @@ class ComposedOperatorsTerm(SingleArithmeticTerm):
         expr = sproduct(*self._operators)
         expr = sproduct(expr, self.field.symbol)
         if self.prefactor is not None:
-            expr = sproduct(self.prefactor, expr)
+            if hasattr(self.prefactor, 'numerical_expression'):
+                expr = sproduct(self.prefactor.numerical_expression, expr)
+            else:
+                expr = sproduct(self.prefactor, expr)
         return sproduct(self.sign, expr)
 
     @property

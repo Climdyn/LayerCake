@@ -39,6 +39,8 @@ import warnings
 import numpy as np
 from fractions import Fraction
 
+import sympy
+
 from layercake.variables.utils import combine_units
 
 
@@ -145,6 +147,8 @@ class Parameter(float):
                     descr = "(" + self.description + ") + (" + other.description + ")"
 
             return Parameter(res, description=descr, units=self.units, symbol=None, symbolic_expression=expr)
+        elif isinstance(other, sympy.Expr):
+            return self.symbolic_expression + other
         else:
             try:
                 if self.symbol is not None:
@@ -196,6 +200,8 @@ class Parameter(float):
                     descr = "(" + self.description + ") - (" + other.description + ")"
 
             return Parameter(res, description=descr, units=self.units, symbol=None, symbolic_expression=expr)
+        elif isinstance(other, sympy.Expr):
+            return self.symbolic_expression - other
         else:
             try:
                 if self.symbol is not None:
@@ -263,6 +269,8 @@ class Parameter(float):
                     descr = "(" + self.description + ") * (" + other.description + ")"
 
             return Parameter(res, description=descr, units=units, symbol=None, symbolic_expression=expr)
+        elif isinstance(other, sympy.Expr):
+            return self.symbolic_expression * other
         else:
             try:
                 if self.symbol is not None:
@@ -313,6 +321,8 @@ class Parameter(float):
                     descr = "(" + self.description + ") / (" + other.description + ")"
 
             return Parameter(res, description=descr, units=units, symbol=None, symbolic_expression=expr)
+        elif isinstance(other, sympy.Expr):
+            return self.symbolic_expression / other
         else:
             try:
                 if self.symbol is not None:
@@ -329,6 +339,8 @@ class Parameter(float):
                 return res
 
     def __rtruediv__(self, other):
+        if isinstance(other, sympy.Expr):
+            return other / self.symbolic_expression
         res = other / float(self)
         try:
             if self.symbol is not None:

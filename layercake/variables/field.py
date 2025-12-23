@@ -310,6 +310,18 @@ class FunctionField(Variable):
         return self.parameters
 
     @property
+    def numerical_expression(self):
+        """~sympy.core.expr.Expr: The numeric expression of the function, i.e. with parameters replaced by their numerical value."""
+        substitutions = list()
+        if self.expression_parameters is None:
+            expr_parameters = list()
+        else:
+            expr_parameters = self.expression_parameters
+        for param in expr_parameters:
+            substitutions.append((param.symbol, float(param)))
+        return self.symbolic_expression.subs(substitutions)
+
+    @property
     def input_dimensional(self):
         """bool: Indicate if the provided value is dimensional or not."""
         return self.parameters.input_dimensional
@@ -339,7 +351,7 @@ class FunctionField(Variable):
             Control the switch from symbolic to numerical integration.
             In the end, all results are converted to numerical expressions, but
             by default, `parallel_integration` workers will try first to integrate
-            |Sympy| expressions symbolically. However a fallback to numerical integration can be enforced.
+            |Sympy| expressions symbolically. However, a fallback to numerical integration can be enforced.
             The options are:
 
             * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
@@ -394,8 +406,9 @@ class FunctionField(Variable):
 if __name__ == "__main__":
     from layercake import Parameter
     from layercake.basis.spherical_harmonics import SphericalHarmonicsBasis
-    from sympy import symbols, sin
+    from sympy import symbols, sin, cos
     from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
+
     _R = symbols('R')
     R = Parameter(1., symbol=_R)
     parameters = [R]
@@ -405,6 +418,7 @@ if __name__ == "__main__":
     cs = s.coordinate_system
     phi = cs.coordinates_symbol_as_list[1]
 
+    p = u'ψ'
+    psi = Field("psi", p, basis, s, units="[m^2][s^-2]", latex=r'\psi')
     ff = FunctionField('ff', basis, sin(phi), inner_product_definition=s, latex=r'\sin \phi')
-
-
+    ffc = FunctionField('ffc', basis, R * cos(phi), inner_product_definition=s, latex=r'\cos \phi')

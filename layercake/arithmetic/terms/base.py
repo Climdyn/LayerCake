@@ -324,9 +324,9 @@ class SingleArithmeticTerm(ArithmeticTerms):
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: ~parameter.Parameter, optional
+    prefactor: ~parameter.Parameter or ~field.FunctionField, optional
         Prefactor in front of the single term.
-        Must be specified as a model parameter.
+        Must be specified as a model parameter or a function field.
     name: str, optional
         Name of the term. Must be defined in subclasses.
     sign: int, optional
@@ -346,7 +346,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
         Set initially to `None` (not computed).
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
-    prefactor: ~parameter.Parameter
+    prefactor: ~parameter.Parameter or ~field.FunctionField
         Prefactor in front of the single term.
     """
     def __init__(self, field, inner_product_definition=None, prefactor=None, name='', sign=1):
