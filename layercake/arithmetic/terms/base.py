@@ -25,6 +25,7 @@ from itertools import product
 from copy import deepcopy
 
 from sympy import ImmutableSparseMatrix, ImmutableSparseNDimArray, Lambda, symbols
+from sympy.core.function import BadSignatureError
 from layercake.arithmetic.symbolic.operators import evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 from layercake.inner_products.definition import InnerProductDefinition
@@ -386,14 +387,22 @@ class SingleArithmeticTerm(ArithmeticTerms):
         """~sympy.core.expr.Expr: The symbolic expression of the term(s), but as a symbolic functional. Only contains symbols."""
         foo = disable_commutativity(self.symbolic_expression)
         ss = disable_commutativity(self.field.symbol)
-        return Lambda(ss, foo)
+        try:
+            return Lambda(ss, foo)
+        except BadSignatureError:
+            _x = symbols('_x')
+            return Lambda(_x, foo)
 
     @property
     def numerical_function(self):
         """~sympy.core.expr.Expr: The numeric expression of the term(s), as a symbolic functional, but with parameters replaced by their numerical value."""
         foo = disable_commutativity(self.numerical_expression)
         ss = disable_commutativity(self.field.symbol)
-        return Lambda(ss, foo)
+        try:
+            return Lambda(ss, foo)
+        except BadSignatureError:
+            _x = symbols('_x')
+            return Lambda(_x, foo)
 
     @staticmethod
     def _evaluate(func):
