@@ -339,7 +339,7 @@ class FunctionField(Variable):
             Control the switch from symbolic to numerical integration.
             In the end, all results are converted to numerical expressions, but
             by default, `parallel_integration` workers will try first to integrate
-            |Sympy| expressions symbolically. However a fallback to numerical integration can be enforced.
+            |Sympy| expressions symbolically. However, a fallback to numerical integration can be enforced.
             The options are:
 
             * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
@@ -394,7 +394,7 @@ class FunctionField(Variable):
 if __name__ == "__main__":
     from layercake import Parameter
     from layercake.basis.spherical_harmonics import SphericalHarmonicsBasis
-    from sympy import symbols, sin
+    from sympy import symbols, sin, cos
     from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
     _R = symbols('R')
     R = Parameter(1., symbol=_R)
@@ -406,5 +406,6 @@ if __name__ == "__main__":
     phi = cs.coordinates_symbol_as_list[1]
 
     ff = FunctionField('ff', basis, sin(phi), inner_product_definition=s, latex=r'\sin \phi')
+    ffc = FunctionField('ffc', basis, cos(phi), inner_product_definition=s, latex=r'\cos \phi')
 
 
