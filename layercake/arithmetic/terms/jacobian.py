@@ -49,9 +49,9 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
     v = coordinate_system.coordinates_symbol_as_list[1]
 
     du_field1 = OperatorTerm(field1, D, u, prefactor=prefactors[0])
-    du_field2 = OperatorTerm(field2, D, u, prefactor=prefactors[1])
+    du_field2 = OperatorTerm(field2, D, u)
 
-    dv_field1 = OperatorTerm(field1, D, v)
+    dv_field1 = OperatorTerm(field1, D, v, prefactor=prefactors[1])
     dv_field2 = OperatorTerm(field2, D, v)
 
     jacobian1 = ProductOfTerms(du_field1, dv_field2, sign=sign)
