@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-from sympy import symbols
+from sympy import symbols, sin, cos
 
 import sys
 import os
@@ -18,7 +18,6 @@ from layercake.basis import SphericalHarmonicsBasis
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 
 # Defining parameter for the sphere
-
 _omega = symbols('ω')
 omega = Parameter(7.292e-5, symbol=_omega, latex=r'\omega', units='[s^-1]')
 _R = symbols('R')
@@ -33,6 +32,9 @@ s = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_sy
 llambda = basis.coordinate_system.coordinates_symbol_as_list[0]
 phi = basis.coordinate_system.coordinates_symbol_as_list[1]
 
+# Defining the inverse of the cosine of the latitude
+cos_inv = FunctionField(u'1/(cos ϕ)', basis, 1 / cos(phi), inner_product_definition=s, latex=r'\frac{1}{\cos \phi}')
+
 # Defining the field
 p = u'ψ'
 psi = Field("streamfunction", p, basis, s, units="[m^2][s^-2]", latex=r'\psi')
@@ -44,18 +46,18 @@ vorticity = OperatorTerm(psi, Laplacian, basis.coordinate_system)
 planetary_equation = Equation(psi, lhs_term=vorticity)
 
 # Defining the advection term
-advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1)
+advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1, prefactors=(cos_inv, cos_inv))
 
 planetary_equation.add_rhs_terms(advection_term)
 
 
 # Defining the earth rotation f-term
-sin_func = basis.find_functions(1, 0)
-rr = np.zeros(len(basis))
-rr[sin_func] = np.sqrt(np.pi / 3)
-sin_theta = ParameterField('2 sin phi', u'sin ϕ', rr, basis, s, latex=r'2 \sin \phi')
+_a = symbols('a')
+a = Parameter(2. * float(omega), symbol=_a)
+sin_theta = FunctionField(u'sin ϕ', basis, a * sin(phi), expression_parameters=(a,),
+                          inner_product_definition=s, latex=r'\sin \phi')
 
-rotation_advection_terms = Jacobian(psi, sin_theta, basis.coordinate_system, sign=-1, prefactors=(omega, omega))
+rotation_advection_terms = Jacobian(psi, sin_theta, basis.coordinate_system, sign=-1, prefactors=(cos_inv, cos_inv))
 
 planetary_equation.add_rhs_terms(rotation_advection_terms)
 
@@ -68,17 +70,17 @@ layer.add_equation(planetary_equation)
 cake = Cake()
 cake.add_layer(layer)
 
-# # computing the tensor
-# cake.compute_tensor(True, True
-#                     )
-# # computing the tendencies
-# f, Df = cake.compute_tendencies()
-#
-# # integrating
-# ic = np.random.rand(cake.ndim) * 0.1
-# res = solve_ivp(f, (0., 1000.), ic)
-#
-# # plotting
-# plt.plot(res.y.T)
-# plt.show()
-#
+# computing the tensor
+cake.compute_tensor(True, True, compute_inner_products_kwargs={'timeout': True}
+                    )
+# computing the tendencies
+f, Df = cake.compute_tendencies()
+
+# integrating
+ic = np.random.rand(cake.ndim) * 0.1
+res = solve_ivp(f, (0., 1000.), ic)
+
+# plotting
+plt.plot(res.y.T)
+plt.show()
+
