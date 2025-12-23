@@ -20,19 +20,17 @@
 from abc import ABC, abstractmethod
 import sparse as sp
 from pebble import ProcessPool as Pool
-from concurrent.futures import TimeoutError
 from multiprocessing import cpu_count
-from sympy.utilities.iterables import multiset_permutations
 from itertools import product
 from copy import deepcopy
 
-from scipy.integrate import dblquad
-from sympy import ImmutableSparseMatrix, ImmutableSparseNDimArray, lambdify, Lambda, symbols
+from sympy import ImmutableSparseMatrix, ImmutableSparseNDimArray, Lambda, symbols
 from layercake.arithmetic.symbolic.operators import evaluate_expr
 from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 from layercake.inner_products.definition import InnerProductDefinition
 from layercake.arithmetic.utils import sproduct
 from layercake.utils.symbolic_tensor import remove_dic_zeros
+from layercake.utils.parallel import parallel_integration
 
 
 class ArithmeticTerms(ABC):
@@ -192,7 +190,17 @@ class ArithmeticTerms(ABC):
             Whether to compute numerical or symbolic inner products.
             Default to `False` (symbolic inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
@@ -214,7 +222,17 @@ class ArithmeticTerms(ABC):
             Whether to compute numerical (with parameters replaced with their values) or symbolic inner products.
             Default to `False` (symbolic inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
@@ -249,8 +267,8 @@ class ArithmeticTerms(ABC):
         else:
             res = None
         with Pool(max_workers=num_threads) as pool:
-            output = _parallel_compute(pool, args_list, substitutions, res, timeout,
-                                       symbolic_int=not numerical, permute=permute)
+            output = parallel_integration(pool, args_list, substitutions, res, timeout,
+                                          symbolic_int=not numerical, permute=permute)
         if not numerical:
             output = remove_dic_zeros(output)
             if self._rank > 2:
@@ -306,9 +324,9 @@ class SingleArithmeticTerm(ArithmeticTerms):
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: ~parameter.Parameter, optional
+    prefactor: ~parameter.Parameter or ~field.FunctionField, optional
         Prefactor in front of the single term.
-        Must be specified as a model parameter.
+        Must be specified as a model parameter or a function field.
     name: str, optional
         Name of the term. Must be defined in subclasses.
     sign: int, optional
@@ -328,7 +346,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
         Set initially to `None` (not computed).
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
-    prefactor: ~parameter.Parameter
+    prefactor: ~parameter.Parameter or ~field.FunctionField
         Prefactor in front of the single term.
     """
     def __init__(self, field, inner_product_definition=None, prefactor=None, name='', sign=1):
@@ -434,7 +452,17 @@ class SingleArithmeticTerm(ArithmeticTerms):
             Whether to compute numerical or symbolic inner products.
             Default to `False` (symbolic inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
@@ -760,7 +788,17 @@ class OperationOnTerms(ArithmeticTerms):
             Whether to compute numerical or symbolic inner products.
             Default to `False` (symbolic inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
@@ -772,120 +810,3 @@ class OperationOnTerms(ArithmeticTerms):
         basis_list = self._create_inner_products_basis_list(basis)
         self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
         self.inner_products = self.sign * self.inner_products
-
-
-# TODO: maybe move the two apply functions below in a separate module and make them public
-def _apply(ls):
-    return ls[0], ls[1](*ls[2])
-
-
-def _num_apply(ls):
-    integrand = ls[1](*ls[2], integrand=True)
-
-    num_integrand = integrand[0].subs(ls[3])
-    func = lambdify((integrand[1][0], integrand[2][0]), num_integrand, 'numpy')
-
-    try:
-        a = integrand[2][1].subs(ls[3])
-    except:
-        a = integrand[2][1]
-    try:
-        a = a.evalf()
-    except:
-        pass
-    try:
-        b = integrand[2][2].subs(ls[3])
-    except:
-        b = integrand[2][2]
-    try:
-        b = b.evalf()
-    except:
-        pass
-    try:
-        gfun = integrand[1][1].subs(ls[3])
-    except:
-        gfun = integrand[1][1]
-    try:
-        gfun = gfun.evalf()
-    except:
-        pass
-    try:
-        hfun = integrand[1][2].subs(ls[3])
-    except:
-        hfun = integrand[1][2]
-    try:
-        hfun = hfun.evalf()
-    except:
-        pass
-
-    res = dblquad(func, a, b, gfun, hfun)
-
-    if abs(res[0]) <= res[1]:
-        return ls[0], 0
-    else:
-        return ls[0], res[0]
-
-
-# TODO: move the functions below in a separate dedicated 'parallel" module and make it public
-def _parallel_compute(pool, args_list, subs, destination, timeout, permute=False, symbolic_int=False):
-    if destination is None:
-        return_dict = True
-        destination = dict()
-    else:
-        return_dict = False
-
-    if timeout is False or symbolic_int:
-        timeout = None
-
-    if timeout is not True:
-        future = pool.map(_apply, args_list, timeout=timeout)
-        results = future.result()
-        num_args_list = list()
-        i = 0
-        while True:
-            try:
-                res = next(results)
-                if symbolic_int:
-                    expr = res[1].simplify()
-                    destination[res[0]] = expr
-                    if permute:
-                        i = res[0][0]
-                        idx = res[0][1:]
-                        perm_idx = multiset_permutations(idx)
-                        for perm in perm_idx:
-                            idx = [i] + perm
-                            destination[tuple(idx)] = expr
-                else:
-                    destination[res[0]] = float(res[1].subs(subs))
-            except StopIteration:
-                break
-            except TimeoutError:
-                num_args_list.append(args_list[i] + [subs])
-            i += 1
-    else:
-        num_args_list = [list(args) + [subs] for args in args_list]
-
-    future = pool.map(_num_apply, num_args_list)
-    results = future.result()
-    if permute:
-        while True:
-            try:
-                res = next(results)
-                i = res[0][0]
-                idx = res[0][1:]
-                perm_idx = multiset_permutations(idx)
-                for perm in perm_idx:
-                    idx = [i] + perm
-                    destination[tuple(idx)] = res[1]
-            except StopIteration:
-                break
-    else:
-        while True:
-            try:
-                res = next(results)
-                destination[res[0]] = res[1]
-            except StopIteration:
-                break
-
-    if return_dict:
-        return destination

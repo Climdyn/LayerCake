@@ -22,7 +22,7 @@ from sympy import zeros as sympy_zeros
 from sympy.matrices.exceptions import NonInvertibleMatrixError
 from layercake.arithmetic.terms.constant import ConstantTerm
 from layercake.arithmetic.terms.operations import ProductOfTerms
-from layercake.variables.field import ParameterField
+from layercake.variables.field import ParameterField, FunctionField
 from layercake.utils.symbolic_tensor import symbolic_tensordot
 
 
@@ -246,7 +246,7 @@ class Layer(object):
                         if isinstance(equation_term, ProductOfTerms):
                             contract = dict()
                             for i, t in enumerate(equation_term.terms):
-                                if isinstance(t.field, ParameterField):
+                                if isinstance(t.field, (ParameterField, FunctionField)):
                                     params = t.field.parameters.astype(float)
                                     contract[i] = params
                             if contract:
@@ -255,7 +255,7 @@ class Layer(object):
                                     increment = np.tensordot(increment, params, ((i+1,), (0,)))
                                     args[i+1] = 0
                         elif hasattr(equation_term, 'field'):
-                            if isinstance(equation_term.field, ParameterField):
+                            if isinstance(equation_term.field, (ParameterField, FunctionField)):
                                 params = equation_term.field.parameters.astype(float)
                                 increment = np.tensordot(increment, params, ((1,), (0,)))
                                 args[1] = 0
@@ -316,7 +316,7 @@ class Layer(object):
                         if isinstance(equation_term, ProductOfTerms):
                             contract = dict()
                             for i, t in enumerate(equation_term.terms):
-                                if isinstance(t.field, ParameterField):
+                                if isinstance(t.field, (ParameterField, FunctionField)):
                                     term_symbol_list = list()
                                     term_symbol_list.append(list(t.field.symbols))
                                     params = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)
@@ -332,7 +332,7 @@ class Layer(object):
                                     iargs.append(0)
                                     increment = increment[tuple(iargs)]
                         elif hasattr(equation_term, 'field'):
-                            if isinstance(equation_term.field, ParameterField):
+                            if isinstance(equation_term.field, (ParameterField, FunctionField)):
                                 term_symbol_list = list()
                                 term_symbol_list.append(list(equation_term.field.symbols))
                                 params = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)

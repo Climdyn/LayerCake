@@ -33,11 +33,14 @@ class EquationFormatter(ABC):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the target language.
+    index_offset: int
+        Number that accesses the first element in an array. Defaults to 0.
     """
 
     def __init__(self, lang_translation=None):
 
         self.lang_translation = dict()
+        self.index_offset = 0
 
         if lang_translation is not None:
             self.lang_translation.update(lang_translation)
@@ -83,7 +86,8 @@ class EquationFormatter(ABC):
         return equations_list[1:]
 
     def _format_components(self, s, idx):
-        return f'{s}{self.opening_character}{idx}{self.closing_character}'
+        # Index offset included to allow for differnet language index bases
+        return f'{s}{self.opening_character}{idx + self.index_offset - 1}{self.closing_character}'
 
     @property
     @abstractmethod
@@ -114,6 +118,8 @@ class JacobianEquationFormatter(EquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the target language.
+    index_offset: int
+        Number that accesses the first element in an array. Defaults to 0.
     """
 
     def __init__(self, lang_translation=None):
@@ -149,7 +155,9 @@ class JacobianEquationFormatter(EquationFormatter):
                 coords = get_coords_from_index(n, ndim, shape_len-1)
                 j = coords[0]
                 if equations_matrix[i][j] is None:
-                    equations_matrix[i][j] = f'{tendencies}({i},{j}) = '
+                    equations_matrix[i][j] = f'{tendencies}{self.opening_character}' \
+                                             f'{i + self.index_offset - 1},' \
+                                             f'{j + self.index_offset - 1}{self.closing_character} = '
                 new_term = f'{val} '
                 if new_term[0] != '-':
                     new_term = '+' + new_term

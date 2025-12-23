@@ -13,6 +13,7 @@
 from sympy import Symbol, S, Eq
 import matplotlib.pyplot as plt
 from layercake.arithmetic.terms.base import ArithmeticTerms, OperationOnTerms
+from layercake.variables.field import FunctionField
 
 
 class Equation(object):
@@ -113,12 +114,24 @@ class Equation(object):
             if issubclass(term.__class__, OperationOnTerms):
                 for tterm in term.terms:
                     param = tterm.prefactor
-                    if param is not None and not self._isin(param, parameters_list):
-                        parameters_list.append(param)
+                    if param is not None:
+                        if isinstance(param, FunctionField):
+                            for par in param.expression_parameters:
+                                if not self._isin(par, parameters_list):
+                                    parameters_list.append(param)
+                        else:
+                            if not self._isin(param, parameters_list):
+                                parameters_list.append(param)
             else:
                 param = term.prefactor
-                if param is not None and not self._isin(param, parameters_list):
-                    parameters_list.append(param)
+                if param is not None:
+                    if isinstance(param, FunctionField):
+                        for par in param.expression_parameters:
+                            if not self._isin(par, parameters_list):
+                                parameters_list.append(param)
+                    else:
+                        if not self._isin(param, parameters_list):
+                            parameters_list.append(param)
 
         for param_field in self.parameter_fields:
             for param in param_field.parameters:
