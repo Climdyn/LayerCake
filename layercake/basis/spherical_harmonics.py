@@ -66,7 +66,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
             for m in range(-M, M+1):
 
-                for n in range(abs(m), M):
+                for n in range(abs(m), M+1):
 
                     if complex:
                         mode_eq = sqrt(2) * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m))) * assoc_legendre(n, m, sin(phi)) * exp(I * m * (llambda))
@@ -75,7 +75,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
                             mode_eq = (2 * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n + m)/factorial(n - m)))
                                        * assoc_legendre(n, -m, sin(phi)) * sin(-m * llambda))
                         elif m == 0:
-                            mode_eq = sqrt((2 * n + 1)/(4 * pi)) * assoc_legendre(n, 0, sin(phi))
+                            mode_eq = pi * sqrt((2 * n + 1)/(2 * pi)) * assoc_legendre(n, 0, sin(phi))
 
                         else:
                             mode_eq = (2 * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m)))
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     _R = symbols('R')
     R = Parameter(1., symbol=_R)
     parameters = [R]
-    basis = SphericalHarmonicsBasis(parameters, {'M': 10})  # , complex=True)
+    basis = SphericalHarmonicsBasis(parameters, {'M': 4})  # , complex=True)
     s = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer='trig')  # , complex=True)
     sn = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer=None)  # , complex=True)
 
