@@ -15,7 +15,11 @@ A partial differential equation is mainly implemented with a :class:`~layercake.
 Symbolic submodule
 ------------------
 
-This submodule deals with the definition of high-level symbolic operations and operators.
+This submodule deals with the definition of high-level expressions, symbolic operations and operators.
+
+.. automodule:: layercake.arithmetic.symbolic.expressions
+    :show-inheritance:
+    :members:
 
 .. automodule:: layercake.arithmetic.symbolic.operators
     :show-inheritance:
