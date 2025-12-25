@@ -216,16 +216,17 @@ class ParameterField(Variable):
 
 class FunctionField(Variable):
     """ Class defining a static spatial fields in the models, specified as a function of the model's coordinates.
-    Can be used as a parameter or as a symbolic expression (for example, as a prefactor).
 
     Parameters
     ----------
     name: str
         Name of the field.
+    symbol: ~sympy.core.symbol.Symbol
+        Symbol representing the field.
+    symbolic_expression: ~sympy.core.expr.Expr
+        A |Sympy| expression to represent the field mathematical expression in symbolic expressions.
     basis: SymbolicBasis
         A symbolic basis of functions on which the Galerkin expansion of the field is performed.
-    symbolic_expression: ~sympy.core.expr.Expr
-        A |Sympy| expression to represent the field in symbolic expressions.
     expression_parameters: None or list(~parameter.Parameter), optional
         List of parameters appearing in the symbolic expression.
         If `None`, assumes that no parameters are appearing there.
@@ -250,15 +251,14 @@ class FunctionField(Variable):
     ----------
     name: str
         Name of the field.
-    symbolic_expression: ~sympy.core.symbol.Symbol
-        The |Sympy| symbol representing the field in symbolic expressions.
+    symbol: ~sympy.core.symbol.Symbol
+        Symbol representing the field.
+    symbolic_expression: ~sympy.core.expr.Expr
+        A |Sympy| expression to represent the field mathematical expression in symbolic expressions.
     basis: SymbolicBasis
         The symbolic basis of functions on which the Galerkin expansion of the field is performed.
     inner_product_definition: InnerProductDefinition
         The inner product definition object used to compute the inner products between the elements of the basis.
-    expression_parameters: None or list(~parameter.Parameter)
-        List of parameters appearing in the symbolic expression.
-        If `None`, assumes that no parameters are appearing there.
     units: str
         The units of the variable.
         Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
@@ -272,7 +272,7 @@ class FunctionField(Variable):
 
     """
 
-    def __init__(self, name, basis, symbolic_expression, expression_parameters=None,
+    def __init__(self, name, symbol, symbolic_expression, basis, expression_parameters=None,
                  inner_product_definition=None, units="", latex=None, extra_substitutions=None, **parameters_array_kwargs):
 
         self.basis = basis
@@ -281,7 +281,7 @@ class FunctionField(Variable):
         self.expression_parameters = expression_parameters
         self.units = units
 
-        Variable.__init__(self, name, self.symbolic_expression, self.units, latex)
+        Variable.__init__(self, name, symbol, self.units, latex)
 
         self.parameters = None
         if self.inner_product_definition is not None:
@@ -302,12 +302,18 @@ class FunctionField(Variable):
     @property
     def symbols(self):
         """~numpy.ndarray(~sympy.core.symbol.Symbol): Returns the symbol of the parameters in the array."""
-        return self.parameters
+        if isinstance(self.symbol, Symbol):
+            return self.parameters.symbols
+        else:
+            return self.parameters
 
     @property
     def symbolic_expressions(self):
         """~numpy.ndarray(~sympy.core.expr.Expr): Returns the symbolic expressions of the parameters in the array."""
-        return self.parameters
+        if isinstance(self.symbol, Symbol):
+            return self.parameters.symbolic_expressions
+        else:
+            return self.parameters
 
     @property
     def numerical_expression(self):
@@ -400,7 +406,10 @@ class FunctionField(Variable):
             else:
                 res[i] = output[i].subs(substitutions)
 
-        self.parameters = ParametersArray(res, units=self.units, symbols=self.symbolic_expression, **parameters_array_kwargs)
+        symbol_name = self.symbol.name
+        symbols_list = [Symbol(f'{symbol_name}_{i}') for i in range(len(self.basis))]
+        symbols_list = np.array(symbols_list, dtype=object)
+        self.parameters = ParametersArray(res, units=self.units, symbols=symbols_list, **parameters_array_kwargs)
 
 
 if __name__ == "__main__":
@@ -420,5 +429,5 @@ if __name__ == "__main__":
 
     p = u'ψ'
     psi = Field("psi", p, basis, s, units="[m^2][s^-2]", latex=r'\psi')
-    ff = FunctionField('ff', basis, sin(phi), inner_product_definition=s, latex=r'\sin \phi')
-    ffc = FunctionField('ffc', basis, R * cos(phi), inner_product_definition=s, latex=r'\cos \phi')
+    ff = FunctionField('ff', 's_phi', sin(phi), basis, inner_product_definition=s, latex=r'\sin \phi')
+    ffc = FunctionField('ffc', 'c_phi', R * cos(phi), basis, inner_product_definition=s, latex=r'\cos \phi')
