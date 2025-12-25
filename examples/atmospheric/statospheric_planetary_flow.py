@@ -33,7 +33,7 @@ llambda = basis.coordinate_system.coordinates_symbol_as_list[0]
 phi = basis.coordinate_system.coordinates_symbol_as_list[1]
 
 # Defining the inverse of the cosine of the latitude
-cos_inv = FunctionField(u'1/(cos ϕ)', basis, 1 / cos(phi), inner_product_definition=s, latex=r'\frac{1}{\cos \phi}')
+cos_inv = Expression(1 / (R**2 * cos(phi)), expression_parameters=(R,), latex=r'\frac{1}{R^2 \cos \phi}')
 
 # Defining the field
 p = u'ψ'
@@ -54,10 +54,10 @@ planetary_equation.add_rhs_terms(advection_term)
 # Defining the earth rotation f-term
 _a = symbols('a')
 a = Parameter(2. * float(omega), symbol=_a)
-sin_theta = FunctionField(u'sin ϕ', basis, a * sin(phi), expression_parameters=(a,),
-                          inner_product_definition=s, latex=r'\sin \phi')
+fterm = FunctionField(u'f', u'f', a * sin(phi), basis, expression_parameters=(a,),
+                      inner_product_definition=s, latex=r'f')
 
-rotation_advection_terms = Jacobian(psi, sin_theta, basis.coordinate_system, sign=-1, prefactors=(cos_inv, cos_inv))
+rotation_advection_terms = Jacobian(psi, fterm, basis.coordinate_system, sign=-1, prefactors=(cos_inv, cos_inv))
 
 planetary_equation.add_rhs_terms(rotation_advection_terms)
 
