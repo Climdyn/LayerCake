@@ -140,7 +140,7 @@ class SymbolicBasis(Basis):
             List of callable basis functions
         """
 
-        coordinates_symbol = self.coordinate_system.coordinates_symbol
+        coordinates_symbol = self.coordinate_system.coordinates_symbol_as_list
 
         nf = list()
         sf = self.subs_functions(extra_subs=extra_subs)

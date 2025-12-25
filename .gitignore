@@ -1,4 +1,7 @@
 .idea
 __pycache__
 build
+*.ipynb
+*.ref
+*.mp4
 
