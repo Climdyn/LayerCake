@@ -58,7 +58,7 @@ class PlanarChannelFourierBasis(SymbolicBasis):
         else:
             raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
 
-        aspect_ratio = float(param)
+        # aspect_ratio = float(param)
 
         if length is None:
             length = 2 * pi / param.symbol
@@ -70,8 +70,7 @@ class PlanarChannelFourierBasis(SymbolicBasis):
             self.length = length
 
         self._n = param.symbol
-        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., pi)))
-        SymbolicBasis.__init__(self, coordinate_system, parameters)
+        SymbolicBasis.__init__(self, None, parameters)
 
         awavenum = channel_wavenumbers(spectral_blocks)
 
@@ -152,7 +151,7 @@ class PlanarBasinFourierBasis(SymbolicBasis):
         else:
             raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
 
-        aspect_ratio = float(param)
+        # aspect_ratio = float(param)
 
         if length is None:
             length = 2 * pi / param.symbol
@@ -164,9 +163,7 @@ class PlanarBasinFourierBasis(SymbolicBasis):
             self.length = length
 
         self._n = param.symbol
-        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., pi)))
-        # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
-        SymbolicBasis.__init__(self, coordinate_system, parameters)
+        SymbolicBasis.__init__(self, None, parameters)
 
         owavenum = basin_wavenumbers(spectral_blocks)
 
@@ -202,6 +199,7 @@ class PlanarBasinFourierBasis(SymbolicBasis):
             length = self.length
 
         coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., pi)))
+        # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
         self.coordinate_system = coordinate_system
         self._n = param.symbol
         self.substitutions = list()
