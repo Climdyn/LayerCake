@@ -210,7 +210,7 @@ class Layer(object):
             used_compute_inner_products_kwargs = deepcopy(compute_inner_products_kwargs)
 
         if numerical and 'timeout' not in used_compute_inner_products_kwargs:
-            used_compute_inner_products_kwargs['timeout'] = None
+            used_compute_inner_products_kwargs['timeout'] = True
 
         if 'numerical' in used_compute_inner_products_kwargs:
             used_compute_inner_products_kwargs.pop('numerical')
