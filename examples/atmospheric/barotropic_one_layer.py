@@ -14,7 +14,6 @@ else:
 from layercake import *
 
 # importing specific modules to create the model basis of functions
-from layercake.basis.planar_fourier import contiguous_channel_basis
 from layercake.variables.systems import PlanarCartesianCoordinateSystem
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 
@@ -29,7 +28,7 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 # Defining the domain
 b = symbols('b')
 b_param = Parameter(0.5, symbol=b)
-parameters = [b]
+parameters = [b_param]
 
 cs = PlanarCartesianCoordinateSystem(extent=((0, 2*pi), (0, b*pi)))
 
@@ -47,8 +46,6 @@ basis.functions.append(2 * sin(x) * sin(y / b))
 basis.functions.append(sqrt(2) * cos(2 * y / b))
 basis.functions.append(2 * cos(x) * sin(2 * y / b))
 basis.functions.append(2 * sin(x) * sin(2 * y / b))
-
-basis.substitutions.append((b, float(b_param)))
 
 inner_products = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system, optimizer='trig', kwargs={'conds': 'none'})
 
@@ -105,7 +102,7 @@ cake = Cake()
 cake.add_layer(layer)
 
 # computing the tensor
-cake.compute_tensor(True, True, compute_inner_products_kwargs={'timeout': True}
+cake.compute_tensor(True, True
                     )
 # computing the tendencies
 f, Df = cake.compute_tendencies()
