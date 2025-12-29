@@ -69,11 +69,9 @@ class PlanarChannelFourierBasis(SymbolicBasis):
         else:
             self.length = length
 
-        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., pi)))
-        # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
-        SymbolicBasis.__init__(self, coordinate_system, parameters)
         self._n = param.symbol
-        self.substitutions.append((self._n, aspect_ratio))
+        coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., pi)))
+        SymbolicBasis.__init__(self, coordinate_system, parameters)
 
         awavenum = channel_wavenumbers(spectral_blocks)
 
@@ -109,6 +107,7 @@ class PlanarChannelFourierBasis(SymbolicBasis):
             length = self.length
 
         coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., pi)))
+        # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
         self.coordinate_system = coordinate_system
         self._n = param.symbol
         self.substitutions = list()
@@ -164,11 +163,10 @@ class PlanarBasinFourierBasis(SymbolicBasis):
         else:
             self.length = length
 
+        self._n = param.symbol
         coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., pi)))
         # coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))
         SymbolicBasis.__init__(self, coordinate_system, parameters)
-        self._n = param.symbol
-        self.substitutions.append((self._n, aspect_ratio))
 
         owavenum = basin_wavenumbers(spectral_blocks)
 

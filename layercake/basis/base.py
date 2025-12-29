@@ -69,7 +69,8 @@ class SymbolicBasis(Basis):
     ----------
     substitutions: list(tuple)
         List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
-        a |Sympy|  expression and then the value to substitute.
+        a |Sympy| symbol or expression and then the value to substitute.
+        Parameters of the basis are automatically added to this list.
     coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
     parameters: list(~parameter.Parameter)
@@ -81,7 +82,8 @@ class SymbolicBasis(Basis):
 
         Basis.__init__(self, coordinate_system)
         self.substitutions = list()
-        self.parameters = parameters
+        self.parameters = None
+        self.set_parameters(parameters)
 
     @property
     def parameters_symbols(self):
@@ -97,6 +99,9 @@ class SymbolicBasis(Basis):
             Dictionary holding the parameters appearing in the equations defining the basis.
         """
         self.parameters = parameters
+
+        for param in self.parameters:
+            self.substitutions.append((param.symbol, float(param)))
 
     def subs_functions(self, extra_subs=None):
         """Return the basis functions with the substitutions stored in the object being applied.
