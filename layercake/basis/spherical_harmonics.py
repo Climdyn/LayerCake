@@ -51,12 +51,8 @@ class SphericalHarmonicsBasis(SymbolicBasis):
         else:
             raise ValueError("Parameter 'R' (sphere radius) should be present in the provided parameters")
 
-        radius = float(param)
         coordinate_system = SphericalCoordinateSystem(param)
         SymbolicBasis.__init__(self, coordinate_system, parameters)
-
-        self._R = param.symbol
-        self.substitutions.append((self._R, radius))
 
         llambda = coordinate_system.coordinates_symbol['lambda']
         phi = coordinate_system.coordinates_symbol['phi']
