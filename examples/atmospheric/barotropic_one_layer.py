@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-from sympy import symbols
+from sympy import symbols, pi, sqrt, cos, sin
 
 import sys
 import os
@@ -15,6 +15,7 @@ from layercake import *
 
 # importing specific modules to create the model basis of functions
 from layercake.basis.planar_fourier import contiguous_channel_basis
+from layercake.variables.systems import PlanarCartesianCoordinateSystem
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 
 
@@ -26,64 +27,74 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 ##############################################################################################
 
 # Defining the domain
-_n = symbols('n')
-n = Parameter(1.3, symbol=_n)
-parameters = [n]
-b = contiguous_channel_basis(1, 2, parameters)
-s = StandardSymbolicInnerProductDefinition(coordinate_system=b.coordinate_system)
+b = symbols('b')
+b_param = Parameter(0.5, symbol=b)
+parameters = [b]
+
+cs = PlanarCartesianCoordinateSystem(extent=((0, 2*pi), (0, b*pi)))
+
+
+# defining the basis
+basis = SymbolicBasis(cs, parameters)
 
 # coordinates
-x = b.coordinate_system.coordinates_symbol_as_list[0]
-y = b.coordinate_system.coordinates_symbol_as_list[1]
+x = basis.coordinate_system.coordinates_symbol_as_list[0]
+y = basis.coordinate_system.coordinates_symbol_as_list[1]
+
+basis.functions.append(sqrt(2) * cos(y / b))
+basis.functions.append(2 * cos(x) * sin(y / b))
+basis.functions.append(2 * sin(x) * sin(y / b))
+basis.functions.append(sqrt(2) * cos(2 * y / b))
+basis.functions.append(2 * cos(x) * sin(2 * y / b))
+basis.functions.append(2 * sin(x) * sin(2 * y / b))
+
+basis.substitutions.append((b, float(b_param)))
+
+inner_products = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system, optimizer='trig', kwargs={'conds': 'none'})
 
 # Defining the field
 p = u'ψ'
-psi = Field("psi", p, b, s, units="[m^2][s^-2]", latex=r'\psi')
+psi = Field("psi", p, basis, inner_products, units="[m^2][inner_products^-2]", latex=r'\psi')
 
 # Defining the equation and LHS
 # Laplacian
-vorticity = OperatorTerm(psi, Laplacian, b.coordinate_system)
+vorticity = OperatorTerm(psi, Laplacian, basis.coordinate_system)
 barotropic_equation = Equation(psi, lhs_term=vorticity)
 
 # Defining the advection term
-advection_term = vorticity_advection(psi, psi, b.coordinate_system, sign=-1)
+advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1)
 
 barotropic_equation.add_rhs_terms(advection_term)
 
 # adding an orographic term
-g = 0.1
-gamma = symbols(u'γ')
-gammap = Parameter(g, symbol=gamma, latex=r'\gamma')
-hh = np.zeros(len(b))
-hh[1] = 1.
-h = ParameterField('h', u'h', hh, b, s)
+gamma = Parameter(0.2, symbol=symbols(u'γ'), latex=r'\gamma')
+hh = np.zeros(len(basis))
+hh[1] = 1.05
+h = ParameterField('h', u'h', hh, basis, inner_products)
 
-orographic_term = Jacobian(psi, h, b.coordinate_system, sign=-1, prefactors=(gammap, gammap))
+orographic_term = Jacobian(psi, h, basis.coordinate_system, sign=-1, prefactors=(gamma, gamma))
 
 barotropic_equation.add_rhs_terms(orographic_term)
 
 # adding the beta term
-betaa = symbols(u'β')
-beta = Parameter(0.20964969238375256, symbol=betaa, latex=r'\beta')
-betaterm = OperatorTerm(psi, D, x, prefactor=beta, sign=-1)
+beta = Parameter(1.25, symbol=symbols(u'β'), latex=r'\beta')
+beta_term = OperatorTerm(psi, D, x, prefactor=beta, sign=-1)
 
-barotropic_equation.add_rhs_term(betaterm)
+barotropic_equation.add_rhs_term(beta_term)
 
-# adding a friction
-kdd = symbols('k_d')
-kd = Parameter(0.05, symbol=kdd)
-friction = OperatorTerm(psi, Laplacian, b.coordinate_system, prefactor=kd, sign=-1)
-barotropic_equation.add_rhs_term(friction)
+# adding a Newtonian cooling
+C_param = Parameter(0.1, symbol=symbols('C'))
+newtonian_cooling1 = OperatorTerm(psi, Laplacian, basis.coordinate_system, prefactor=C_param, sign=-1)
 
-# adding an interaction with a background streamfunction
-Cdd = symbols('C')
-Cd = Parameter(0.05, symbol=Cdd)
-rr = np.zeros(len(b))
-rr[0] = 0.3
-C = ParameterField('eta', u'η', rr, b, s, latex=r'\eta')
-CT = OperatorTerm(C, Laplacian, b.coordinate_system, prefactor=Cd)
+psi_ast_array = np.zeros(len(basis))
+r = -0.771
+psi_ast_array[0] = 0.95
+psi_ast_array[3] = r * psi_ast_array[0]
+psi_ast = ParameterField('psi_ast', p+u'*', psi_ast_array, basis, inner_products, latex=r'\psi^\ast')
+LinearTerm(psi_ast, inner_products, prefactor=C_param)
+newtonian_cooling2 = OperatorTerm(psi_ast, Laplacian, basis.coordinate_system, prefactor=C_param)
 
-barotropic_equation.add_rhs_term(CT)
+barotropic_equation.add_rhs_terms((newtonian_cooling1, newtonian_cooling2))
 
 # constructing the layer
 layer = Layer()
@@ -94,7 +105,7 @@ cake = Cake()
 cake.add_layer(layer)
 
 # computing the tensor
-cake.compute_tensor(True, True
+cake.compute_tensor(True, True, compute_inner_products_kwargs={'timeout': True}
                     )
 # computing the tendencies
 f, Df = cake.compute_tendencies()
@@ -102,7 +113,11 @@ f, Df = cake.compute_tendencies()
 # integrating
 ic = np.random.rand(cake.ndim) * 0.1
 res = solve_ivp(f, (0., 1000.), ic)
+res = solve_ivp(f, (0., 1000.), res.y[:, -1])
 
 # plotting
+plt.figure()
 plt.plot(res.y.T)
+plt.figure()
+plt.plot(res.y[0], res.y[3])
 plt.show()
