@@ -17,9 +17,12 @@ import numpy as np
 from numpy.linalg import LinAlgError
 import matplotlib.pyplot as plt
 import sparse as sp
+from copy import deepcopy
+
 from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray
 from sympy import zeros as sympy_zeros
 from sympy.matrices.exceptions import NonInvertibleMatrixError
+
 from layercake.arithmetic.terms.constant import ConstantTerm
 from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.variables.field import ParameterField, FunctionField
@@ -202,10 +205,18 @@ class Layer(object):
         """
 
         if compute_inner_products_kwargs is None:
-            compute_inner_products_kwargs = dict()
+            used_compute_inner_products_kwargs = dict()
+        else:
+            used_compute_inner_products_kwargs = deepcopy(compute_inner_products_kwargs)
+
+        if numerical and 'timeout' not in used_compute_inner_products_kwargs:
+            used_compute_inner_products_kwargs['timeout'] = None
+
+        if 'numerical' in used_compute_inner_products_kwargs:
+            used_compute_inner_products_kwargs.pop('numerical')
 
         if compute_inner_products:
-            self.compute_inner_products(numerical=numerical, **compute_inner_products_kwargs)
+            self.compute_inner_products(numerical=numerical, **used_compute_inner_products_kwargs)
 
         if self._cake is not None:
             shape = tuple([self.ndim + 1] + [self._cake.ndim + 1] * (self.maximum_rank - 1))
