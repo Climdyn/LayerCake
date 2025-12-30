@@ -62,18 +62,18 @@ basis.functions.append(2 * cos(x) * sin(2 * y / b))
 basis.functions.append(2 * sin(x) * sin(2 * y / b))
 
 # creating a inner product definition with an optimizer for trigonometric functions
-inner_products = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system,
-                                                        optimizer='trig', kwargs={'conds': 'none'})
+inner_products_definition = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system,
+                                                                   optimizer='trig', kwargs={'conds': 'none'})
 
 # Defining the fields
 #######################
 p = u'ψ'
-psi = Field("psi", p, basis, inner_products, units="[m^2][inner_products^-2]", latex=r'\psi')
+psi = Field("psi", p, basis, inner_products_definition, units="[m^2][inner_products^-2]", latex=r'\psi')
 
 # Barotropic field equation definition
 #######################################
 
-# defining the equation and LHS as a Laplacian (vorticity)
+# defining the LHS as the time derivative of the vorticity
 vorticity = OperatorTerm(psi, Laplacian, basis.coordinate_system)
 barotropic_equation = Equation(psi, lhs_term=vorticity)
 
@@ -85,7 +85,7 @@ barotropic_equation.add_rhs_terms(advection_term)
 gamma = Parameter(0.2, symbol=symbols(u'γ'), latex=r'\gamma')
 hh = np.zeros(len(basis))
 hh[1] = 1.
-h = ParameterField('h', u'h', hh, basis, inner_products)
+h = ParameterField('h', u'h', hh, basis, inner_products_definition)
 
 orographic_term = Jacobian(psi, h, basis.coordinate_system, sign=-1, prefactors=(gamma, gamma))
 
@@ -105,8 +105,8 @@ psi_ast_array = np.zeros(len(basis))
 r = -0.771
 psi_ast_array[0] = 0.95
 psi_ast_array[3] = r * psi_ast_array[0]
-psi_ast = ParameterField('psi_ast', p+u'*', psi_ast_array, basis, inner_products, latex=r'\psi^\ast')
-LinearTerm(psi_ast, inner_products, prefactor=C_param)
+psi_ast = ParameterField('psi_ast', p+u'*', psi_ast_array, basis, inner_products_definition, latex=r'\psi^\ast')
+LinearTerm(psi_ast, inner_products_definition, prefactor=C_param)
 newtonian_cooling2 = OperatorTerm(psi_ast, Laplacian, basis.coordinate_system, prefactor=C_param)
 
 barotropic_equation.add_rhs_terms((newtonian_cooling1, newtonian_cooling2))
