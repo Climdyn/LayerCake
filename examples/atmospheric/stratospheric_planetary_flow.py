@@ -27,6 +27,7 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 #
 # Constantin, A., & Germain, P. (2022). Stratospheric planetary flows from the perspective
 # of the Euler equation on a rotating sphere. Archive for Rational Mechanics and Analysis, 245(1), 587-644.
+# https://doi.org/10.1007/s00205-022-01791-3
 #
 # and is a very simplified model for the stratosphere.
 #
