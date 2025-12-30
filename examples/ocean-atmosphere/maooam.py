@@ -48,7 +48,7 @@ sigma = Parameter(2.1581898457499433e-6, symbol=Symbol('σ'), units='[m^2][s^-2]
 # Meridional gradient of the Coriolis parameter at phi_0
 beta = Parameter(1.620094191522763e-11, symbol=Symbol(u'β'), units='[m^-1][s^-1]')
 
-# atmosphere bottom friction coefficient
+# Atmosphere bottom friction coefficient
 kd = Parameter(2.9928e-6, symbol=Symbol('k_d'), units='[s^-1]')
 
 # Atmosphere internal friction coefficient
@@ -96,7 +96,11 @@ gp = Parameter(0.031, symbol=Symbol("g'"), units='[m][s^-2]')
 parameters = [n]
 atmospheric_basis = contiguous_channel_basis(2, 2, parameters)
 oceanic_basis = contiguous_basin_basis(2, 4, parameters)
-s = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system)
+
+# creating a inner product definition with an optimizer for trigonometric functions
+inner_products_definition = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system,
+                                                                   optimizer='trig', kwargs={'conds': 'none'})
+
 # coordinates
 x = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[0]
 y = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[1]
@@ -124,24 +128,24 @@ LSBpa = 8 * eps * sb * T0a ** 3 / (gamma_a * f0)
 # In the ocean
 Cov = np.zeros(len(atmospheric_basis))
 Cov[0] = 310
-Cpo = ParameterField("Co'", Symbol("Co'"), Cov / (gamma_o * f0) * rr / (f0 ** 2 * L ** 2), atmospheric_basis, s)
+Cpo = ParameterField("Co'", Symbol("Co'"), Cov / (gamma_o * f0) * rr / (f0 ** 2 * L ** 2), atmospheric_basis, inner_products_definition)
 
 # In the atmosphere
 Cav = np.zeros(len(atmospheric_basis))
 Cav[0] = 310./3.
-Cpa = ParameterField("Ca'", Symbol("Ca'"), a * Cav / (gamma_a * f0) * rr / (f0 ** 2 * L ** 2) / 2, atmospheric_basis, s)
+Cpa = ParameterField("Ca'", Symbol("Ca'"), a * Cav / (gamma_a * f0) * rr / (f0 ** 2 * L ** 2) / 2, atmospheric_basis, inner_products_definition)
 
 # Defining the fields
 #######################
 p = u'ψ_a'
-psi_a = Field("psi_a", p, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\psi_{\rm a}')
+psi_a = Field("psi_a", p, atmospheric_basis, inner_products_definition, units="[m^2][s^-2]", latex=r'\psi_{\rm a}')
 tt = u'θ_a'
-theta_a = Field("theta_a", tt, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\theta_{\rm a}')
+theta_a = Field("theta_a", tt, atmospheric_basis, inner_products_definition, units="[m^2][s^-2]", latex=r'\theta_{\rm a}')
 
 p_o = u'ψ_o'
-psi_o = Field("psi_o", p_o, oceanic_basis, s, units="[m^2][s^-2]", latex=r'\psi_{\rm o}')
+psi_o = Field("psi_o", p_o, oceanic_basis, inner_products_definition, units="[m^2][s^-2]", latex=r'\psi_{\rm o}')
 tt_o = u'δT_o'
-deltaT_o = Field("deltaT_o", tt_o, oceanic_basis, s, units="[m^2][s^-2]", latex=r'\delta T_{\rm o}')
+deltaT_o = Field("deltaT_o", tt_o, oceanic_basis, inner_products_definition, units="[m^2][s^-2]", latex=r'\delta T_{\rm o}')
 
 # --------------------------------------------------------
 #
@@ -149,8 +153,7 @@ deltaT_o = Field("deltaT_o", tt_o, oceanic_basis, s, units="[m^2][s^-2]", latex=
 #
 # --------------------------------------------------------
 
-# Defining the equation and LHS
-# Laplacian
+# defining LHS as the time derivative of the vorticity
 vorticity = OperatorTerm(psi_a, Laplacian, atmospheric_basis.coordinate_system)
 barotropic_equation = Equation(psi_a, lhs_term=vorticity)
 
@@ -182,8 +185,7 @@ barotropic_equation.add_rhs_term(ocfriction)
 #
 # --------------------------------------------------------
 
-# Defining the equation and LHS
-# Laplacian
+# defining the LHS
 vorticity = OperatorTerm(theta_a, Laplacian, atmospheric_basis.coordinate_system)
 
 lin_lhs = LinearTerm(theta_a, prefactor=a, sign=-1)
@@ -244,8 +246,7 @@ baroclinic_equation.add_rhs_term(Cat)
 #
 # --------------------------------------------------------
 
-# Defining the equation and LHS
-# Laplacian
+# defining LHS as the time derivative of the vorticity
 vorticity = OperatorTerm(psi_o, Laplacian, oceanic_basis.coordinate_system)
 lin_lhs = LinearTerm(psi_o, prefactor=G)
 lhs = AdditionOfTerms(lin_lhs, vorticity)
@@ -280,8 +281,7 @@ oceanic_equation.add_rhs_term(bfriction)
 #
 # --------------------------------------------------------
 
-# Defining the equation and LHS
-# Laplacian
+# Defining the LHS
 lhs = LinearTerm(deltaT_o)
 ocean_temperature_equation = Equation(deltaT_o, lhs_term=lhs)
 
