@@ -1,3 +1,4 @@
+
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
@@ -23,9 +24,20 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 # This script defines a barotropic one layer model over a beta plane
 # in numerical mode and then integrates (run) it, and plots the resulting trajectory.
 #
+# The model is inspired from
+#
+# Crommelin, D. T., Opsteegh, J. D., & Verhulst, F. (2004). A Mechanism for Atmospheric Regime
+# Behavior. Journal of the Atmospheric Sciences, 61(12), 1406–1419.
+# https://doi.org/10.1175/1520-0469(2004)061%253C1406:AMFARB%253E2.0.CO;2
+#
+# which is itself inspired from
+#
+# Charney, J. G., & DeVore, J. G. (1979). Multiple flow equilibria in the atmosphere and blocking.
+# Journal of the atmospheric sciences, 36(7), 1205-1216.
+#
 ##############################################################################################
 
-# Defining the domain
+# defining the domain
 b = symbols('b')
 b_param = Parameter(0.5, symbol=b)
 parameters = [b_param]
@@ -47,26 +59,26 @@ basis.functions.append(sqrt(2) * cos(2 * y / b))
 basis.functions.append(2 * cos(x) * sin(2 * y / b))
 basis.functions.append(2 * sin(x) * sin(2 * y / b))
 
-inner_products = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system, optimizer='trig', kwargs={'conds': 'none'})
+# creating a inner product definition with an optimizer for trigonometric functions
+inner_products = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system,
+                                                        optimizer='trig', kwargs={'conds': 'none'})
 
-# Defining the field
+# defining the field
 p = u'ψ'
 psi = Field("psi", p, basis, inner_products, units="[m^2][inner_products^-2]", latex=r'\psi')
 
-# Defining the equation and LHS
-# Laplacian
+# defining the equation and LHS as a Laplacian (vorticity)
 vorticity = OperatorTerm(psi, Laplacian, basis.coordinate_system)
 barotropic_equation = Equation(psi, lhs_term=vorticity)
 
-# Defining the advection term
+# defining the advection term
 advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1)
-
 barotropic_equation.add_rhs_terms(advection_term)
 
 # adding an orographic term
 gamma = Parameter(0.2, symbol=symbols(u'γ'), latex=r'\gamma')
 hh = np.zeros(len(basis))
-hh[1] = 1.05
+hh[1] = 1.
 h = ParameterField('h', u'h', hh, basis, inner_products)
 
 orographic_term = Jacobian(psi, h, basis.coordinate_system, sign=-1, prefactors=(gamma, gamma))
@@ -102,8 +114,8 @@ cake = Cake()
 cake.add_layer(layer)
 
 # computing the tensor
-cake.compute_tensor(True, True
-                    )
+cake.compute_tensor(True, True)
+
 # computing the tendencies
 f, Df = cake.compute_tendencies()
 
