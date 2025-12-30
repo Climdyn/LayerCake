@@ -116,7 +116,7 @@ barotropic_equation.add_rhs_terms((newtonian_cooling1, newtonian_cooling2))
 layer = Layer()
 layer.add_equation(barotropic_equation)
 
-# constructing the cake
+# Constructing the cake
 #########################
 cake = Cake()
 cake.add_layer(layer)

@@ -22,7 +22,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
     ----------
     parameters: list(~parameter.Parameter)
         List holding the parameters appearing in the equations defining the basis.
-    truncation_parameter: dict
+    truncation_parameters: dict
         Dictionary of parameter associated with the specified truncature.
         For example, for the default triangular truncation, it expects an entry `'M'`
         in the dictionary, determining the level of truncation `TM`.
@@ -48,7 +48,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
     """
 
-    def __init__(self, parameters, truncation_parameter, complex=False, truncation='T', exclude_constant_term=True):
+    def __init__(self, parameters, truncation_parameters, complex=False, truncation='T', exclude_constant_term=True):
 
         for param in parameters:
             if str(param.symbol) == 'R':
@@ -65,7 +65,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
         phi = coordinate_system.coordinates_symbol['phi']
 
         if truncation == 'T':
-            M = truncation_parameter['M']
+            M = truncation_parameters['M']
 
             for m in range(-M, M+1):
 
