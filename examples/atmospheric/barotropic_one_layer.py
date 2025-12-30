@@ -37,7 +37,8 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 #
 ##############################################################################################
 
-# defining the domain
+# Defining the domain
+######################
 b = symbols('b')
 b_param = Parameter(0.5, symbol=b)
 parameters = [b_param]
@@ -45,7 +46,8 @@ parameters = [b_param]
 cs = PlanarCartesianCoordinateSystem(extent=((0, 2*pi), (0, b*pi)))
 
 
-# defining the basis
+# Defining a specific basis for the model
+##########################################
 basis = SymbolicBasis(cs, parameters)
 
 # coordinates
@@ -63,9 +65,13 @@ basis.functions.append(2 * sin(x) * sin(2 * y / b))
 inner_products = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system,
                                                         optimizer='trig', kwargs={'conds': 'none'})
 
-# defining the field
+# Defining the fields
+#######################
 p = u'ψ'
 psi = Field("psi", p, basis, inner_products, units="[m^2][inner_products^-2]", latex=r'\psi')
+
+# Barotropic field equation definition
+#######################################
 
 # defining the equation and LHS as a Laplacian (vorticity)
 vorticity = OperatorTerm(psi, Laplacian, basis.coordinate_system)
@@ -105,13 +111,18 @@ newtonian_cooling2 = OperatorTerm(psi_ast, Laplacian, basis.coordinate_system, p
 
 barotropic_equation.add_rhs_terms((newtonian_cooling1, newtonian_cooling2))
 
-# constructing the layer
+# Constructing the layer
+#########################
 layer = Layer()
 layer.add_equation(barotropic_equation)
 
 # constructing the cake
+#########################
 cake = Cake()
 cake.add_layer(layer)
+
+# Computing the tendencies and integrating
+###########################################
 
 # computing the tensor
 cake.compute_tensor(True, True)
