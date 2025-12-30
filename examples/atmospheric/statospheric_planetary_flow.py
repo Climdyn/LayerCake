@@ -1,3 +1,4 @@
+
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
@@ -18,10 +19,8 @@ from layercake.basis import SphericalHarmonicsBasis
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 
 # Defining parameter for the sphere
-_omega = symbols('ω')
-omega = Parameter(7.292e-5, symbol=_omega, latex=r'\omega', units='[s^-1]')
-_R = symbols('R')
-R = Parameter(1., symbol=_R)
+omega = Parameter(9., symbol=symbols('ω'), latex=r'\omega', units='[s^-1]')
+R = Parameter(1., symbol=symbols('R'))
 parameters = [R]
 
 # defining basis of functions (modes) and inner products
@@ -52,8 +51,7 @@ planetary_equation.add_rhs_terms(advection_term)
 
 
 # Defining the earth rotation f-term
-_a = symbols('a')
-a = Parameter(2. * float(omega), symbol=_a)
+a = Parameter(2. * float(omega), symbol=symbols('a'))
 fterm = FunctionField(u'f', u'f', a * sin(phi), basis, expression_parameters=(a,),
                       inner_product_definition=s, latex=r'f')
 
@@ -71,14 +69,14 @@ cake = Cake()
 cake.add_layer(layer)
 
 # computing the tensor
-cake.compute_tensor(True, True, compute_inner_products_kwargs={'timeout': True}
-                    )
+cake.compute_tensor(True, True)
+
 # computing the tendencies
 f, Df = cake.compute_tendencies()
 
 # integrating
 ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 1000.), ic)
+res = solve_ivp(f, (0., 100000.), ic, method='DOP853')
 
 # plotting
 plt.plot(res.y.T)
