@@ -338,8 +338,8 @@ cake.add_layer(oceanic_layer)
 # --------------------------------
 
 # computing the tensor
-cake.compute_tensor(True, True, compute_inner_products_kwargs={'timeout': True}
-                    )
+cake.compute_tensor(True, True)
+
 # computing the tendencies
 f, Df = cake.compute_tendencies()
 
