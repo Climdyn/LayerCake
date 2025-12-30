@@ -22,14 +22,19 @@ class SphericalHarmonicsBasis(SymbolicBasis):
     ----------
     parameters: list(~parameter.Parameter)
         List holding the parameters appearing in the equations defining the basis.
-    truncation_parameter: dict
+    truncation_parameters: dict
         Dictionary of parameter associated with the specified truncature.
+        For example, for the default triangular truncation, it expects an entry `'M'`
+        in the dictionary, determining the level of truncation `TM`.
     complex: bool, optional
         Whether the spherical harmonics are defined using complex functions.
         Default to `False`.
-    truncation: str
+    truncation: str, optional
         Type of truncation to use.
         Default to `"T"` for a triangular truncature.
+    exclude_constant_term: bool, optional
+        Whether the spherical harmonics corresponding to a constant should be discarded.
+        Default to `True`.
 
     Attributes
     ----------
@@ -43,7 +48,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
     """
 
-    def __init__(self, parameters, truncation_parameter, complex=False, truncation='T'):
+    def __init__(self, parameters, truncation_parameters, complex=False, truncation='T', exclude_constant_term=True):
 
         for param in parameters:
             if str(param.symbol) == 'R':
@@ -51,6 +56,8 @@ class SphericalHarmonicsBasis(SymbolicBasis):
         else:
             raise ValueError("Parameter 'R' (sphere radius) should be present in the provided parameters")
 
+        self._R = param.symbol
+        self._map_mn = dict()
         coordinate_system = SphericalCoordinateSystem(param)
         SymbolicBasis.__init__(self, coordinate_system, parameters)
 
@@ -58,15 +65,22 @@ class SphericalHarmonicsBasis(SymbolicBasis):
         phi = coordinate_system.coordinates_symbol['phi']
 
         if truncation == 'T':
-            M = truncation_parameter['M']
+            M = truncation_parameters['M']
 
             for m in range(-M, M+1):
 
                 for n in range(abs(m), M+1):
 
                     if complex:
-                        mode_eq = sqrt(2) * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m))) * assoc_legendre(n, m, sin(phi)) * exp(I * m * (llambda))
+                        if exclude_constant_term:
+                            if n == 0 and m == 0:
+                                continue
+                        mode_eq = (sqrt(2) * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m)))
+                                   * assoc_legendre(n, m, sin(phi)) * exp(I * m * (llambda)))
                     else:
+                        if exclude_constant_term:
+                            if n == 0 and m == 0:
+                                continue
                         if m < 0:
                             mode_eq = (2 * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n + m)/factorial(n - m)))
                                        * assoc_legendre(n, -m, sin(phi)) * sin(-m * llambda))
@@ -79,9 +93,32 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
                     if mode_eq is not None:
                         self.functions.append(mode_eq)
+                        if n not in self._map_mn:
+                            self._map_mn[n] = dict()
+                        if m not in self._map_mn[n]:
+                            self._map_mn[n][m] = len(self.functions) - 1
 
         else:
             raise NotImplementedError("Only triangular ('T') truncation is implemented for the moment.")
+
+    def find_functions(self, n, m):
+        """Function which returns the index of the basis function of given n, m indices in the basis list.
+
+        Parameters
+        ----------
+        m, n: int
+            Spectral indices of the sought function.
+
+        Returns
+        -------
+        int:
+            The index of the basis function in the list.
+        """
+        if n in self._map_mn:
+            if m in self._map_mn[n]:
+                return self._map_mn[n][m]
+
+        raise ValueError(f'Basis function for indices n={n} and m={m} not found.')
 
     def set_parameters(self, parameters):
         """Setter for the parameters' dictionary.

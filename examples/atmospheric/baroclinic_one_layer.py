@@ -236,8 +236,8 @@ cake.add_layer(layer)
 # --------------------------------
 
 # computing the tensor
-cake.compute_tensor(True, True
-                    )
+cake.compute_tensor(True, True)
+
 # computing the tendencies
 f, Df = cake.compute_tendencies()
 

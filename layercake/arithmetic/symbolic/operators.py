@@ -13,6 +13,7 @@
 from sympy.core.decorators import call_highest_priority
 from sympy import Expr, Matrix, Mul, Add, diff
 from sympy.core.numbers import Zero
+from sympy import Derivative
 
 from layercake.utils.commutativity import enable_commutativity
 from layercake.variables.systems import CoordinateSystem
@@ -152,6 +153,23 @@ def _evaluate_add(expr):
     return Add(*newargs)
 
 
+def _test_if_derivative_in_expr(expr, subs):
+
+    status = False
+    for arg in expr.args:
+
+        if isinstance(arg, Derivative) or isinstance(arg, D):
+            if arg not in subs:
+                subs.append(arg)
+            status = True
+        if hasattr(arg, 'args'):
+            res = _test_if_derivative_in_expr(arg, subs)
+            if res:
+                status = True
+
+    return status
+
+
 def evaluate_expr(expr):
     """Evaluate a given |Sympy| expression.
 
@@ -178,6 +196,20 @@ def evaluate_expr(expr):
         expr = _evaluate_add(expr)
     elif isinstance(expr, D):
         expr = Zero()
+
+    constant = True
+    while constant:
+        repl = list()
+        constant = _test_if_derivative_in_expr(expr, repl)
+        if constant:
+            new_expr = expr.replace(repl[0], Zero())
+            for rep in repl[1:]:
+                new_expr = new_expr.replace(rep, Zero())
+        else:
+            new_expr = expr
+
+        expr = new_expr
+
     return expr
 
 
@@ -247,7 +279,8 @@ def Divergence(coordinate_system):
     derivative_list = list()
     volume = coordinate_system.infinitesimal_volume
     for coord in coordinate_system.coordinates:
-        derivative_list.append(Mul(volume**(-1), Mul(D(coord.symbol), volume, evaluate=False), evaluate=False))
+        derivative_list.append(Mul(volume**(-1), Mul(D(coord.symbol), volume / coord.infinitesimal_length,
+                                   evaluate=False), evaluate=False))
 
     mat = Matrix([derivative_list])
     mat.latex = r'\nabla \cdot'
