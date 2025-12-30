@@ -59,7 +59,7 @@ sigma = Parameter(2.1581898457499433e-06, symbol=sigma_symbol, units='[m^2][s^-2
 beta_symbol = Symbol(u'β')
 beta = Parameter(1.3594204385792041e-11, symbol=beta_symbol, units='[m^-1][s^-1]')
 
-# atmosphere bottom friction coefficient
+# Atmosphere bottom friction coefficient
 kd_symbol = Symbol('k_d')
 kd = Parameter(1.032e-05, symbol=kd_symbol, units='[s^-1]')
 
@@ -76,7 +76,10 @@ hd = Parameter(4.644e-06, symbol=hd_symbol, units='[s^-1]')
 
 parameters = [n]
 atmospheric_basis = contiguous_channel_basis(2, 2, parameters)
-s = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system)
+
+# creating a inner product definition with an optimizer for trigonometric functions
+inner_products_definition = StandardSymbolicInnerProductDefinition(coordinate_system=atmospheric_basis.coordinate_system,
+                                                                   optimizer='trig', kwargs={'conds': 'none'})
 # coordinates
 x = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[0]
 y = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[1]
@@ -96,19 +99,19 @@ hd_deriv = Parameter(a * hd / f0, symbol=hd_symbol, units='')
 
 hh = np.zeros(len(atmospheric_basis))
 hh[1] = 0.2
-h = ParameterField('h', u'h', hh, atmospheric_basis, s)
+h = ParameterField('h', u'h', hh, atmospheric_basis, inner_products_definition)
 
 # Equilibrium temperature
 rr = np.zeros(len(atmospheric_basis))
 rr[0] = 0.1
-Tf = ParameterField('T', u'T', rr, atmospheric_basis, s)
+Tf = ParameterField('T', u'T', rr, atmospheric_basis, inner_products_definition)
 
 # Defining the fields
 #######################
 p = u'ψ'
-psi = Field("psi", p, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\psi')
+psi = Field("psi", p, atmospheric_basis, inner_products_definition, units="[m^2][s^-2]", latex=r'\psi')
 tt = u'θ'
-theta = Field("theta", tt, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\theta')
+theta = Field("theta", tt, atmospheric_basis, inner_products_definition, units="[m^2][s^-2]", latex=r'\theta')
 
 
 # --------------------------------
@@ -117,8 +120,7 @@ theta = Field("theta", tt, atmospheric_basis, s, units="[m^2][s^-2]", latex=r'\t
 #
 # --------------------------------
 
-# Defining the equation and LHS
-# Laplacian
+# defining the LHS as the time derivative of the vorticity
 vorticity = OperatorTerm(psi, Laplacian, atmospheric_basis.coordinate_system)
 barotropic_equation = Equation(psi, lhs_term=vorticity)
 
@@ -158,8 +160,7 @@ barotropic_equation.add_rhs_term(ofriction)
 #
 # --------------------------------
 
-# Defining the equation and LHS
-# Laplacian
+# defining the LHS
 vorticity = OperatorTerm(theta, Laplacian, atmospheric_basis.coordinate_system)
 
 lin_lhs = LinearTerm(theta, prefactor=a, sign=-1)
