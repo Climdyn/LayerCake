@@ -220,3 +220,48 @@ def numerical_integration(ls):
         return ls[0], 0
     else:
         return ls[0], res[0]
+
+
+def _inner_product_arguments(args):
+    return args[1], args[3], args[4]._inner_product_arguments(args[0], args[1], args[2])
+
+
+def parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numerical, term):
+    """Functions to evaluate |Sympy| inner products expressions inside tensors in parallel.
+
+    Parameters
+    ----------
+    pool: pebble.ProcessPool
+        A Pebble pool of workers.
+    indices_list: list(tuple)
+        A list of tuples with the indices of the tensor entries.
+    inner_product: callable
+        A callable defining the inner products.
+    basis: list(SymbolicBasis)
+        List of symbolic function basis on which each element of the term(s) inner products must be decomposed.
+    numerical: bool
+        Whether to compute numerical or symbolic inner products.
+    term: ArithmeticTerms
+        Arithmetic term(s) from which the inner products will be computed.
+
+    Returns
+    -------
+    tuple(2-tuple)
+        A list with the results, as 2-tuple with the labelling indices and the output of the evaluation.
+
+    """
+    args_list_in = [(basis, indices, numerical, inner_product, term) for indices in indices_list]
+    args_list_out = list()
+
+    future = pool.map(_inner_product_arguments, args_list_in)
+    results = future.result()
+    while True:
+        try:
+            res = next(results)
+            args_list_out.append(res)
+        except StopIteration:
+            break
+        except TimeoutError:
+            break
+
+    return args_list_out
