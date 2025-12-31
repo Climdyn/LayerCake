@@ -306,7 +306,7 @@ class Cake(object):
 
         return jacobian_tensor
 
-    def compute_tendencies(self, language='python', lang_translation=None):
+    def compute_tendencies(self, language='python', lang_translation=None, force_symbolic_output=False):
         """Function handling the tendencies tensor to create a tendencies function for the whole cake.
         Returns the tendencies function :math:`\\boldsymbol{f}` determining the model's ordinary differential
         equations:
@@ -327,43 +327,71 @@ class Cake(object):
             String defining in which computing language the tendencies lists must be returned.
             Currently, it can be `'python'`, `'fortran'` or `'julia`'.
             Default to `'python'`.
-        lang_translation: dict(str)
+        lang_translation: dict(str), optional
             Additional language translation mapping provided by the user, mapping replacements for converting
             Sympy symbolic output strings to the target language.
+        force_symbolic_output: bool, optional
+            Force the return of symbolic tendencies, even if the tensor is numerical.
+            Useful to use the results with another language, or to save it in plain text.
+            Default to `False`.
 
         Returns
         -------
         f: callable or list(str), list(Symbol)
             If the tendencies tensor is numerical, the numba-jitted tendencies function.
-            If the tendencies tensor is symbolic, the list of tendencies string in the selected target language,
+            If the tendencies tensor is symbolic, or if `force_symbolic` is `True`, the list of tendencies string in the selected target language,
             along with the list of parameters appearing in them.
         Df: callable or list(str), list(Symbol)
             If the tendencies tensor is numerical, the numba-jitted linearized tendencies function.
-            If the tendencies tensor is symbolic, the list of linearized tendencies string in the selected target language,
+            If the tendencies tensor is symbolic, or if `force_symbolic` is `True`, the list of linearized tendencies string in the selected target language,
             along with the list of parameters appearing in them.
         """
         if self.tensor is not None:
 
             if isinstance(self.tensor, sp.COO):
-                coo = self.tensor.coords.T
-                val = self.tensor.data
+                if force_symbolic_output:
+                    t = ImmutableSparseNDimArray(self.tensor.todense())
+                    if language == 'python':
+                        formatter = PythonEquationFormatter(lang_translation)
+                        jacobian_formatter = PythonJacobianEquationFormatter(lang_translation)
+                    elif language == 'fortran':
+                        formatter = FortranEquationFormatter(lang_translation)
+                        jacobian_formatter = FortranJacobianEquationFormatter(lang_translation)
+                    elif language == 'julia':
+                        formatter = JuliaEquationFormatter(lang_translation)
+                        jacobian_formatter = JuliaJacobianEquationFormatter(lang_translation)
+                    elif isinstance(language, (tuple, list)):
+                        formatter = language[0]
+                        jacobian_formatter = language[1]
+                    else:
+                        raise ValueError('Unable to determine the formatter.')
 
-                @njit
-                def f(t, x):
-                    xx = np.concatenate((np.full((1,), 1.), x))
-                    xr = sparse_mul(xx, coo, val)
-                    return xr[1:]
+                    equations_list = formatter(t)
+                    jt = ImmutableSparseNDimArray(self.jacobian_tensor.todense())
+                    jacobian_equations_list = jacobian_formatter(jt)
 
-                jcoo = self.jacobian_tensor.coords.T
-                jval = self.jacobian_tensor.data
+                    return (equations_list, t.free_symbols), (jacobian_equations_list, jt.free_symbols)
 
-                @njit
-                def Df(t, x):
-                    xx = np.concatenate((np.full((1,), 1.), x))
-                    mul_jac = jsparse_mul(xx, jcoo, jval)
-                    return mul_jac[1:, 1:]
+                else:
+                    coo = self.tensor.coords.T
+                    val = self.tensor.data
 
-                return f, Df
+                    @njit
+                    def f(t, x):
+                        xx = np.concatenate((np.full((1,), 1.), x))
+                        xr = sparse_mul(xx, coo, val)
+                        return xr[1:]
+
+                    jcoo = self.jacobian_tensor.coords.T
+                    jval = self.jacobian_tensor.data
+
+                    @njit
+                    def Df(t, x):
+                        xx = np.concatenate((np.full((1,), 1.), x))
+                        mul_jac = jsparse_mul(xx, jcoo, jval)
+                        return mul_jac[1:, 1:]
+
+                    return f, Df
 
             elif isinstance(self.tensor, ImmutableSparseNDimArray):
                 if language == 'python':
