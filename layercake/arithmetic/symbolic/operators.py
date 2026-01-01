@@ -28,13 +28,13 @@ class D(Expr):
     Parameters
     ----------
     *variables: ~sympy.core.symbol.Symbol
-        Variables with respect to which the operator differentiate.
+        Variables with respect to which the operator differentiates.
         The number of variables indicate the order of the derivative.
 
     Attributes
     ----------
     variables: list(~sympy.core.symbol.Symbol)
-        Variables with respect to which the operator differentiate.
+        Variables with respect to which the operator differentiates.
         The number of variables indicate the order of the derivative.
     evaluate: bool
         Whether the expression resulting from the action of the operator is
