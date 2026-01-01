@@ -232,7 +232,7 @@ def parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numer
     Parameters
     ----------
     pool: concurrent.futures.ThreadPoolExecutor or concurrent.futures.ProcessPoolExecutor
-        A Pebble pool of workers.
+        A pool of workers.
     indices_list: list(tuple)
         A list of tuples with the indices of the tensor entries.
     inner_product: callable
@@ -252,6 +252,4 @@ def parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numer
     """
     args_list_in = [(basis, indices, numerical, inner_product, term) for indices in indices_list]
 
-    args_list_out = pool.map(_inner_product_arguments, args_list_in)
-
-    return args_list_out
+    return pool.map(_inner_product_arguments, args_list_in)
