@@ -19,11 +19,8 @@
 
 from abc import ABC, abstractmethod
 import sparse as sp
+import os
 from pebble import ProcessPool as PebblePool
-# from concurrent.futures import ThreadPoolExecutor as Pool
-# in some cases, processes will work, then this line can be uncommented
-# from concurrent.futures import ProcessPoolExecutor as Pool
-from multiprocess.pool import Pool
 from multiprocessing import cpu_count
 from itertools import product
 from copy import deepcopy
@@ -36,6 +33,16 @@ from layercake.inner_products.definition import InnerProductDefinition
 from layercake.arithmetic.utils import sproduct
 from layercake.utils.symbolic_tensor import remove_dic_zeros
 from layercake.utils.parallel import parallel_integration, parallel_symbolic_evaluation
+
+if 'LAYERCAKE_PARALLEL_METHOD' not in os.environ:
+    from concurrent.futures import ThreadPoolExecutor as Pool
+else:
+    if os.environ['LAYERCAKE_PARALLEL_METHOD'] == 'processes':
+        from concurrent.futures import ProcessPoolExecutor as Pool
+    elif os.environ['LAYERCAKE_PARALLEL_METHOD'] == 'threads':
+        from concurrent.futures import ThreadPoolExecutor as Pool
+    else:
+        from concurrent.futures import ThreadPoolExecutor as Pool
 
 
 class ArithmeticTerms(ABC):
@@ -158,7 +165,7 @@ class ArithmeticTerms(ABC):
             if num_threads is None:
                 num_threads = cpu_count()
             # with Pool(max_workers=num_threads) as pool:
-            with Pool(processes=num_threads) as pool:
+            with Pool(max_workers=num_threads) as pool:
                 args_list = parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numerical, self)
         else:
             args_list = [(indices, inner_product, self._inner_product_arguments(basis, indices, numerical=numerical))

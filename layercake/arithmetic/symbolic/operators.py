@@ -77,7 +77,7 @@ class D(Expr):
         return derivatives
 
     def __repr__(self):
-        return 'D%s' % str(self.variables)
+        return 'D%s' % str(tuple(self.variables))
 
     def __str__(self):
         return self.__repr__()
