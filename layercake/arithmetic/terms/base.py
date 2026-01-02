@@ -20,9 +20,10 @@
 from abc import ABC, abstractmethod
 import sparse as sp
 from pebble import ProcessPool as PebblePool
-from concurrent.futures import ThreadPoolExecutor as Pool
+# from concurrent.futures import ThreadPoolExecutor as Pool
 # in some cases, processes will work, then this line can be uncommented
 # from concurrent.futures import ProcessPoolExecutor as Pool
+from multiprocess.pool import Pool
 from multiprocessing import cpu_count
 from itertools import product
 from copy import deepcopy
@@ -156,7 +157,8 @@ class ArithmeticTerms(ABC):
         if parallelize:
             if num_threads is None:
                 num_threads = cpu_count()
-            with Pool(max_workers=num_threads) as pool:
+            # with Pool(max_workers=num_threads) as pool:
+            with Pool(processes=num_threads) as pool:
                 args_list = parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numerical, self)
         else:
             args_list = [(indices, inner_product, self._inner_product_arguments(basis, indices, numerical=numerical))
@@ -417,10 +419,6 @@ class SingleArithmeticTerm(ArithmeticTerms):
             _x = symbols('_x')
             return Lambda(_x, foo)
 
-    @staticmethod
-    def _evaluate(func):
-        return enable_commutativity(evaluate_expr(func))
-
     def _inner_product_arguments(self, basis, indices, numerical=False):
         """Returns the tuple of all the arguments of the inner products integral for a given element of the tensor of
         inner products related to the term.
@@ -660,10 +658,6 @@ class OperationOnTerms(ArithmeticTerms):
     @property
     def _fields_list(self):
         return list(map(lambda t: t.field, self._terms))
-
-    @staticmethod
-    def _evaluate(func):
-        return enable_commutativity(evaluate_expr(func))
 
     @property
     def symbolic_function_dummy(self):
