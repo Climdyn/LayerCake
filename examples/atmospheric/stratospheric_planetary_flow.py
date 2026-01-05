@@ -72,13 +72,17 @@ planetary_equation.add_rhs_terms(advection_term)
 
 
 # defining the earth rotation f-term
+# Direct expression:
 a = Parameter(2. * float(omega), symbol=symbols('a'))
-fterm = FunctionField(u'f', u'f', a * sin(phi), basis, expression_parameters=(a,),
-                      inner_product_definition=s, latex=r'f')
-
-rotation_advection_terms = Jacobian(psi, fterm, basis.coordinate_system, sign=-1, prefactors=(cos_inv, cos_inv))
-
-planetary_equation.add_rhs_terms(rotation_advection_terms)
+rotation_term = OperatorTerm(psi, D, llambda, prefactor=a, sign=-1)
+planetary_equation.add_rhs_term(rotation_term)
+# but there is another way to include this term, by computing the Jacobian of the f-term:
+# fterm = FunctionField(u'f', u'f', a * sin(phi), basis, expression_parameters=(a,),
+#                       inner_product_definition=s, latex=r'f')
+#
+# rotation_terms = Jacobian(psi, fterm, basis.coordinate_system, sign=-1, prefactors=(cos_inv, cos_inv))
+#
+# planetary_equation.add_rhs_terms(rotation_terms)
 
 
 # Constructing the layer
@@ -109,4 +113,3 @@ res = solve_ivp(f, (0., 100000.), ic, method='DOP853')
 # plotting
 plt.plot(res.y.T)
 plt.show()
-

@@ -15,7 +15,7 @@ from sympy import Expr, Matrix, Mul, Add, diff
 from sympy.core.numbers import Zero
 from sympy import Derivative
 
-from layercake.utils.commutativity import enable_commutativity
+from layercake.utils.commutativity import enable_commutativity, disable_commutativity
 from layercake.variables.systems import CoordinateSystem
 
 # courtesy of https://stackoverflow.com/questions/15463412/differential-operator-usable-in-matrix-form-in-python-module-sympy
@@ -28,13 +28,13 @@ class D(Expr):
     Parameters
     ----------
     *variables: ~sympy.core.symbol.Symbol
-        Variables with respect to which the operator differentiate.
+        Variables with respect to which the operator differentiates.
         The number of variables indicate the order of the derivative.
 
     Attributes
     ----------
     variables: list(~sympy.core.symbol.Symbol)
-        Variables with respect to which the operator differentiate.
+        Variables with respect to which the operator differentiates.
         The number of variables indicate the order of the derivative.
     evaluate: bool
         Whether the expression resulting from the action of the operator is
@@ -44,13 +44,15 @@ class D(Expr):
         LaTeX representation of the operator.
 
     """
+
     _op_priority = 11.
     is_commutative = False
 
-    def __init__(self, *variables, **assumptions):
-        super(D, self).__init__()
-        self.evaluate = False
-        self.variables = variables
+    def __new__(cls, *variables, **kwargs):
+        derivatives = Expr.__new__(cls, *variables, **kwargs)
+        derivatives.evaluate = False
+        nc_variables = [disable_commutativity(var) for var in variables]
+        derivatives.variables = nc_variables
         latexes = list()
         for var in variables:
             if hasattr(var, 'latex'):
@@ -64,16 +66,18 @@ class D(Expr):
             latexes.append(str(var))
 
         if len(variables) > 1:
-            self.latex = r'\frac{\partial^' + str(len(variables)) + r'}{'
+            derivatives.latex = r'\frac{\partial^' + str(len(variables)) + r'}{'
         else:
-            self.latex = r'\frac{\partial}{'
+            derivatives.latex = r'\frac{\partial}{'
 
         for var in latexes[:-1]:
-            self.latex += r'\partial ' + var + ' '
-        self.latex += r'\partial ' + latexes[-1] + r'}'
+            derivatives.latex += r'\partial ' + var + ' '
+        derivatives.latex += r'\partial ' + latexes[-1] + r'}'
+
+        return derivatives
 
     def __repr__(self):
-        return 'D%s' % str(self.variables)
+        return 'D%s' % str(tuple(self.variables))
 
     def __str__(self):
         return self.__repr__()
@@ -98,9 +102,13 @@ class D(Expr):
         else:
             return Mul(self, other)
 
-    def __pow__(self, other):
+    def __pow__(self, power, modulo=None):
+
+        if modulo is not None:
+            raise NotImplemented('D class: Modular exponentiation not implemented for derivatives')
+
         variables = self.variables
-        for i in range(other-1):
+        for i in range(power - 1):
             variables += self.variables
         return D(*variables)
 
@@ -298,6 +306,23 @@ class _Add(Add):
         a._latex = latex
 
         return a
+
+    @property
+    def latex(self):
+        return self._latex
+
+
+class _Mul(Mul):
+
+    def __new__(cls, *args, **kwargs):
+        try:
+            latex = kwargs.pop('latex')
+        except KeyError:
+            latex = ''
+        m = Mul.__new__(cls, *args, **kwargs)
+        m._latex = latex
+
+        return m
 
     @property
     def latex(self):

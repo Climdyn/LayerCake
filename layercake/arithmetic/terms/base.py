@@ -19,7 +19,8 @@
 
 from abc import ABC, abstractmethod
 import sparse as sp
-from pebble import ProcessPool as Pool
+import os
+from pebble import ProcessPool as PebblePool
 from multiprocessing import cpu_count
 from itertools import product
 from copy import deepcopy
@@ -31,7 +32,17 @@ from layercake.utils.commutativity import enable_commutativity, disable_commutat
 from layercake.inner_products.definition import InnerProductDefinition
 from layercake.arithmetic.utils import sproduct
 from layercake.utils.symbolic_tensor import remove_dic_zeros
-from layercake.utils.parallel import parallel_integration
+from layercake.utils.parallel import parallel_integration, parallel_symbolic_evaluation
+
+if 'LAYERCAKE_PARALLEL_METHOD' not in os.environ:
+    from concurrent.futures import ThreadPoolExecutor as Pool
+else:
+    if os.environ['LAYERCAKE_PARALLEL_METHOD'] == 'processes':
+        from concurrent.futures import ProcessPoolExecutor as Pool
+    elif os.environ['LAYERCAKE_PARALLEL_METHOD'] == 'threads':
+        from concurrent.futures import ThreadPoolExecutor as Pool
+    else:
+        from concurrent.futures import ThreadPoolExecutor as Pool
 
 
 class ArithmeticTerms(ABC):
@@ -134,9 +145,10 @@ class ArithmeticTerms(ABC):
     def _evaluate(func):
         return enable_commutativity(evaluate_expr(func))
 
-    def _integrations(self, *basis, inner_product=None, numerical=False):
+    def _integrations(self, *basis, inner_product=None, numerical=False, parallelize=False, num_threads=None):
         """Returns the list of all the integrations to be computed to get the full tensor of inner products related to the term(s).
         Elements of the list includes indices locating the inner products in the tensor, inner product Sympy expression, and inner products integral arguments."""
+
         if len(basis) == 1:
             nmod = len(basis[0])
             nmodr = (range(nmod),) * self._rank
@@ -147,8 +159,17 @@ class ArithmeticTerms(ABC):
             nmodr = list()
             for n in nmod:
                 nmodr.append(range(n))
-        args_list = [(indices, inner_product, self._inner_product_arguments(basis, indices, numerical=numerical))
-                     for indices in product(*nmodr)]
+
+        indices_list = [indices for indices in product(*nmodr)]
+        if parallelize:
+            if num_threads is None:
+                num_threads = cpu_count()
+            # with Pool(max_workers=num_threads) as pool:
+            with Pool(max_workers=num_threads) as pool:
+                args_list = parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numerical, self)
+        else:
+            args_list = [(indices, inner_product, self._inner_product_arguments(basis, indices, numerical=numerical))
+                         for indices in product(*nmodr)]
 
         return args_list
 
@@ -248,7 +269,8 @@ class ArithmeticTerms(ABC):
 
         args_list = self._integrations(*basis,
                                        inner_product=self.inner_product_definition.inner_product,
-                                       numerical=numerical)
+                                       numerical=numerical, parallelize=True,
+                                       num_threads=num_threads)
         if len(basis) == 1:
             basis = basis[0]
             nmod = len(basis)
@@ -267,7 +289,7 @@ class ArithmeticTerms(ABC):
             res = sp.zeros(matrix_shape, dtype=float, format='dok')
         else:
             res = None
-        with Pool(max_workers=num_threads) as pool:
+        with PebblePool(max_workers=num_threads) as pool:
             output = parallel_integration(pool, args_list, substitutions, res, timeout,
                                           symbolic_int=not numerical, permute=permute)
         if not numerical:
@@ -403,10 +425,6 @@ class SingleArithmeticTerm(ArithmeticTerms):
         except BadSignatureError:
             _x = symbols('_x')
             return Lambda(_x, foo)
-
-    @staticmethod
-    def _evaluate(func):
-        return enable_commutativity(evaluate_expr(func))
 
     def _inner_product_arguments(self, basis, indices, numerical=False):
         """Returns the tuple of all the arguments of the inner products integral for a given element of the tensor of
@@ -647,10 +665,6 @@ class OperationOnTerms(ArithmeticTerms):
     @property
     def _fields_list(self):
         return list(map(lambda t: t.field, self._terms))
-
-    @staticmethod
-    def _evaluate(func):
-        return enable_commutativity(evaluate_expr(func))
 
     @property
     def symbolic_function_dummy(self):
