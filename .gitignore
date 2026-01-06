@@ -4,4 +4,6 @@ build
 *.ipynb
 *.ref
 *.mp4
+*.txt
+*.pyc
 
