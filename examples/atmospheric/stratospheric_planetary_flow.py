@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-from sympy import symbols, sin, cos
+from sympy import symbols, sin, cos, trigsimp
 
 import sys
 import os
@@ -17,6 +17,7 @@ from layercake import *
 # importing specific modules to create the model basis of functions
 from layercake.basis import SphericalHarmonicsBasis
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
+
 
 ##############################################################################################
 #
@@ -44,7 +45,8 @@ parameters = [R]
 # Defining basis of functions (modes) and inner products
 #########################################################
 basis = SphericalHarmonicsBasis(parameters, {'M': 4})
-s = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system)
+s = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system,
+                                           optimizer='trig', kwargs={'conds': 'none'})
 
 # coordinates
 llambda = basis.coordinate_system.coordinates_symbol_as_list[0]
@@ -99,17 +101,18 @@ cake.add_layer(layer)
 ###########################################
 
 # computing the tensor
-cake.compute_tensor(True, True)
+cake.compute_tensor(False, True,
+                    compute_inner_products_kwargs={'num_threads': 1})
 
-# computing the tendencies
-f, Df = cake.compute_tendencies()
-
-# integrating
-ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 100000.), ic, method='DOP853')
-# Remark: The DOP853 is a 7th-order integrator which is not able to conserve the energy
-# and dissipate here to a periodic orbit representing a rotating polar vortex.
-
-# plotting
-plt.plot(res.y.T)
-plt.show()
+# # computing the tendencies
+# f, Df = cake.compute_tendencies()
+#
+# # integrating
+# ic = np.random.rand(cake.ndim) * 0.1
+# res = solve_ivp(f, (0., 100000.), ic, method='DOP853')
+# # Remark: The DOP853 is a 7th-order integrator which is not able to conserve the energy
+# # and dissipate here to a periodic orbit representing a rotating polar vortex.
+#
+# # plotting
+# plt.plot(res.y.T)
+# plt.show()

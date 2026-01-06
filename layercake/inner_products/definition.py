@@ -13,7 +13,8 @@
 """
 
 from abc import ABC, abstractmethod
-from sympy.simplify.fu import TR8, TR10
+# from sympy.simplify.fu import TR8, TR10  # old qgs optimizer functions
+from sympy.simplify.fu import fu
 from sympy import integrate, Integral, conjugate
 
 
@@ -107,7 +108,8 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
 
     @staticmethod
     def _trig_optimizer(expr):
-        return TR10(TR8(expr))
+        # return TR10(TR8(expr))  # old qgs optimizer
+        return fu(expr)
 
     def integrate_over_domain(self, expr, symbolic_expr=False):
         """Definition of the integrals over the spatial domain used by the inner products:
@@ -162,6 +164,11 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         _extent_u = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
         _extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
         norm = ((_extent_u[1] - _extent_u[0]) * (_extent_v[1] - _extent_v[0]))
+        print(f'')
+        print(f'S={S}')
+        print(f'G={G}')
+        print(f'fu(G)={self.optimizer(G)}')
+        print(f'')
         if self.complex:
             expr = (S * conjugate(G)) / norm
         else:
@@ -170,4 +177,3 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
             return expr * _u_elem * _v_elem,  (_u, *_extent_u), (_v, *_extent_v)
         else:
             return self.integrate_over_domain(self.optimizer(expr * _u_elem * _v_elem), symbolic_expr=symbolic_expr)
-

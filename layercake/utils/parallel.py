@@ -13,6 +13,7 @@
 
 """
 
+import time
 from concurrent.futures import TimeoutError
 from sympy.utilities.iterables import multiset_permutations
 from scipy.integrate import dblquad
@@ -150,7 +151,13 @@ def symbolic_integration(ls):
         The outcome of the symbolic integration.
 
     """
-    return ls[0], ls[1](*ls[2])
+    print(f'Performing integration of term {ls[0]}: {ls[2]}')
+    start = time.process_time()
+    res = ls[1](*ls[2])
+    print(f'Done ! Time elapsed: {(time.process_time() - start):.2f} seconds \n')
+    print(f'--------------------------------------------------------------------\n')
+
+    return ls[0], res
 
 
 def numerical_integration(ls):

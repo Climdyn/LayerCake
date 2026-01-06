@@ -167,8 +167,12 @@ class Layer(object):
             Default to `None`.
         """
         for field, eq in zip(self.fields, self.equations):
+            print(f'\nComputing term {eq.lhs_term}\n')
+            print('------------------------------------------------\n')
             eq.lhs_term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
             for term in eq.terms:
+                print(f'\nComputing term {term}\n')
+                print('------------------------------------------------\n')
                 term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
 
     def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,
@@ -282,7 +286,6 @@ class Layer(object):
                 substitutions = list()
             if parameters_subs is not None:
                 p_subs = [(param.symbol, float(param)) for param in parameters_subs]
-                # TODO: Seems to not allow ParameterField to be substituted. To check.
             else:
                 p_subs = list()
             self.tensor = MutableSparseNDimArray(iterable={}, shape=shape)
