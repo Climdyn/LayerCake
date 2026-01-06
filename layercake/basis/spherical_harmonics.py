@@ -8,7 +8,8 @@
 
 """
 from sympy import assoc_legendre, exp, I, sin, cos, sqrt, pi
-from math import factorial
+from sympy import factorial as symb_factorial
+from math import factorial as num_factorial
 
 from layercake.basis.base import SymbolicBasis
 from layercake.variables.systems import SphericalCoordinateSystem
@@ -35,6 +36,9 @@ class SphericalHarmonicsBasis(SymbolicBasis):
     exclude_constant_term: bool, optional
         Whether the spherical harmonics corresponding to a constant should be discarded.
         Default to `True`.
+    use_num_factorial: bool, optional
+        Use a numerical factorial instead of a symbolic one. Might speed up computations in certain cases.
+        Default to `False`.
 
     Attributes
     ----------
@@ -48,7 +52,13 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
     """
 
-    def __init__(self, parameters, truncation_parameters, complex=False, truncation='T', exclude_constant_term=True):
+    def __init__(self, parameters, truncation_parameters, complex=False, truncation='T', exclude_constant_term=True,
+                 use_num_factorial=False):
+
+        if use_num_factorial:
+            factorial = num_factorial
+        else:
+            factorial = symb_factorial
 
         for param in parameters:
             if str(param.symbol) == 'R':
@@ -76,7 +86,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
                             if n == 0 and m == 0:
                                 continue
                         mode_eq = (sqrt(2) * pi * sqrt(((2 * n + 1)/(4 * pi)) * (factorial(n - m)/factorial(n + m)))
-                                   * assoc_legendre(n, m, sin(phi)) * exp(I * m * (llambda)))
+                                   * assoc_legendre(n, m, sin(phi)) * exp(I * m * llambda))
                     else:
                         if exclude_constant_term:
                             if n == 0 and m == 0:
@@ -146,7 +156,6 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
 if __name__ == "__main__":
     from layercake import Parameter
-    from layercake.basis.spherical_harmonics import SphericalHarmonicsBasis
     from sympy import symbols
     from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
     _R = symbols('R')
@@ -155,4 +164,3 @@ if __name__ == "__main__":
     basis = SphericalHarmonicsBasis(parameters, {'M': 4})  # , complex=True)
     s = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer='trig')  # , complex=True)
     sn = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer=None)  # , complex=True)
-
