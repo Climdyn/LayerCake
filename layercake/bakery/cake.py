@@ -28,6 +28,7 @@ from sympy import simplify, N
 from sympy.tensor.array import permutedims
 
 real_eps = np.finfo(np.float64).eps
+small_number = 1.e-10
 
 
 class Cake(object):
@@ -138,7 +139,7 @@ class Cake(object):
             Whether to compute the numerical or the symbolic tensor.
             Default to `True` (numerical tensor as output).
         compute_inner_products: bool, optional
-            Whether the inner products tensors of the layer equations' terms must be compute first.
+            Whether the inner products tensors of the layer equations' terms must be computed first.
             Default to `False`. Please note that if the inner products are not computed firsthand, the tensor computation
             will fail.
         compute_inner_products_kwargs: dict, optional
@@ -240,7 +241,7 @@ class Cake(object):
         else:
             tensor = ImmutableSparseNDimArray(tensor)
 
-        tensor = self.simplify_tensor(tensor)
+        tensor = self.simplify_tensor(tensor, small_number)
 
         return tensor
 
@@ -423,7 +424,7 @@ class Cake(object):
                              "Run the 'compute_tensor' method first.")
 
     @staticmethod
-    def simplify_tensor(tensor):
+    def simplify_tensor(tensor, threshold=None):
         """Routine that simplifies the component of a tensor :math:`\\mathcal{T}`.
         For each index :math:`i`, it upper-triangularizes the
         tensor :math:`\\mathcal{T}_{i,\\ldots}` for all the subsequent indices.
@@ -432,6 +433,11 @@ class Cake(object):
         ----------
         tensor: sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray
             The tensor to simplify.
+        threshold: float, optional
+            If the absolute value of  a tensor entry is lower than this threshold value,
+            then this value is removed from the tensor. No threshold is applied if not set.
+            Only applies to numerical tensors.
+            Useful to filter small spurious results of numerical integrations.
 
         Returns
         -------
@@ -443,7 +449,11 @@ class Cake(object):
             sorted_indices = np.sort(coords_val[1:, :], axis=0)
             coords_val[1:, :] = sorted_indices
 
-            upp_tensor = sp.COO(coords_val, tensor.data.copy(), shape=tensor.shape, prune=True)
+            data = tensor.data.copy()
+            if isinstance(threshold, (float, int)):
+                data[abs(data) < threshold] = 0.
+
+            upp_tensor = sp.COO(coords_val, data, shape=tensor.shape, prune=True)
 
             return upp_tensor
         elif isinstance(tensor, ImmutableSparseNDimArray):
