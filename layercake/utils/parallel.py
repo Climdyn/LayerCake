@@ -16,9 +16,11 @@
 import time
 from concurrent.futures import TimeoutError
 from sympy.utilities.iterables import multiset_permutations
+from sympy.core.numbers import Zero
 from scipy.integrate import dblquad
 from sympy import lambdify
 
+small_number = 1.e-12
 
 def parallel_integration(pool, args_list, substitutions, destination, timeout, permute=False, symbolic_int=False):
     """Functions to integrate |Sympy| expressions, either symbolically or numerically, in parallel.
@@ -77,7 +79,8 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
         timeout = None
 
     if timeout is not True:
-        future = pool.map(symbolic_integration, args_list, timeout=timeout)
+        new_args_list = [tuple(list(args)+[substitutions]) for args in args_list]
+        future = pool.map(symbolic_integration, new_args_list, timeout=timeout)
         results = future.result()
         num_args_list = list()
         i = 0
@@ -142,6 +145,9 @@ def symbolic_integration(ls):
           Will be returned by the worker.
         * `integrals_definition`: A callable returning the integral(s) as a |Sympy| expression.
         * `integrals_arguments`: A tuple with the arguments to be provided to the `integrals_definition` callable.
+        * `substitutions`: List of 2-tuples containing symbolic substitutions to be made before numerically integrating.
+          The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
+          This is used to check and bypass integrations that are giving zero values.
 
     Returns
     -------
@@ -153,7 +159,11 @@ def symbolic_integration(ls):
     """
     print(f'Performing integration of term {ls[0]}: {ls[2]}')
     start = time.process_time()
-    res = ls[1](*ls[2])
+    num_res = numerical_integration(ls)
+    if num_res[1] < small_number:
+        res = Zero()
+    else:
+        res = ls[1](*ls[2])
     print(f'Done ! Time elapsed: {(time.process_time() - start):.2f} seconds \n')
     print(f'--------------------------------------------------------------------\n')
 
@@ -172,7 +182,7 @@ def numerical_integration(ls):
           Will be returned by the worker.
         * `integrals_definition`: A callable returning the integral(s) as a |Sympy| expression.
         * `integrals_arguments`: A tuple with the arguments to be provided to the `integrals_definition` callable.
-        * `substitutions`: List of 2-tuples containing symbolic substitutions to be made before numerically integrationg.
+        * `substitutions`: List of 2-tuples containing symbolic substitutions to be made before numerically integrating.
           The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
 
     Returns

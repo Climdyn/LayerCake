@@ -101,8 +101,8 @@ cake.add_layer(layer)
 ###########################################
 
 # computing the tensor
-cake.compute_tensor(False, True,
-                    compute_inner_products_kwargs={'num_threads': 1})
+cake.compute_tensor(False, True)#,
+                    # compute_inner_products_kwargs={'num_threads': 1})
 
 # # computing the tendencies
 # f, Df = cake.compute_tendencies()
