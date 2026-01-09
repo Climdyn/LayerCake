@@ -13,6 +13,9 @@
 
 """
 
+import threading
+import _thread as thread
+
 import time
 from concurrent.futures import TimeoutError
 from sympy.utilities.iterables import multiset_permutations
@@ -21,6 +24,7 @@ from scipy.integrate import dblquad
 from sympy import lambdify
 
 small_number = 1.e-12
+
 
 def parallel_integration(pool, args_list, substitutions, destination, timeout, permute=False, symbolic_int=False):
     """Functions to integrate |Sympy| expressions, either symbolically or numerically, in parallel.
@@ -159,8 +163,12 @@ def symbolic_integration(ls):
     """
     print(f'Performing integration of term {ls[0]}: {ls[2]}')
     start = time.process_time()
-    num_res = numerical_integration(ls)
-    if num_res[1] < small_number:
+    # try to see if the integration is 0 and we can bypass it
+    try:
+        num_res = numerical_integration(ls)
+    except:
+        num_res = (0, small_number + 1)
+    if abs(num_res[1]) < small_number:
         res = Zero()
     else:
         res = ls[1](*ls[2])
@@ -270,3 +278,25 @@ def parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numer
     args_list_in = [(basis, indices, numerical, inner_product, term) for indices in indices_list]
 
     return pool.map(_inner_product_arguments, args_list_in)
+
+
+def _quit_function(fn_name):
+    thread.interrupt_main()
+
+
+def exit_after(s):
+    """
+    use as decorator to exit process if 
+    function takes longer than s seconds
+    """
+    def outer(fn):
+        def inner(*args, **kwargs):
+            timer = threading.Timer(s, _quit_function, args=[fn.__name__])
+            timer.start()
+            try:
+                result = fn(*args, **kwargs)
+            finally:
+                timer.cancel()
+            return result
+        return inner
+    return outer

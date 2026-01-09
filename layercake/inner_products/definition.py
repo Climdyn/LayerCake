@@ -14,8 +14,12 @@
 
 from abc import ABC, abstractmethod
 # from sympy.simplify.fu import TR8, TR10  # old qgs optimizer functions
-from sympy.simplify.fu import fu
+from sympy import trigsimp
 from sympy import integrate, Integral, conjugate
+
+from layercake.utils.parallel import exit_after
+
+symbolic_computation_timeout = 200
 
 
 class InnerProductDefinition(ABC):
@@ -106,10 +110,30 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
     def _no_optimizer(expr):
         return expr
 
+    # @staticmethod
+    # def _trig_optimizer(expr):  # old qgs optimizer
+    #     return TR10(TR8(expr))
+
     @staticmethod
     def _trig_optimizer(expr):
-        # return TR10(TR8(expr))  # old qgs optimizer
-        return fu(expr)
+        res = list()
+        res.append(_matching(expr))
+        res.append(_old(expr))
+        res.append(_fu(expr))
+
+        measure = list()
+        for i, r in enumerate(res):
+            try:
+                measure.append(len(str(r)))
+            except AttributeError:
+                res[i] = None
+                measure.append(1000000000+i)
+        print(f'selecting {measure.index(min(measure))}')
+        sel_res = res[measure.index(min(measure))]
+        if sel_res is None:
+            raise TimeoutError(f'Simplification of symbolic expression in integrals: No simplifications '
+                               f'were achieved in less that {symbolic_computation_timeout} seconds !')
+        return sel_res
 
     def integrate_over_domain(self, expr, symbolic_expr=False):
         """Definition of the integrals over the spatial domain used by the inner products:
@@ -177,3 +201,18 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
             return expr * _u_elem * _v_elem,  (_u, *_extent_u), (_v, *_extent_v)
         else:
             return self.integrate_over_domain(self.optimizer(expr * _u_elem * _v_elem), symbolic_expr=symbolic_expr)
+
+
+@exit_after(symbolic_computation_timeout)
+def _fu(expr):
+    return trigsimp(expr, method='fu')
+
+
+@exit_after(symbolic_computation_timeout)
+def _matching(expr):
+    return trigsimp(expr, method='matching')
+
+
+@exit_after(symbolic_computation_timeout)
+def _old(expr):
+    return trigsimp(expr, method='old')
