@@ -267,9 +267,14 @@ class ArithmeticTerms(ABC):
         if num_threads is None:
             num_threads = cpu_count()
 
+        parallelize = True
+        if 'LAYERCAKE_PARALLEL_METHOD' in os.environ:
+            if os.environ['LAYERCAKE_PARALLEL_METHOD'] == 'none':
+                parallelize = False
+
         args_list = self._integrations(*basis,
                                        inner_product=self.inner_product_definition.inner_product,
-                                       numerical=numerical, parallelize=True,
+                                       numerical=numerical, parallelize=parallelize,
                                        num_threads=num_threads)
         if len(basis) == 1:
             basis = basis[0]
