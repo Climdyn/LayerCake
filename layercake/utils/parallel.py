@@ -18,6 +18,7 @@ import _thread as thread
 
 import time
 from concurrent.futures import TimeoutError
+from pebble import ProcessExpired
 from sympy.utilities.iterables import multiset_permutations
 from sympy.core.numbers import Zero
 from scipy.integrate import dblquad
@@ -107,6 +108,12 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
                 break
             except TimeoutError:
                 num_args_list.append(args_list[i] + [substitutions])
+            except ProcessExpired as e:
+                print("%s. Exit code: %d" % (e, e.exitcode))
+            except Exception as e:
+                print("Function raised %s" % e)
+                print(e.traceback)  # Python's traceback of remote process
+
             i += 1
     else:
         num_args_list = [list(args) + [substitutions] for args in args_list]
