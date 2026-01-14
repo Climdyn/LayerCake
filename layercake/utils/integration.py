@@ -66,7 +66,7 @@ def integration(args_list, substitutions, destination, permute=False, symbolic_i
     if not symbolic_int:
         for args in args_list:
             new_args = tuple(list(args) + [substitutions])
-            res = numerical_integration(*new_args)
+            res = numerical_integration(new_args)
 
             if permute:
                 i = res[0][0]
@@ -80,7 +80,7 @@ def integration(args_list, substitutions, destination, permute=False, symbolic_i
     else:
         for args in args_list:
             new_args = tuple(list(args) + [substitutions])
-            res = symbolic_integration(*new_args)
+            res = symbolic_integration(new_args)
             expr = res[1].simplify()
             destination[res[0]] = expr  # why like that here and not like above ?
             if permute:

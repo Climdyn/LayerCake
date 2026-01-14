@@ -299,7 +299,7 @@ class ArithmeticTerms(ABC):
         if 'LAYERCAKE_PARALLEL_INTEGRATION' not in os.environ:
             parallel_integrations = True
         else:
-            if os.environ['LAYERCAKE_PARALLEL_METHOD'] == 'none':
+            if os.environ['LAYERCAKE_PARALLEL_INTEGRATION'] == 'none':
                 parallel_integrations = False
             else:
                 parallel_integrations = True
