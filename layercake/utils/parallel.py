@@ -89,7 +89,6 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
                 res = next(results)
                 if symbolic_int:
                     expr = res[1].simplify()
-                    destination[res[0]] = expr
                     if permute:
                         i = res[0][0]
                         idx = res[0][1:]
@@ -97,6 +96,8 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
                         for perm in perm_idx:
                             idx = [i] + perm
                             destination[tuple(idx)] = expr
+                    else:
+                        destination[res[0]] = expr
                 else:
                     destination[res[0]] = float(res[1].subs(substitutions))
                     # permutations missing here ?

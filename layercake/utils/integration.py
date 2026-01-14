@@ -82,7 +82,6 @@ def integration(args_list, substitutions, destination, permute=False, symbolic_i
             new_args = tuple(list(args) + [substitutions])
             res = symbolic_integration(new_args)
             expr = res[1].simplify()
-            destination[res[0]] = expr  # why like that here and not like above ?
             if permute:
                 i = res[0][0]
                 idx = res[0][1:]
@@ -90,6 +89,8 @@ def integration(args_list, substitutions, destination, permute=False, symbolic_i
                 for perm in perm_idx:
                     idx = [i] + perm
                     destination[tuple(idx)] = expr
+            else:
+                destination[res[0]] = expr
 
     if return_dict:
         return destination
