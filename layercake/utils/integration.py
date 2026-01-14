@@ -24,7 +24,7 @@ small_number = 1.e-12
 
 
 def integration(args_list, substitutions, destination, permute=False, symbolic_int=False):
-    """Functions to integrate |Sympy| expressions, either symbolically or numerically, in parallel.
+    """Functions to integrate |Sympy| expressions, either symbolically or numerically.
 
     Parameters
     ----------
