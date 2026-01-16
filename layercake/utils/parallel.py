@@ -119,13 +119,13 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
             except ProcessExpired as e:
                 start = "\033[1m"
                 end = "\033[0;0m"
-                warnings.warn("A process expired. " + start +
+                warnings.warn("An integration process expired. " + start +
                               "Be suspicious of the resulting inner products and tensors" + end + ".")
                 print("%s. Exit code: %d" % (e, e.exitcode))
             except Exception as e:
                 start = "\033[1m"
                 end = "\033[0;0m"
-                warnings.warn("Something went wrong. " + start +
+                warnings.warn("Something went wrong with an integration process. " + start +
                               "Be suspicious of the resulting inner products and tensors" + end + ".")
                 print("Function raised %s" % e)
                 print(e.traceback)  # Python's traceback of remote process
