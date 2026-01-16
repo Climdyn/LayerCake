@@ -16,3 +16,6 @@ Module with various submodules with useful functions used throughout the code.
 
 .. automodule:: layercake.utils.parallel
     :members:
+
+.. automodule:: layercake.utils.integration
+    :members:
