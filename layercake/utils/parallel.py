@@ -100,7 +100,17 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
                         destination[res[0]] = expr
                 else:
                     destination[res[0]] = float(res[1].subs(substitutions))
-                    # permutations missing here ?
+                    expr_subs = float(res[1].subs(substitutions))
+                    if permute:
+                        i = res[0][0]
+                        idx = res[0][1:]
+                        perm_idx = multiset_permutations(idx)
+                        for perm in perm_idx:
+                            idx = [i] + perm
+                            destination[tuple(idx)] = expr_subs
+                    else:
+                        destination[res[0]] = expr_subs
+
             except StopIteration:
                 break
             except TimeoutError:
