@@ -13,6 +13,7 @@
 
 """
 
+import warnings
 import threading
 import _thread as thread
 
@@ -116,8 +117,16 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
             except TimeoutError:
                 num_args_list.append(args_list[i] + [substitutions])
             except ProcessExpired as e:
+                start = "\033[1m"
+                end = "\033[0;0m"
+                warnings.warn("A process expired. " + start +
+                              "Be suspicious of the resulting inner products and tensors" + end + ".")
                 print("%s. Exit code: %d" % (e, e.exitcode))
             except Exception as e:
+                start = "\033[1m"
+                end = "\033[0;0m"
+                warnings.warn("Something went wrong. " + start +
+                              "Be suspicious of the resulting inner products and tensors" + end + ".")
                 print("Function raised %s" % e)
                 print(e.traceback)  # Python's traceback of remote process
 
