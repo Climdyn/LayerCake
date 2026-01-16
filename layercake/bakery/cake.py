@@ -449,13 +449,17 @@ class Cake(object):
             sorted_indices = np.sort(coords_val[1:, :], axis=0)
             coords_val[1:, :] = sorted_indices
 
-            data = tensor.data.copy()
+            tmp_tensor = sp.COO(coords_val, tensor.data, shape=tensor.shape, prune=True)
+
+            coords_val = tmp_tensor.coords.copy()
+            data = tmp_tensor.data.copy()
             if isinstance(threshold, (float, int)):
                 data[abs(data) < threshold] = 0.
 
             upp_tensor = sp.COO(coords_val, data, shape=tensor.shape, prune=True)
 
             return upp_tensor
+
         elif isinstance(tensor, ImmutableSparseNDimArray):
             coords_val = get_coords_and_values_from_tensor(tensor, 'numpy')
             sorted_indices = np.sort(coords_val[:, 1:-1], axis=1)
