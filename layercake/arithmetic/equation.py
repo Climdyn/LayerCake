@@ -109,6 +109,7 @@ class Equation(object):
     @property
     def parameters(self):
         """list(~parameter.Parameter): List of parameters present in the equation."""
+        # TODO: must be rethinked to include FunctionField properly and to recurse
         parameters_list = list()
         for term in self.terms + [self.lhs_term]:
             if issubclass(term.__class__, OperationOnTerms):
