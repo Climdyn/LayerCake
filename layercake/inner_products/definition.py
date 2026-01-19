@@ -19,8 +19,6 @@ from sympy import integrate, Integral, conjugate
 
 from layercake.utils.parallel import exit_after
 
-symbolic_computation_timeout = 200
-
 
 class InnerProductDefinition(ABC):
     """Base class to define the model's basis inner products."""
@@ -72,11 +70,16 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
     ----------
     coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
+    complex: bool, optional
+        Whether to compute the inner products with complex conjugate expression
+        for the second term.
     optimizer: None or callable
         A function to optimize the computation of the integrals or the integrand.
         If `None`, does not optimize the computation.
 
     """
+
+    symbolic_computation_timeout = 200  # default value
 
     def __init__(self, coordinate_system, optimizer=None, complex=False, kwargs=None):
 
@@ -115,11 +118,26 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
     #     return TR10(TR8(expr))
 
     @staticmethod
-    def _trig_optimizer(expr):
+    @exit_after(symbolic_computation_timeout)
+    def _fu(expr):
+        return trigsimp(expr, method='fu')
+
+    @staticmethod
+    @exit_after(symbolic_computation_timeout)
+    def _matching(expr):
+        return trigsimp(expr, method='matching')
+
+    @staticmethod
+    @exit_after(symbolic_computation_timeout)
+    def _old(expr):
+        return trigsimp(expr, method='old')
+
+    @classmethod
+    def _trig_optimizer(cls, expr):
         res = list()
-        res.append(_matching(expr))
-        res.append(_old(expr))
-        res.append(_fu(expr))
+        res.append(cls._matching(expr))
+        res.append(cls._old(expr))
+        res.append(cls._fu(expr))
 
         measure = list()
         for i, r in enumerate(res):
@@ -128,11 +146,12 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
             except AttributeError:
                 res[i] = None
                 measure.append(1000000000+i)
-        print(f'selecting {measure.index(min(measure))}')
         sel_res = res[measure.index(min(measure))]
         if sel_res is None:
-            raise TimeoutError(f'Simplification of symbolic expression in integrals: No simplifications '
-                               f'were achieved in less that {symbolic_computation_timeout} seconds !')
+            raise TimeoutError(f"Simplification of symbolic expression in integrals: No simplifications "
+                               f"were achieved in less that {cls.symbolic_computation_timeout} seconds !"
+                               f" Change the 'symbolic_computation_timeout' attribute of the inner product"
+                               f" definition class if you want to try longer computation time.")
         return sel_res
 
     def integrate_over_domain(self, expr, symbolic_expr=False):
@@ -189,11 +208,6 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
         norm = ((extent_u[1] - extent_u[0]) * (extent_v[1] - extent_v[0]))
         mod_G = self.optimizer(G)
-        print(f'')
-        print(f'S={S}')
-        print(f'G={G}')
-        print(f'fu(G)={mod_G}')
-        print(f'')
         if self.complex:
             expr = (S * conjugate(mod_G)) / norm
         else:
@@ -202,18 +216,3 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
             return expr * u_elem * v_elem,  (u, *extent_u), (v, *extent_v)
         else:
             return self.integrate_over_domain(self.optimizer(expr * u_elem * v_elem), symbolic_expr=symbolic_expr)
-
-
-@exit_after(symbolic_computation_timeout)
-def _fu(expr):
-    return trigsimp(expr, method='fu')
-
-
-@exit_after(symbolic_computation_timeout)
-def _matching(expr):
-    return trigsimp(expr, method='matching')
-
-
-@exit_after(symbolic_computation_timeout)
-def _old(expr):
-    return trigsimp(expr, method='old')

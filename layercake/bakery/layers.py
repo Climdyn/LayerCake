@@ -167,12 +167,8 @@ class Layer(object):
             Default to `None`.
         """
         for field, eq in zip(self.fields, self.equations):
-            print(f'\nComputing term {eq.lhs_term}\n')
-            print('------------------------------------------------\n')
             eq.lhs_term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
             for term in eq.terms:
-                print(f'\nComputing term {term}\n')
-                print('------------------------------------------------\n')
                 term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
 
     def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,

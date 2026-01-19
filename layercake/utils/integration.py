@@ -13,8 +13,6 @@
 
 """
 
-import time
-
 from sympy.core.numbers import Zero
 from scipy.integrate import dblquad
 from sympy import lambdify
@@ -120,8 +118,6 @@ def symbolic_integration(ls):
         The outcome of the symbolic integration.
 
     """
-    print(f'Performing integration of term {ls[0]}: {ls[2]}')
-    start = time.process_time()
     # try to see if the integration is 0 and we can bypass it
     try:
         num_res = numerical_integration(ls)
@@ -131,8 +127,6 @@ def symbolic_integration(ls):
         res = Zero()
     else:
         res = ls[1](*ls[2])
-    print(f'Done ! Time elapsed: {(time.process_time() - start):.2f} seconds \n')
-    print(f'--------------------------------------------------------------------\n')
 
     return ls[0], res
 
