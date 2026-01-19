@@ -1,10 +1,10 @@
 
 """
 
-    Non-parallel integration module
-    ===============================
+    Integration module
+    ==================
 
-    Defines functions to deal with integration (not done in parallel).
+    Defines low-level functions to deal with integrations.
 
     Warnings
     --------

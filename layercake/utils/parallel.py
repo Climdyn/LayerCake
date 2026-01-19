@@ -4,7 +4,7 @@
     Parallel computations utility module
     ====================================
 
-    Defines functions to deal with parallel computation tasks.
+    Defines low-level functions to deal with parallel computation tasks.
 
     Warnings
     --------
