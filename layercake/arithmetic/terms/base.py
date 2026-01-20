@@ -32,6 +32,7 @@ from layercake.utils.commutativity import enable_commutativity, disable_commutat
 from layercake.inner_products.definition import InnerProductDefinition
 from layercake.arithmetic.utils import sproduct
 from layercake.utils.symbolic_tensor import remove_dic_zeros
+from layercake.utils.integration import integration
 from layercake.utils.parallel import parallel_integration, parallel_symbolic_evaluation
 
 if 'LAYERCAKE_PARALLEL_METHOD' not in os.environ:
@@ -267,9 +268,14 @@ class ArithmeticTerms(ABC):
         if num_threads is None:
             num_threads = cpu_count()
 
+        parallelize = True
+        if 'LAYERCAKE_PARALLEL_METHOD' in os.environ:
+            if os.environ['LAYERCAKE_PARALLEL_METHOD'] == 'none':
+                parallelize = False
+
         args_list = self._integrations(*basis,
                                        inner_product=self.inner_product_definition.inner_product,
-                                       numerical=numerical, parallelize=True,
+                                       numerical=numerical, parallelize=parallelize,
                                        num_threads=num_threads)
         if len(basis) == 1:
             basis = basis[0]
@@ -289,9 +295,22 @@ class ArithmeticTerms(ABC):
             res = sp.zeros(matrix_shape, dtype=float, format='dok')
         else:
             res = None
-        with PebblePool(max_workers=num_threads) as pool:
-            output = parallel_integration(pool, args_list, substitutions, res, timeout,
-                                          symbolic_int=not numerical, permute=permute)
+
+        if 'LAYERCAKE_PARALLEL_INTEGRATION' not in os.environ:
+            parallel_integrations = True
+        else:
+            if os.environ['LAYERCAKE_PARALLEL_INTEGRATION'] == 'none':
+                parallel_integrations = False
+            else:
+                parallel_integrations = True
+
+        if parallel_integrations:
+            with PebblePool(max_workers=num_threads) as pool:
+                output = parallel_integration(pool, args_list, substitutions, res, timeout,
+                                              symbolic_int=not numerical, permute=permute)
+        else:
+            output = integration(args_list, substitutions, res, permute=permute, symbolic_int=not numerical)
+
         if not numerical:
             output = remove_dic_zeros(output)
             if self._rank > 2:

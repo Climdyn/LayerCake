@@ -13,8 +13,11 @@
 """
 
 from abc import ABC, abstractmethod
-from sympy.simplify.fu import TR8, TR10
+# from sympy.simplify.fu import TR8, TR10  # old qgs optimizer functions
+from sympy import trigsimp
 from sympy import integrate, Integral, conjugate
+
+from layercake.utils.parallel import exit_after
 
 
 class InnerProductDefinition(ABC):
@@ -67,11 +70,16 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
     ----------
     coordinate_system: ~systems.CoordinateSystem
         Coordinate system on which the basis is defined.
+    complex: bool, optional
+        Whether to compute the inner products with complex conjugate expression
+        for the second term.
     optimizer: None or callable
         A function to optimize the computation of the integrals or the integrand.
         If `None`, does not optimize the computation.
 
     """
+
+    symbolic_computation_timeout = 200  # default value
 
     def __init__(self, coordinate_system, optimizer=None, complex=False, kwargs=None):
 
@@ -105,9 +113,46 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
     def _no_optimizer(expr):
         return expr
 
+    # @staticmethod
+    # def _trig_optimizer(expr):  # old qgs optimizer
+    #     return TR10(TR8(expr))
+
     @staticmethod
-    def _trig_optimizer(expr):
-        return TR10(TR8(expr))
+    @exit_after(symbolic_computation_timeout)
+    def _fu(expr):
+        return trigsimp(expr, method='fu')
+
+    @staticmethod
+    @exit_after(symbolic_computation_timeout)
+    def _matching(expr):
+        return trigsimp(expr, method='matching')
+
+    @staticmethod
+    @exit_after(symbolic_computation_timeout)
+    def _old(expr):
+        return trigsimp(expr, method='old')
+
+    @classmethod
+    def _trig_optimizer(cls, expr):
+        res = list()
+        res.append(cls._matching(expr))
+        res.append(cls._old(expr))
+        res.append(cls._fu(expr))
+
+        measure = list()
+        for i, r in enumerate(res):
+            try:
+                measure.append(len(str(r)))
+            except AttributeError:
+                res[i] = None
+                measure.append(1000000000+i)
+        sel_res = res[measure.index(min(measure))]
+        if sel_res is None:
+            raise TimeoutError(f"Simplification of symbolic expression in integrals: No simplifications "
+                               f"were achieved in less that {cls.symbolic_computation_timeout} seconds !"
+                               f" Change the 'symbolic_computation_timeout' attribute of the inner product"
+                               f" definition class if you want to try longer computation time.")
+        return sel_res
 
     def integrate_over_domain(self, expr, symbolic_expr=False):
         """Definition of the integrals over the spatial domain used by the inner products:
@@ -125,14 +170,14 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         ~sympy.core.expr.Expr
             The result of the symbolic integration.
         """
-        _u = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
-        _v = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
-        _extent_u = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
-        _extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
+        u = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
+        v = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
+        extent_u = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
+        extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
         if symbolic_expr:
-            return Integral(expr, (_u, *_extent_u), (_v, *_extent_v), **self.kwargs)
+            return Integral(expr, (u, *extent_u), (v, *extent_v), **self.kwargs)
         else:
-            return integrate(expr, (_u, *_extent_u), (_v, *_extent_v), **self.kwargs)
+            return integrate(expr, (u, *extent_u), (v, *extent_v), **self.kwargs)
 
     def inner_product(self, S, G, symbolic_expr=False, integrand=False):
         """Function defining the inner product to be computed symbolically:
@@ -155,19 +200,19 @@ class StandardSymbolicInnerProductDefinition(InnerProductDefinition):
         ~sympy.core.expr.Expr
             The result of the symbolic integration
         """
-        _u = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
-        _v = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
-        _u_elem = self.coordinate_system.coordinates[0].infinitesimal_length
-        _v_elem = self.coordinate_system.coordinates[1].infinitesimal_length
-        _extent_u = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
-        _extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
-        norm = ((_extent_u[1] - _extent_u[0]) * (_extent_v[1] - _extent_v[0]))
+        u = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[0]]
+        v = self.coordinate_system.coordinates_symbol[self.coordinate_system.coordinates_name[1]]
+        u_elem = self.coordinate_system.coordinates[0].infinitesimal_length
+        v_elem = self.coordinate_system.coordinates[1].infinitesimal_length
+        extent_u = self.coordinate_system.extent[self.coordinate_system.coordinates_name[0]]
+        extent_v = self.coordinate_system.extent[self.coordinate_system.coordinates_name[1]]
+        norm = ((extent_u[1] - extent_u[0]) * (extent_v[1] - extent_v[0]))
+        mod_G = self.optimizer(G)
         if self.complex:
-            expr = (S * conjugate(G)) / norm
+            expr = (S * conjugate(mod_G)) / norm
         else:
-            expr = (S * G) / norm
+            expr = (S * mod_G) / norm
         if integrand:
-            return expr * _u_elem * _v_elem,  (_u, *_extent_u), (_v, *_extent_v)
+            return expr * u_elem * v_elem,  (u, *extent_u), (v, *extent_v)
         else:
-            return self.integrate_over_domain(self.optimizer(expr * _u_elem * _v_elem), symbolic_expr=symbolic_expr)
-
+            return self.integrate_over_domain(self.optimizer(expr * u_elem * v_elem), symbolic_expr=symbolic_expr)

@@ -282,7 +282,6 @@ class Layer(object):
                 substitutions = list()
             if parameters_subs is not None:
                 p_subs = [(param.symbol, float(param)) for param in parameters_subs]
-                # TODO: Seems to not allow ParameterField to be substituted. To check.
             else:
                 p_subs = list()
             self.tensor = MutableSparseNDimArray(iterable={}, shape=shape)

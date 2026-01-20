@@ -28,7 +28,7 @@ from sympy import simplify, N
 from sympy.tensor.array import permutedims
 
 real_eps = np.finfo(np.float64).eps
-small_number = 1.e-10
+small_number = 1.e-12
 
 
 class Cake(object):

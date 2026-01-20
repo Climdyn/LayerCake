@@ -4,7 +4,7 @@
     Parallel computations utility module
     ====================================
 
-    Defines functions to deal with parallel computation tasks.
+    Defines low-level functions to deal with parallel computation tasks.
 
     Warnings
     --------
@@ -13,10 +13,14 @@
 
 """
 
+import warnings
+import threading
+import _thread as thread
+
 from concurrent.futures import TimeoutError
+from pebble import ProcessExpired
 from sympy.utilities.iterables import multiset_permutations
-from scipy.integrate import dblquad
-from sympy import lambdify
+from layercake.utils.integration import symbolic_integration, numerical_integration
 
 
 def parallel_integration(pool, args_list, substitutions, destination, timeout, permute=False, symbolic_int=False):
@@ -76,7 +80,8 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
         timeout = None
 
     if timeout is not True:
-        future = pool.map(symbolic_integration, args_list, timeout=timeout)
+        new_args_list = [tuple(list(args)+[substitutions]) for args in args_list]
+        future = pool.map(symbolic_integration, new_args_list, timeout=timeout)
         results = future.result()
         num_args_list = list()
         i = 0
@@ -85,7 +90,6 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
                 res = next(results)
                 if symbolic_int:
                     expr = res[1].simplify()
-                    destination[res[0]] = expr
                     if permute:
                         i = res[0][0]
                         idx = res[0][1:]
@@ -93,12 +97,39 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
                         for perm in perm_idx:
                             idx = [i] + perm
                             destination[tuple(idx)] = expr
+                    else:
+                        destination[res[0]] = expr
                 else:
                     destination[res[0]] = float(res[1].subs(substitutions))
+                    expr_subs = float(res[1].subs(substitutions))
+                    if permute:
+                        i = res[0][0]
+                        idx = res[0][1:]
+                        perm_idx = multiset_permutations(idx)
+                        for perm in perm_idx:
+                            idx = [i] + perm
+                            destination[tuple(idx)] = expr_subs
+                    else:
+                        destination[res[0]] = expr_subs
+
             except StopIteration:
                 break
             except TimeoutError:
                 num_args_list.append(args_list[i] + [substitutions])
+            except ProcessExpired as e:
+                start = "\033[1m"
+                end = "\033[0;0m"
+                warnings.warn("An integration process expired. " + start +
+                              "Be suspicious of the resulting inner products and tensors" + end + ".")
+                print("%s. Exit code: %d" % (e, e.exitcode))
+            except Exception as e:
+                start = "\033[1m"
+                end = "\033[0;0m"
+                warnings.warn("Something went wrong with an integration process. " + start +
+                              "Be suspicious of the resulting inner products and tensors" + end + ".")
+                print("Function raised %s" % e)
+                print(e.traceback)  # Python's traceback of remote process
+
             i += 1
     else:
         num_args_list = [list(args) + [substitutions] for args in args_list]
@@ -127,99 +158,6 @@ def parallel_integration(pool, args_list, substitutions, destination, timeout, p
 
     if return_dict:
         return destination
-
-
-def symbolic_integration(ls):
-    """Return the result of a symbolic integration.
-
-    Parameters
-    ----------
-    ls: list or tuple
-        A list or a tuple with the following arguments for the integration:
-
-        * `indices`: Tuple of integers labelling the integration.
-          Will be returned by the worker.
-        * `integrals_definition`: A callable returning the integral(s) as a |Sympy| expression.
-        * `integrals_arguments`: A tuple with the arguments to be provided to the `integrals_definition` callable.
-
-    Returns
-    -------
-    tuple(int):
-        The integers labelling the integration.
-    ~sympy.core.expr.Expr:
-        The outcome of the symbolic integration.
-
-    """
-    return ls[0], ls[1](*ls[2])
-
-
-def numerical_integration(ls):
-    """Return the result of a numerical integration.
-
-    Parameters
-    ----------
-    ls: list or tuple
-        A list or a tuple with the following arguments for the integration:
-
-        * `indices`: Tuple of integers labelling the integration.
-          Will be returned by the worker.
-        * `integrals_definition`: A callable returning the integral(s) as a |Sympy| expression.
-        * `integrals_arguments`: A tuple with the arguments to be provided to the `integrals_definition` callable.
-        * `substitutions`: List of 2-tuples containing symbolic substitutions to be made before numerically integrationg.
-          The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
-
-    Returns
-    -------
-    tuple(int):
-        The integers labelling the integration.
-    float:
-        The outcome of the numerical integration.
-
-    """
-    integrand = ls[1](*ls[2], integrand=True)
-
-    num_integrand = integrand[0].subs(ls[3])
-    func = lambdify((integrand[1][0], integrand[2][0]), num_integrand, 'numpy')
-
-    try:
-        a = integrand[2][1].subs(ls[3])
-    except:
-        a = integrand[2][1]
-    try:
-        a = a.evalf()
-    except:
-        pass
-    try:
-        b = integrand[2][2].subs(ls[3])
-    except:
-        b = integrand[2][2]
-    try:
-        b = b.evalf()
-    except:
-        pass
-    try:
-        gfun = integrand[1][1].subs(ls[3])
-    except:
-        gfun = integrand[1][1]
-    try:
-        gfun = gfun.evalf()
-    except:
-        pass
-    try:
-        hfun = integrand[1][2].subs(ls[3])
-    except:
-        hfun = integrand[1][2]
-    try:
-        hfun = hfun.evalf()
-    except:
-        pass
-
-    res = dblquad(func, a, b, gfun, hfun)
-
-    if abs(res[0]) <= res[1]:
-        return ls[0], 0
-    else:
-        return ls[0], res[0]
 
 
 def _inner_product_arguments(args):
@@ -253,3 +191,25 @@ def parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numer
     args_list_in = [(basis, indices, numerical, inner_product, term) for indices in indices_list]
 
     return pool.map(_inner_product_arguments, args_list_in)
+
+
+def _quit_function(fn_name):
+    thread.interrupt_main()
+
+
+def exit_after(s):
+    """
+    use as decorator to exit process if 
+    function takes longer than s seconds
+    """
+    def outer(fn):
+        def inner(*args, **kwargs):
+            timer = threading.Timer(s, _quit_function, args=[fn.__name__])
+            timer.start()
+            try:
+                result = fn(*args, **kwargs)
+            finally:
+                timer.cancel()
+            return result
+        return inner
+    return outer

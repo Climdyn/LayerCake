@@ -18,6 +18,7 @@ from layercake import *
 from layercake.basis import SphericalHarmonicsBasis
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 
+
 ##############################################################################################
 #
 # This script defines the Euler equation over a rotating sphere of radius one
@@ -44,7 +45,8 @@ parameters = [R]
 # Defining basis of functions (modes) and inner products
 #########################################################
 basis = SphericalHarmonicsBasis(parameters, {'M': 4})
-s = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system)
+s = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system,
+                                           optimizer='trig', kwargs={'conds': 'none'})
 
 # coordinates
 llambda = basis.coordinate_system.coordinates_symbol_as_list[0]
