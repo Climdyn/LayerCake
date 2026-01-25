@@ -27,6 +27,7 @@ from layercake.arithmetic.terms.constant import ConstantTerm
 from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.variables.field import ParameterField, FunctionField
 from layercake.utils.symbolic_tensor import symbolic_tensordot
+from layercake.utils import isin
 
 
 class Layer(object):
@@ -99,18 +100,9 @@ class Layer(object):
         parameters_list = list()
         for eq in self.equations:
             for param in eq.parameters:
-                if not self._isin(param, parameters_list):
+                if not isin(param, parameters_list):
                     parameters_list.append(param)
         return parameters_list
-
-    @staticmethod
-    def _isin(o, it):
-        res = False
-        for i in it:
-            if o is i:
-                res = True
-                break
-        return res
 
     @property
     def parameters_symbols(self):

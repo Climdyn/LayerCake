@@ -34,6 +34,9 @@ from layercake.arithmetic.utils import sproduct
 from layercake.utils.symbolic_tensor import remove_dic_zeros
 from layercake.utils.integration import integration
 from layercake.utils.parallel import parallel_integration, parallel_symbolic_evaluation
+from layercake.variables.field import FunctionField
+from layercake.arithmetic.symbolic.expressions import Expression
+from layercake.utils import isin
 
 if 'LAYERCAKE_PARALLEL_METHOD' not in os.environ:
     from concurrent.futures import ThreadPoolExecutor as Pool
@@ -408,6 +411,28 @@ class SingleArithmeticTerm(ArithmeticTerms):
         return [self]
 
     @property
+    def parameters(self):
+        """list(~parameter.Parameter): List of parameters present in the term(s)."""
+        param = self.prefactor
+        if param is not None:
+            if isinstance(param, FunctionField):
+                params_list = list()
+                for par in param.expression_parameters:
+                    if not isin(par, params_list):
+                        params_list.append(par)
+                return params_list
+            elif isinstance(param, Expression):
+                params_list = list()
+                for par in param.expression_parameters:
+                    if not isin(par, params_list):
+                        params_list.append(par)
+                return params_list
+            else:
+                return [param]
+        else:
+            return list()
+
+    @property
     def _symbolic_expressions_list(self):
         return [self.symbolic_expression]
 
@@ -618,6 +643,18 @@ class OperationOnTerms(ArithmeticTerms):
     def terms(self):
         """list(ArithmeticTerms): List of the terms on which the operation acts."""
         return self._terms
+
+    @property
+    def parameters(self):
+        """list(~parameter.Parameter): List of parameters present in the terms."""
+        params_list = list()
+        for term in self.terms:
+            tpl = term.parameters
+            for par in tpl:
+                if not isin(par, params_list):
+                    params_list.append(par)
+
+        return params_list
 
     @abstractmethod
     def _compute_rank(self):
