@@ -412,7 +412,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
 
     @property
     def parameters(self):
-        """list(~parameter.Parameter): List of parameters present in the term(s)."""
+        """list(~parameter.Parameter): List of parameters present in the term."""
         param = self.prefactor
         if param is not None:
             if isinstance(param, FunctionField):
