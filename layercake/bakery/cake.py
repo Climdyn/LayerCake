@@ -23,6 +23,7 @@ from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor, c
 from layercake.formatters.fortran import FortranJacobianEquationFormatter, FortranEquationFormatter
 from layercake.formatters.python import PythonJacobianEquationFormatter, PythonEquationFormatter
 from layercake.formatters.julia import JuliaJacobianEquationFormatter, JuliaEquationFormatter
+from layercake.utils import isin
 from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
 from sympy import simplify, N
 from sympy.tensor.array import permutedims
@@ -90,18 +91,9 @@ class Cake(object):
         parameters_list = list()
         for layer in self.layers:
             for param in layer.parameters:
-                if not self._isin(param, parameters_list):
+                if not isin(param, parameters_list):
                     parameters_list.append(param)
         return parameters_list
-
-    @staticmethod
-    def _isin(o, it):
-        res = False
-        for i in it:
-            if o is i:
-                res = True
-                break
-        return res
 
     @property
     def parameters_symbols(self):

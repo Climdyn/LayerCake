@@ -12,8 +12,8 @@
 
 from sympy import Symbol, S, Eq
 import matplotlib.pyplot as plt
-from layercake.arithmetic.terms.base import ArithmeticTerms, OperationOnTerms
-from layercake.variables.field import FunctionField
+from layercake.arithmetic.terms.base import ArithmeticTerms
+from layercake.utils import isin
 
 
 class Equation(object):
@@ -109,46 +109,19 @@ class Equation(object):
     @property
     def parameters(self):
         """list(~parameter.Parameter): List of parameters present in the equation."""
-        # TODO: must be rethinked to include FunctionField properly and to recurse
         parameters_list = list()
         for term in self.terms + [self.lhs_term]:
-            if issubclass(term.__class__, OperationOnTerms):
-                for tterm in term.terms:
-                    param = tterm.prefactor
-                    if param is not None:
-                        if isinstance(param, FunctionField):
-                            for par in param.expression_parameters:
-                                if not self._isin(par, parameters_list):
-                                    parameters_list.append(param)
-                        else:
-                            if not self._isin(param, parameters_list):
-                                parameters_list.append(param)
-            else:
-                param = term.prefactor
-                if param is not None:
-                    if isinstance(param, FunctionField):
-                        for par in param.expression_parameters:
-                            if not self._isin(par, parameters_list):
-                                parameters_list.append(param)
-                    else:
-                        if not self._isin(param, parameters_list):
-                            parameters_list.append(param)
+            params_list = term.parameters
+            for param in params_list:
+                if not isin(param, parameters_list):
+                    parameters_list.append(param)
 
         for param_field in self.parameter_fields:
             for param in param_field.parameters:
-                if param is not None and not self._isin(param, parameters_list):
+                if param is not None and not isin(param, parameters_list):
                     parameters_list.append(param)
 
         return parameters_list
-
-    @staticmethod
-    def _isin(o, it):
-        res = False
-        for i in it:
-            if o is i:
-                res = True
-                break
-        return res
 
     @property
     def parameters_symbols(self):
