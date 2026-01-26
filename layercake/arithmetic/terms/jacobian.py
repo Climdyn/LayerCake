@@ -13,6 +13,7 @@
 from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.arithmetic.terms.operators import OperatorTerm, ComposedOperatorsTerm
 from layercake.arithmetic.symbolic.operators import Laplacian, D
+from layercake.arithmetic.symbolic.expressions import Expression
 
 
 def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None)):
@@ -45,8 +46,13 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
         2-tuple containing arithmetic terms representing each term of the Jacobian.
     """
 
+    e1 = coordinate_system.coordinates[0].infinitesimal_length
+    e2 = coordinate_system.coordinates[1].infinitesimal_length
+
     u = coordinate_system.coordinates_symbol_as_list[0]
     v = coordinate_system.coordinates_symbol_as_list[1]
+
+    elem_prefs = Expression(1 / (e1 * e2), )
 
     du_field1 = OperatorTerm(field1, D, u, prefactor=prefactors[0])
     du_field2 = OperatorTerm(field2, D, u)
@@ -66,7 +72,7 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
     provided by the expression :math:`J(\\psi, \\nabla^2 \\phi)`,
     where :math:`J` is the partial differential equation's Jacobian :func:`~layercake.arithmetic.terms.jacobian.Jacobian`:
 
-    .. math:: J(\\psi, \\nabla^2 \\phi) = \\partial_{u_1} \\psi \\, \\partial_{u_2} \\nabla^2 \\phi - \\partial_{u_1} \\nabla^2 \\phi \\, \\partial_{u_2} \\psi
+    .. math:: J(\\psi, \\nabla^2 \\phi) = e_1 \\, e_2 \, \\left(\\partial_{u_1} \\psi \\, \\partial_{u_2} \\nabla^2 \\phi - \\partial_{u_1} \\nabla^2 \\phi \\, \\partial_{u_2} \\psi \\right)
 
     where :math:`\\phi` and :math:`\\psi` are two fields defined on the model's domain,
     and :math:`u_1, u_2` are the coordinates of the model.
