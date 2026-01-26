@@ -27,9 +27,9 @@ class LinearTerm(SingleArithmeticTerm):
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
         Default to using the inner product definition found in the `field` object.
-    prefactor: ~parameter.Parameter or ~field.FunctionField, optional
+    prefactor: ~parameter.Parameter or ~expressions.Expression, optional
         Prefactor in front of the term.
-        Must be specified as a model parameter or a function field.
+        Must be specified as a model parameter or a symbolic expression.
     name: str, optional
         Name of the term.
     sign: int, optional
@@ -49,7 +49,7 @@ class LinearTerm(SingleArithmeticTerm):
         Set initially to `None` (not computed).
     inner_product_definition: InnerProductDefinition
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
-    prefactor: ~parameter.Parameter or ~field.FunctionField
+    prefactor: ~parameter.Parameter or ~expressions.Expression
         Prefactor in front of the term.
     """
 

@@ -35,9 +35,9 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
     sign: int, optional
         Sign in front of the Jacobian term. Either +1 or -1.
         Default to +1.
-    prefactors: tuple(~parameter.Parameter or ~field.FunctionField), optional
+    prefactors: tuple(~parameter.Parameter or ~expressions.Expression), optional
         2-tuple providing the prefactors in front of each of the two terms composing the Jacobian.
-        Must be specified as model parameters or function fields.
+        Must be specified as model parameters or symbolic expressions.
 
     Returns
     -------
@@ -82,9 +82,9 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
     sign: int, optional
         Sign in front of the vorticity advection term. Either +1 or -1.
         Default to +1.
-    prefactors: tuple(~parameter.Parameter or ~field.FunctionField), optional
+    prefactors: tuple(~parameter.Parameter  or ~expressions.Expression), optional
         2-tuple providing the prefactors in front of each of the two terms composing the Jacobian.
-        Must be specified as model parameters or function fields.
+        Must be specified as model parameters or symbolic expressions.
 
     Returns
     -------
