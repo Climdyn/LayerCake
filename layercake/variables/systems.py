@@ -28,7 +28,7 @@ class CoordinateSystem(object):
     name: str, optional
         Optional name for the coordinate system.
     parameters: list(~parameter.Parameter) or tuple(~parameter.Parameter), optional
-        List of parameters used to define the coordinate system.
+        List of parameters used to define the coordinates infinitesimal length.
 
     Attributes
     ----------
@@ -37,7 +37,7 @@ class CoordinateSystem(object):
     name: str
         Optional name for the coordinate system.
     parameters: list(~parameter.Parameter)
-        List of parameters used to define the coordinate system.
+        List of parameters used to define the coordinates infinitesimal length.
     """
 
     def __init__(self, coordinates, name="", parameters=None):
