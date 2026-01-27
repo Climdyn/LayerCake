@@ -27,6 +27,8 @@ class CoordinateSystem(object):
         List of coordinates on which the basis is defined.
     name: str, optional
         Optional name for the coordinate system.
+    parameters: list(~parameter.Parameter) or tuple(~parameter.Parameter), optional
+        List of parameters used to define the coordinate system.
 
     Attributes
     ----------
@@ -34,12 +36,20 @@ class CoordinateSystem(object):
         List of coordinates on which the basis is defined.
     name: str
         Optional name for the coordinate system.
+    parameters: list(~parameter.Parameter)
+        List of parameters used to define the coordinate system.
     """
 
-    def __init__(self, coordinates, name=""):
+    def __init__(self, coordinates, name="", parameters=None):
 
         self.name = name
         self.coordinates = coordinates
+        if isinstance(parameters, tuple):
+            self.parameters = list(parameters)
+        elif parameters is None:
+            self.parameters = list()
+        else:
+            self.parameters = parameters
 
     @property
     def coordinates_symbol(self):
@@ -79,6 +89,11 @@ class PlanarCartesianCoordinateSystem(CoordinateSystem):
     ----------
     extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol))
         Defines the extent of the plane.
+
+    Attributes
+    ----------
+    coordinates: list(~variable.Coordinate)
+        x and y coordinates.
     """
 
     def __init__(self, extent):
@@ -96,16 +111,19 @@ class SphericalCoordinateSystem(CoordinateSystem):
 
     Parameters
     ----------
-    radius: Variable or Parameter
+    radius: ~parameter.Parameter
         The radius of the sphere.
     extent: list(tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol)), optional
         Defines the extent of the coordinates on the sphere.
         If not provided, the coordinate system covers the whole sphere.
 
+
     Attributes
     ----------
-    radius: Variable or Parameter
-        The radius of the sphere.
+    coordinates: list(~variable.Coordinate)
+        lambda and phi coordinates.
+    parameters: list(~parameter.Parameter)
+        List of parameters used to define the coordinate system.
 
     """
 
@@ -119,7 +137,7 @@ class SphericalCoordinateSystem(CoordinateSystem):
         llambdas = Symbol(u'λ')
         phis = Symbol(u'ϕ')
 
-        llambda = Coordinate('lambda', llambdas, extent=extent[0], infinitesimal_length=R * cos(phis))
-        phi = Coordinate("phi", phis, extent=extent[1], infinitesimal_length=R)
+        llambda = Coordinate('lambda', llambdas, extent=extent[0], infinitesimal_length=R * cos(phis), latex=r'\lambda')
+        phi = Coordinate("phi", phis, extent=extent[1], infinitesimal_length=R, latex=r'\phi')
         CoordinateSystem.__init__(self, coordinates=[llambda, phi], name='Spherical Coordinate System')
-        self.radius = radius
+        self.parameters.append(radius)

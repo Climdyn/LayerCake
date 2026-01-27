@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-from sympy import symbols, sin, cos
+from sympy import symbols
 
 import sys
 import os
@@ -52,10 +52,6 @@ s = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_sy
 llambda = basis.coordinate_system.coordinates_symbol_as_list[0]
 phi = basis.coordinate_system.coordinates_symbol_as_list[1]
 
-# Defining the inverse of the cosine of the latitude
-#########################################################
-cos_inv = Expression(1 / (R**2 * cos(phi)), expression_parameters=(R,), latex=r'\frac{1}{R^2 \cos \phi}')
-
 # Defining the field
 p = u'ψ'
 psi = Field("streamfunction", p, basis, s, units="[m^2][s^-2]", latex=r'\psi')
@@ -68,7 +64,7 @@ vorticity = OperatorTerm(psi, Laplacian, basis.coordinate_system)
 planetary_equation = Equation(psi, lhs_term=vorticity)
 
 # defining the advection term
-advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1, prefactors=(cos_inv, cos_inv))
+advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1)
 
 planetary_equation.add_rhs_terms(advection_term)
 

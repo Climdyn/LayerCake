@@ -83,3 +83,49 @@ def combine_units(units1, units2, operation):
             else:
                 units.append("[" + us[0] + "]")
     return "".join(units)
+
+
+def power_units(units, power):
+    """Apply power to a units strings.
+
+    Parameters
+    ----------
+    units: str
+       Units to take power of.
+    power: int
+       Power.
+
+    Returns
+    -------
+    str
+        The resulting units string.
+
+    """
+
+    if units:
+        ul = units.split('][')
+        ul[0] = ul[0][1:]
+        ul[-1] = ul[-1][:-1]
+
+        usl = list()
+        for us in ul:
+            up = us.split('^')
+            if len(up) == 1:
+                up.append("1")
+
+            usl.append(tuple(up))
+
+        units_elements = list()
+        for us in usl:
+            units_elements.append(list((us[0], str(int(us[1]) * power))))
+
+        out_units = list()
+        for us in units_elements:
+            if us is not None:
+                if int(us[1]) != 1:
+                    out_units.append("[" + us[0] + "^" + us[1] + "]")
+                else:
+                    out_units.append("[" + us[0] + "]")
+        return "".join(out_units)
+    else:
+        return ""
