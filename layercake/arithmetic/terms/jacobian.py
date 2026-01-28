@@ -56,64 +56,39 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
     v = vc.symbol
 
     if uc.infinitesimal_length == 1 and vc.infinitesimal_length == 1:
-        uprefactor1 = prefactors[0]
-        vprefactor1 = None
-        uprefactor2 = prefactors[1]
-        vprefactor2 = None
+        prefactor1 = prefactors[0]
+        prefactor2 = prefactors[1]
     else:
-        uprefs = 1 / uc.infinitesimal_length
-        vprefs = 1 / vc.infinitesimal_length
+        prefs = 1 / (uc.infinitesimal_length * vc.infinitesimal_length)
         if prefactors[0] is not None:
-            uprefs1 = prefactors[0].symbol * uprefs
-            vprefs1 = vprefs
-            uprefactor1 = Expression(uprefs1,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(combine_units(prefactors[0].units, uc.units, '+'), -1),
-                                     latex=uprefs1._repr_latex_()[15:-1])
-            vprefactor1 = Expression(vprefs1,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(vc.units, -1),
-                                     latex=vprefs1._repr_latex_()[15:-1])
+            prefs1 = prefactors[0].symbol * prefs
+            prefactor1 = Expression(prefs1,
+                                    expression_parameters=coordinate_system.parameters,
+                                    units=combine_units(prefactors[0].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    latex=prefs1._repr_latex_()[15:-1])
         else:
-            uprefs1 = uprefs
-            vprefs1 = vprefs
-            uprefactor1 = Expression(uprefs1,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(uc.units, -1),
-                                     latex=uprefs1._repr_latex_()[15:-1])
-            vprefactor1 = Expression(vprefs1,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(vc.units, -1),
-                                     latex=vprefs1._repr_latex_()[15:-1])
+            prefactor1 = Expression(prefs,
+                                    expression_parameters=coordinate_system.parameters,
+                                    units=power_units(combine_units(uc.units, vc.units, '+'), -1),
+                                    latex=prefs._repr_latex_()[15:-1])
 
         if prefactors[1] is not None:
-            uprefs2 = uprefs
-            vprefs2 = prefactors[1].symbol * vprefs
-            vprefactor2 = Expression(vprefs2,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(combine_units(prefactors[0].units, vc.units, '+'), -1),
-                                     latex=uprefs2._repr_latex_()[15:-1])
-            uprefactor2 = Expression(uprefs2,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(uc.units, -1),
-                                     latex=uprefs2._repr_latex_()[15:-1])
+            prefs2 = prefactors[2].symbol * prefs
+            prefactor2 = Expression(prefs2,
+                                    expression_parameters=coordinate_system.parameters,
+                                    units=combine_units(prefactors[0].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    latex=prefs2._repr_latex_()[15:-1])
         else:
-            uprefs2 = uprefs
-            vprefs2 = vprefs
-            uprefactor2 = Expression(uprefs2,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(uc.units, -1),
-                                     latex=uprefs2._repr_latex_()[15:-1])
-            vprefactor2 = Expression(vprefs2,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(vc.units, -1),
-                                     latex=vprefs2._repr_latex_()[15:-1])
+            prefactor2 = Expression(prefs,
+                                    expression_parameters=coordinate_system.parameters,
+                                    units=power_units(combine_units(uc.units, vc.units, '+'), -1),
+                                    latex=prefs._repr_latex_()[15:-1])
 
-    du_field1 = OperatorTerm(field1, D, u, prefactor=uprefactor1)
-    du_field2 = OperatorTerm(field2, D, u, prefactor=uprefactor2)
+    du_field1 = OperatorTerm(field1, D, u, prefactor=prefactor1)
+    du_field2 = OperatorTerm(field2, D, u)
 
-    dv_field1 = OperatorTerm(field1, D, v, prefactor=vprefactor2)
-    dv_field2 = OperatorTerm(field2, D, v, prefactor=vprefactor1)
+    dv_field1 = OperatorTerm(field1, D, v, prefactor=prefactor2)
+    dv_field2 = OperatorTerm(field2, D, v)
 
     jacobian1 = ProductOfTerms(du_field1, dv_field2, sign=sign)
     jacobian2 = ProductOfTerms(dv_field1, du_field2, sign=-sign)
@@ -162,67 +137,40 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
     v = vc.symbol
 
     if uc.infinitesimal_length == 1 and vc.infinitesimal_length == 1:
-        uprefactor1 = prefactors[0]
-        vprefactor1 = None
-        uprefactor2 = prefactors[1]
-        vprefactor2 = None
+        prefactor1 = prefactors[0]
+        prefactor2 = prefactors[1]
     else:
-        uprefs = 1 / uc.infinitesimal_length
-        vprefs = 1 / vc.infinitesimal_length
+        prefs = 1 / (uc.infinitesimal_length * vc.infinitesimal_length)
         if prefactors[0] is not None:
-            uprefs1 = prefactors[0].symbol * uprefs
-            vprefs1 = vprefs
-            uprefactor1 = Expression(uprefs1,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(combine_units(prefactors[0].units, uc.units, '+'), -1),
-                                     latex=uprefs1._repr_latex_()[15:-1])
-            vprefactor1 = Expression(vprefs1,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(vc.units, -1),
-                                     latex=vprefs1._repr_latex_()[15:-1])
+            prefs1 = prefactors[0].symbol * prefs
+            prefactor1 = Expression(prefs1,
+                                    expression_parameters=coordinate_system.parameters,
+                                    units=combine_units(prefactors[0].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    latex=prefs1._repr_latex_()[15:-1])
         else:
-            uprefs1 = uprefs
-            vprefs1 = vprefs
-            uprefactor1 = Expression(uprefs1,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(uc.units, -1),
-                                     latex=uprefs1._repr_latex_()[15:-1])
-            vprefactor1 = Expression(vprefs1,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(vc.units, -1),
-                                     latex=vprefs1._repr_latex_()[15:-1])
+            prefactor1 = Expression(prefs,
+                                    expression_parameters=coordinate_system.parameters,
+                                    units=power_units(combine_units(uc.units, vc.units, '+'), -1),
+                                    latex=prefs._repr_latex_()[15:-1])
 
         if prefactors[1] is not None:
-            uprefs2 = uprefs
-            vprefs2 = prefactors[1].symbol * vprefs
-            vprefactor2 = Expression(vprefs2,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(combine_units(prefactors[0].units, vc.units, '+'), -1),
-                                     latex=uprefs2._repr_latex_()[15:-1])
-            uprefactor2 = Expression(uprefs2,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(uc.units, -1),
-                                     latex=uprefs2._repr_latex_()[15:-1])
+            prefs2 = prefactors[2].symbol * prefs
+            prefactor2 = Expression(prefs2,
+                                    expression_parameters=coordinate_system.parameters,
+                                    units=combine_units(prefactors[0].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    latex=prefs2._repr_latex_()[15:-1])
         else:
-            uprefs2 = uprefs
-            vprefs2 = vprefs
-            uprefactor2 = Expression(uprefs2,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(uc.units, -1),
-                                     latex=uprefs2._repr_latex_()[15:-1])
-            vprefactor2 = Expression(vprefs2,
-                                     expression_parameters=coordinate_system.parameters,
-                                     units=power_units(vc.units, -1),
-                                     latex=vprefs2._repr_latex_()[15:-1])
+            prefactor2 = Expression(prefs,
+                                    expression_parameters=coordinate_system.parameters,
+                                    units=power_units(combine_units(uc.units, vc.units, '+'), -1),
+                                    latex=prefs._repr_latex_()[15:-1])
 
-    du_field1 = OperatorTerm(field1, D, u, prefactor=uprefactor1)
-    dv_field1 = OperatorTerm(field1, D, v, prefactor=vprefactor2)
+    du_field1 = OperatorTerm(field1, D, u, prefactor=prefactor1)
+    dv_field1 = OperatorTerm(field1, D, v, prefactor=prefactor2)
 
-    du_lap_field2 = ComposedOperatorsTerm(field2, (D, Laplacian), (u, coordinate_system),
-                                          prefactor=uprefactor2)
+    du_lap_field2 = ComposedOperatorsTerm(field2, (D, Laplacian), (u, coordinate_system))
 
-    dv_lap_field2 = ComposedOperatorsTerm(field2, (D, Laplacian), (v, coordinate_system),
-                                          prefactor=vprefactor1)
+    dv_lap_field2 = ComposedOperatorsTerm(field2, (D, Laplacian), (v, coordinate_system))
 
     jacobian1 = ProductOfTerms(du_field1, dv_lap_field2, sign=sign)
     jacobian2 = ProductOfTerms(dv_field1, du_lap_field2, sign=-sign)
