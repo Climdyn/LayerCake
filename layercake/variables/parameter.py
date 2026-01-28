@@ -56,7 +56,7 @@ class Parameter(float):
         Value of the parameter.
     units: str, optional
         The units of the provided value.
-        Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
+        Should be specified by joining atoms like `'[unit^power]'`, e.g `'[m^2][s^-2][Pa^-2]'`.
         Empty by default.
     description: str, optional
         String describing the parameter.
