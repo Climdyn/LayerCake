@@ -25,7 +25,7 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
 
     where :math:`\\phi` and :math:`\\psi` are two fields defined on the model's domain,
     :math:`u_1, u_2` are the coordinates of the model, and :math:`e_1, e_2` are the inverse of the infinitesimal
-    length of the coordinates.
+    length of the coordinates (which can be functions of the :math:`u_1, u_2` coordinates).
 
     Parameters
     ----------
@@ -106,7 +106,7 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
 
     where :math:`\\phi` and :math:`\\psi` are two fields defined on the model's domain,
     :math:`u_1, u_2` are the coordinates of the model, and :math:`e_1, e_2` are the inverse of the infinitesimal
-    length of the coordinates.
+    length of the coordinates (which can be functions of the :math:`u_1, u_2` coordinates).
 
     Parameters
     ----------
