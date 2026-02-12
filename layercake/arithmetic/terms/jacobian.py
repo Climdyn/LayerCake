@@ -55,6 +55,9 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
     u = uc.symbol
     v = vc.symbol
 
+    uunits = combine_units(uc.units, uc.infinitesimal_length_units, '+')
+    vunits = combine_units(vc.units, vc.infinitesimal_length_units, '+')
+
     if uc.infinitesimal_length == 1 and vc.infinitesimal_length == 1:
         prefactor1 = prefactors[0]
         prefactor2 = prefactors[1]
@@ -64,24 +67,24 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
             prefs1 = prefactors[0].symbol * prefs
             prefactor1 = Expression(prefs1,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[0].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    units=combine_units(prefactors[0].units, combine_units(uunits, vunits, '+'), '-'),
                                     latex=prefs1._repr_latex_()[15:-1])
         else:
             prefactor1 = Expression(prefs,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=power_units(combine_units(uc.units, vc.units, '+'), -1),
+                                    units=power_units(combine_units(uunits, vunits, '+'), -1),
                                     latex=prefs._repr_latex_()[15:-1])
 
         if prefactors[1] is not None:
             prefs2 = prefactors[1].symbol * prefs
             prefactor2 = Expression(prefs2,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[1].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    units=combine_units(prefactors[1].units, combine_units(uunits, vunits, '+'), '-'),
                                     latex=prefs2._repr_latex_()[15:-1])
         else:
             prefactor2 = Expression(prefs,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=power_units(combine_units(uc.units, vc.units, '+'), -1),
+                                    units=power_units(combine_units(uunits, vunits, '+'), -1),
                                     latex=prefs._repr_latex_()[15:-1])
 
     du_field1 = OperatorTerm(field1, D, u, prefactor=prefactor1)
@@ -136,6 +139,9 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
     u = uc.symbol
     v = vc.symbol
 
+    uunits = combine_units(uc.units, uc.infinitesimal_length_units, '+')
+    vunits = combine_units(vc.units, vc.infinitesimal_length_units, '+')
+
     if uc.infinitesimal_length == 1 and vc.infinitesimal_length == 1:
         prefactor1 = prefactors[0]
         prefactor2 = prefactors[1]
@@ -145,24 +151,24 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
             prefs1 = prefactors[0].symbol * prefs
             prefactor1 = Expression(prefs1,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[0].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    units=combine_units(prefactors[0].units, combine_units(uunits, vunits, '+'), '-'),
                                     latex=prefs1._repr_latex_()[15:-1])
         else:
             prefactor1 = Expression(prefs,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=power_units(combine_units(uc.units, vc.units, '+'), -1),
+                                    units=power_units(combine_units(uunits, vunits, '+'), -1),
                                     latex=prefs._repr_latex_()[15:-1])
 
         if prefactors[1] is not None:
             prefs2 = prefactors[1].symbol * prefs
             prefactor2 = Expression(prefs2,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[1].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    units=combine_units(prefactors[1].units, combine_units(uunits, vunits, '+'), '-'),
                                     latex=prefs2._repr_latex_()[15:-1])
         else:
             prefactor2 = Expression(prefs,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=power_units(combine_units(uc.units, vc.units, '+'), -1),
+                                    units=power_units(combine_units(uunits, vunits, '+'), -1),
                                     latex=prefs._repr_latex_()[15:-1])
 
     du_field1 = OperatorTerm(field1, D, u, prefactor=prefactor1)

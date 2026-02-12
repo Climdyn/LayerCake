@@ -26,9 +26,11 @@ class Coordinate(Variable):
     units: str, optional
         The units of the coordinate. Used to compute the conversion between dimensional and nondimensional
         value. Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
-    infinitesimal_length: float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol
+    infinitesimal_length: float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol, optional
         Infinitesimal length associated with the
-    latex: str
+    infinitesimal_length_units: str, optional
+        Infinitesimal length units. Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
+    latex: str, optional
         Latex string representing the coordinate.
 
     Attributes
@@ -39,11 +41,13 @@ class Coordinate(Variable):
         Sympy symbol of the coordinate
     extent: tuple(float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol)
         2-tuple giving the natural extent of the coordinate, i.e. the lower and higher bounds of the coordinate's interval.
-    units: str, optional
+    units: str
         The units of the coordinate. Used to compute the conversion between dimensional and nondimensional
-        value. Should be specified by joining atoms like `'[unit^power]'`, e.g '`[m^2][s^-2][Pa^-2]'`.
+        value.
     infinitesimal_length: float or ~sympy.core.expr.Expr or ~sympy.core.symbol.Symbol
         Infinitesimal length associated with the
+    infinitesimal_length_units: str
+        Infinitesimal length units
     latex: str
         Latex string representing the coordinate.
 
@@ -53,8 +57,9 @@ class Coordinate(Variable):
 
     """
 
-    def __init__(self, name, symbol, extent, infinitesimal_length=S.One, units=None, latex=None):
+    def __init__(self, name, symbol, extent, infinitesimal_length=S.One, infinitesimal_length_units=None, units=None, latex=None):
 
         Variable.__init__(self, name, symbol, units, latex)
         self.extent = extent
         self.infinitesimal_length = infinitesimal_length
+        self.infinitesimal_length_units = infinitesimal_length_units
