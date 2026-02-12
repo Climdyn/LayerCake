@@ -73,10 +73,10 @@ def Jacobian(field1, field2, coordinate_system, sign=1, prefactors=(None, None))
                                     latex=prefs._repr_latex_()[15:-1])
 
         if prefactors[1] is not None:
-            prefs2 = prefactors[2].symbol * prefs
+            prefs2 = prefactors[1].symbol * prefs
             prefactor2 = Expression(prefs2,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[0].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    units=combine_units(prefactors[1].units, combine_units(uc.units, vc.units, '+'), '-'),
                                     latex=prefs2._repr_latex_()[15:-1])
         else:
             prefactor2 = Expression(prefs,
@@ -154,10 +154,10 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
                                     latex=prefs._repr_latex_()[15:-1])
 
         if prefactors[1] is not None:
-            prefs2 = prefactors[2].symbol * prefs
+            prefs2 = prefactors[1].symbol * prefs
             prefactor2 = Expression(prefs2,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[0].units, combine_units(uc.units, vc.units, '+'), '-'),
+                                    units=combine_units(prefactors[1].units, combine_units(uc.units, vc.units, '+'), '-'),
                                     latex=prefs2._repr_latex_()[15:-1])
         else:
             prefactor2 = Expression(prefs,
@@ -169,7 +169,6 @@ def vorticity_advection(field1, field2, coordinate_system, sign=1, prefactors=(N
     dv_field1 = OperatorTerm(field1, D, v, prefactor=prefactor2)
 
     du_lap_field2 = ComposedOperatorsTerm(field2, (D, Laplacian), (u, coordinate_system))
-
     dv_lap_field2 = ComposedOperatorsTerm(field2, (D, Laplacian), (v, coordinate_system))
 
     jacobian1 = ProductOfTerms(du_field1, dv_lap_field2, sign=sign)
