@@ -27,6 +27,17 @@ def combine_units(units1, units2, operation):
         The resulting units string.
 
     """
+
+    if not units1 and not units2:
+        return ''
+    elif not units2:
+        return units1
+    elif not units1:
+        if operation == '+':
+            return units2
+        else:
+            return power_units(units2, -1)
+
     ul = units1.split('][')
     ul[0] = ul[0][1:]
     ul[-1] = ul[-1][:-1]
