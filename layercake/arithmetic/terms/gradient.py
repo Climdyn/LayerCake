@@ -55,6 +55,9 @@ def gradients_product(field1, field2, coordinate_system, sign=1, prefactors=(Non
     u = uc.symbol
     v = vc.symbol
 
+    uunits = combine_units(uc.units, uc.infinitesimal_length_units, '+')
+    vunits = combine_units(vc.units, vc.infinitesimal_length_units, '+')
+
     if uc.infinitesimal_length == 1 and vc.infinitesimal_length == 1:
         prefactor1 = prefactors[0]
         prefactor2 = prefactors[1]
@@ -64,12 +67,12 @@ def gradients_product(field1, field2, coordinate_system, sign=1, prefactors=(Non
             prefs1 = prefactors[0].symbol * prefs
             prefactor1 = Expression(prefs1,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[0].units, power_units(uc.units, 2), '-'),
+                                    units=combine_units(prefactors[0].units, power_units(uunits, 2), '-'),
                                     latex=prefs1._repr_latex_()[15:-1])
         else:
             prefactor1 = Expression(prefs,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=power_units(uc.units, -2),
+                                    units=power_units(uunits, -2),
                                     latex=prefs._repr_latex_()[15:-1])
 
         prefs = 1 / (vc.infinitesimal_length ** 2)
@@ -77,12 +80,12 @@ def gradients_product(field1, field2, coordinate_system, sign=1, prefactors=(Non
             prefs2 = prefactors[1].symbol * prefs
             prefactor2 = Expression(prefs2,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[1].units, power_units(vc.units, 2), '-'),
+                                    units=combine_units(prefactors[1].units, power_units(vunits, 2), '-'),
                                     latex=prefs2._repr_latex_()[15:-1])
         else:
             prefactor2 = Expression(prefs,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=power_units(vc.units, -2),
+                                    units=power_units(vunits, -2),
                                     latex=prefs._repr_latex_()[15:-1])
 
     du_field1 = OperatorTerm(field1, D, u, prefactor=prefactor1)
@@ -137,6 +140,9 @@ def vorticity_gradients_product(field1, field2, coordinate_system, sign=1, prefa
     u = uc.symbol
     v = vc.symbol
 
+    uunits = combine_units(uc.units, uc.infinitesimal_length_units, '+')
+    vunits = combine_units(vc.units, vc.infinitesimal_length_units, '+')
+
     if uc.infinitesimal_length == 1 and vc.infinitesimal_length == 1:
         prefactor1 = prefactors[0]
         prefactor2 = prefactors[1]
@@ -146,12 +152,12 @@ def vorticity_gradients_product(field1, field2, coordinate_system, sign=1, prefa
             prefs1 = prefactors[0].symbol * prefs
             prefactor1 = Expression(prefs1,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[0].units, power_units(uc.units, 2), '-'),
+                                    units=combine_units(prefactors[0].units, power_units(uunits, 2), '-'),
                                     latex=prefs1._repr_latex_()[15:-1])
         else:
             prefactor1 = Expression(prefs,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=power_units(uc.units, -2),
+                                    units=power_units(uunits, -2),
                                     latex=prefs._repr_latex_()[15:-1])
 
         prefs = 1 / (vc.infinitesimal_length ** 2)
@@ -159,12 +165,12 @@ def vorticity_gradients_product(field1, field2, coordinate_system, sign=1, prefa
             prefs2 = prefactors[1].symbol * prefs
             prefactor2 = Expression(prefs2,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=combine_units(prefactors[1].units, power_units(vc.units, 2), '-'),
+                                    units=combine_units(prefactors[1].units, power_units(vunits, 2), '-'),
                                     latex=prefs2._repr_latex_()[15:-1])
         else:
             prefactor2 = Expression(prefs,
                                     expression_parameters=coordinate_system.parameters,
-                                    units=power_units(vc.units, -2),
+                                    units=power_units(vunits, -2),
                                     latex=prefs._repr_latex_()[15:-1])
 
     du_field1 = OperatorTerm(field1, D, u, prefactor=prefactor1)
