@@ -295,34 +295,13 @@ def Divergence(coordinate_system):
     return mat
 
 
-class _Add(Add):
+class _Add_Laplacian(Add):
 
     def __new__(cls, *args, **kwargs):
-        try:
-            latex = kwargs.pop('latex')
-        except KeyError:
-            latex = ''
         a = Add.__new__(cls, *args, **kwargs)
-        a._latex = latex
+        a._latex = r'\nabla^2'
 
         return a
-
-    @property
-    def latex(self):
-        return self._latex
-
-
-class _Mul(Mul):
-
-    def __new__(cls, *args, **kwargs):
-        try:
-            latex = kwargs.pop('latex')
-        except KeyError:
-            latex = ''
-        m = Mul.__new__(cls, *args, **kwargs)
-        m._latex = latex
-
-        return m
 
     @property
     def latex(self):
@@ -355,5 +334,5 @@ def Laplacian(coordinate_system):
     divergence = Divergence(coordinate_system)
     laplacian = Mul(divergence[0] * nabla[0], evaluate=False)
     for i in range(1, len(nabla)):
-        laplacian = _Add(laplacian, Mul(divergence[i] * nabla[i], evaluate=False), latex=r'\nabla^2')
+        laplacian = _Add_Laplacian(laplacian, Mul(divergence[i] * nabla[i], evaluate=False))
     return laplacian
