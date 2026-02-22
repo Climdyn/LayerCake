@@ -33,7 +33,7 @@ class Equation(object):
         Must be a single term, possibly a combination
         through :class:`~layercake.arithmetic.terms.base.OperationOnTerms` operations.
     name: str, optional
-        Optional name for the equation.
+        Name for the equation.
 
     Attributes
     ----------
@@ -246,10 +246,10 @@ class Equation(object):
         else:
             latex_string = r'\frac{\partial}{\partial t} ' + lhs
 
-        fterm = self.terms[0].latex
+        first_term = self.terms[0].latex
         if drop_first_rhs_char:
-            fterm = fterm[2:]
-        latex_string += ' = ' + fterm
+            first_term = first_term[2:]
+        latex_string += ' = ' + first_term
 
         for term in self.terms[1:]:
             latex_string += term.latex
