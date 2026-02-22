@@ -91,6 +91,9 @@ class Equation(object):
             for term in equation_term.terms:
                 if term.field is not self.field and term.field.dynamical and term.field not in other_fields:
                     other_fields.append(term.field)
+        for term in self.lhs_term.terms:
+            if term.field is not self.field and term.field.dynamical and term.field not in other_fields:
+                other_fields.append(term.field)
         return other_fields
 
     @property

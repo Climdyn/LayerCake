@@ -94,6 +94,18 @@ class Layer(object):
         return fields_list
 
     @property
+    def other_fields(self):
+        """list(~field.Field): Returns the list of dynamical fields of other layers, i.e. the fields whose time
+        evolution is provided by the partial differential equations of other layers."""
+        layer_fields = self.fields
+        other_fields = list()
+        for eq in self.equations:
+            for field in eq.other_fields:
+                if field not in layer_fields:
+                    other_fields.append(field)
+        return other_fields
+
+    @property
     def parameters(self):
         """list(~parameter.Parameter): Returns the list of parameters of the layer, i.e. the explicit parameters
         appearing in the partial differential equations of the layer."""
