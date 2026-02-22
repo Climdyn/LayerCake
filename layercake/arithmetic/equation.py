@@ -28,7 +28,7 @@ class Equation(object):
     ----------
     field: ~field.Field
         The spatial field over which the partial differential equation.
-    lhs_term: ~arithmetic.terms.base.ArithmeticTerms
+    lhs_term: ~arithmetic.terms.base.ArithmeticTerms or list(~arithmetic.terms.base.ArithmeticTerms)
         Term on the left-hand side of the equation.
         Must be a single term, possibly a combination
         through :class:`~layercake.arithmetic.terms.base.OperationOnTerms` operations.
@@ -55,7 +55,6 @@ class Equation(object):
         self.field._equation = self
         self.terms = list()
         self.lhs_term = lhs_term
-        self.lhs_term.field = self.field
         self.name = name
         self._layer = None
         self._cake = None
