@@ -171,8 +171,8 @@ class Layer(object):
             Default to `None`.
         """
         for field, eq in zip(self.fields, self.equations):
-            eq.lhs_term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
-            for term in eq.terms:
+            eq.lhs_terms.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
+            for term in eq.rhs_terms:
                 term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
 
     def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,
@@ -235,12 +235,14 @@ class Layer(object):
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
                 try:
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
+                    if eq.other_fields_in_lhs:
+                        raise NotImplementedError('Other fields in LHS of equations is not yer implemented.')
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_terms.inner_products.todense())
                 except LinAlgError:
                     raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
-                for equation_term in eq.terms:
+                for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
-                    for term in equation_term.terms:
+                    for term in equation_term.rhs_terms:
                         term_field = term.field
                         if term_field.dynamical:
                             if self._cake is not None:
@@ -302,12 +304,12 @@ class Layer(object):
                             b_subs.append(sbsb)
                 ndim = field.state.__len__()
                 try:
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.inverse().simplify()
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_terms.inner_products.inverse().simplify()
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
-                for equation_term in eq.terms:
+                for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
-                    for term in equation_term.terms:
+                    for term in equation_term.rhs_terms:
                         term_field = term.field
                         if term_field.dynamical:
                             if self._cake is not None:
