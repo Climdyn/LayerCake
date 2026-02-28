@@ -156,7 +156,7 @@ class Layer(object):
 
     def compute_inner_products(self, numerical=True, timeout=None, num_threads=None):
         """Compute the inner products tensors, either symbolic or numerical ones, of all the terms
-        of the layer equations, including the left-hand side term.
+        of the layer equations, including the left-hand side terms.
         Computations are parallelized on multiple CPUs.
 
         Parameters
@@ -165,15 +165,23 @@ class Layer(object):
             Whether to compute numerical or symbolic inner products.
             Default to `True` (numerical inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
         """
         for field, eq in zip(self.fields, self.equations):
-            eq.lhs_terms.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
-            for term in eq.rhs_terms:
-                term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
+            eq.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
 
     def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,
                        substitutions=None, basis_subs=False, parameters_subs=None):

@@ -222,8 +222,8 @@ class Equation(object):
         """int: Maximum rank of the right-hand side terms tensors."""
         return max(self.terms.maximum_rank, self.lhs_terms.maximum_rank)
 
-    def compute_lhs_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
-        """Compute the inner products tensor of the left-hand side terms.
+    def compute_inner_products(self, basis, numerical=False, timeout=None, num_threads=None, permute=False):
+        """Compute the inner products tensor of the left-hand and right-hand side terms.
 
         Parameters
         ----------
@@ -236,17 +236,24 @@ class Equation(object):
             Number of threads to use to compute the inner products. If `None` use all the cpus available.
             Default to `None`.
         timeout: int or float or bool or None, optional
-            The timeout for the numerical computation of each inner product.
-            After the timeout, compute the inner product with a quadrature instead of symbolic integration.
-            Does not apply to symbolic output computations.
-            If `None` or `False`, no timeout occurs.
-            Default to `None`.
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         permute: bool, optional
             If `True`, applies all the possible permutations to the tensor indices
             from 1 to the rank of the tensor.
             Default to `False`, i.e. no permutation is applied.
         """
         self.lhs_terms.compute_inner_products(basis, numerical, timeout, num_threads, permute)
+        self.rhs_terms.compute_inner_products(basis, numerical, timeout, num_threads, permute)
 
     def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
         """Generate a LaTeX string representing the equation mathematically.
@@ -341,11 +348,17 @@ class ListOfAdditiveArithmeticTerms(list):
             Number of threads to use to compute the inner products. If `None` use all the cpus available.
             Default to `None`.
         timeout: int or float or bool or None, optional
-            The timeout for the numerical computation of each inner product.
-            After the timeout, compute the inner product with a quadrature instead of symbolic integration.
-            Does not apply to symbolic output computations.
-            If `None` or `False`, no timeout occurs.
-            Default to `None`.
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         permute: bool, optional
             If `True`, applies all the possible permutations to the tensor indices
             from 1 to the rank of the tensor.
