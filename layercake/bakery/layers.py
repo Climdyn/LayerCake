@@ -245,7 +245,7 @@ class Layer(object):
                 try:
                     if eq.other_fields_in_lhs:
                         raise NotImplementedError('Other fields in LHS of equations is not yer implemented.')
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_terms.inner_products.todense())
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
                 except LinAlgError:
                     raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.rhs_terms:
@@ -312,7 +312,9 @@ class Layer(object):
                             b_subs.append(sbsb)
                 ndim = field.state.__len__()
                 try:
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_terms.inner_products.inverse().simplify()
+                    if eq.other_fields_in_lhs:
+                        raise NotImplementedError('Other fields in LHS of equations is not yer implemented.')
+                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inverse().simplify()
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.rhs_terms:

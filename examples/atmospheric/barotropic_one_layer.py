@@ -75,7 +75,7 @@ psi = Field("psi", p, basis, inner_products_definition, units="[m^2][inner_produ
 
 # defining the LHS as the time derivative of the vorticity
 vorticity = OperatorTerm(psi, Laplacian, basis.coordinate_system)
-barotropic_equation = Equation(psi, lhs_term=vorticity)
+barotropic_equation = Equation(psi, lhs_terms=vorticity)
 
 # defining the advection term
 advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1)

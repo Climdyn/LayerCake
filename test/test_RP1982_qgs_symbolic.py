@@ -185,7 +185,7 @@ class TestRP1982QgsSymbolic(TestQgsBase):
         # Defining the equation and LHS
         # Laplacian
         vorticity = OperatorTerm(psi, Laplacian, atmospheric_basis.coordinate_system)
-        barotropic_equation = Equation(psi, lhs_term=vorticity)
+        barotropic_equation = Equation(psi, lhs_terms=vorticity)
 
         # Defining the advection term
         advection_term1 = vorticity_advection(psi, psi, atmospheric_basis.coordinate_system, sign=-1)
@@ -229,7 +229,7 @@ class TestRP1982QgsSymbolic(TestQgsBase):
 
         lin_lhs = LinearTerm(theta, prefactor=a, sign=-1)
         lhs = AdditionOfTerms(lin_lhs, vorticity)
-        baroclinic_equation = Equation(theta, lhs_term=lhs)
+        baroclinic_equation = Equation(theta, lhs_terms=lhs)
 
         # Defining the advection terms
         advection_term1 = vorticity_advection(psi, theta, atmospheric_basis.coordinate_system, sign=-1)
