@@ -204,9 +204,18 @@ class Equation(object):
 
     @property
     def lhs_inner_products(self):
-        """list(~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray) or list(sparse.COO(float)): Left-hand
-        side inner products of the equation, if available."""
+        """list(~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray) or list(sparse.COO(float)): Inner products of each term of
+        the left-hand side of the equation, if available."""
         return [term.inner_products for term in self.lhs_terms]
+
+    @property
+    def lhs_inner_products_addition(self):
+        """~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float): Added left-hand
+        side inner products of the equation, if available. Might raise an error if not all terms are compatible."""
+        result = self.lhs_terms[0].inner_products.copy()
+        for term in self.lhs_terms[1:]:
+            result = result + term.inner_products
+        return result
 
     @property
     def maximum_rank(self):
