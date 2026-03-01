@@ -113,7 +113,7 @@ class Equation(object):
     @property
     def terms(self):
         """Alias for the list of RHS arithmetic terms."""
-        return self.terms
+        return self.rhs_terms
 
     @property
     def other_fields(self):
