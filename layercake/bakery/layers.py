@@ -37,7 +37,7 @@ class Layer(object):
     Parameters
     ----------
     name: str, optional
-        Optional name for the layer.
+        Name for the layer.
 
     Attributes
     ----------
@@ -57,6 +57,9 @@ class Layer(object):
         self.name = name
         self._cake = None
         self._cake_order = 0
+        self._lhs_inversion = True
+        self._lhs_inverted = False
+        self._lhs_mat = None
 
     @property
     def _cake_first_index(self):
@@ -101,6 +104,18 @@ class Layer(object):
         other_fields = list()
         for eq in self.equations:
             for field in eq.other_fields:
+                if field not in layer_fields:
+                    other_fields.append(field)
+        return other_fields
+
+    @property
+    def other_fields_in_lhs(self):
+        """list(~field.Field): Returns the list of dynamical fields of other layers present in the LHS of the layer's equations,
+        i.e. the fields whose time evolution is provided by the partial differential equations of other layers."""
+        layer_fields = self.fields
+        other_fields = list()
+        for eq in self.equations:
+            for field in eq.other_fields_in_lhs:
                 if field not in layer_fields:
                     other_fields.append(field)
         return other_fields
@@ -238,14 +253,28 @@ class Layer(object):
         if numerical:
 
             self.tensor = sp.zeros(shape, dtype=np.float64, format='dok')
-            lhs_mat = np.zeros((self.ndim+1, self.ndim+1))
+            self._lhs_mat = sp.zeros((self.ndim+1, self.ndim+1), dtype=np.float64, format='dok')
+            lhs_mat_inverted = np.zeros((self.ndim+1, self.ndim+1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
                 try:
                     if eq.other_fields_in_lhs:
-                        raise NotImplementedError('Other fields in LHS of equations is not yer implemented.')
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
+                        if self.other_fields_in_lhs:
+                            self._lhs_inversion = False
+                            raise NotImplementedError('Fields from other layers in LHS of equations is not yer implemented.')
+                        else:
+                            for lhs_term in eq.lhs_terms:
+                                ofield = lhs_term.field
+                                ofield_order = 1
+                                for tfield in self.fields:
+                                    if ofield is tfield:
+                                        break
+                                    ofield_order += ndim
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = lhs_term.inner_products
+                    else:
+                        lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
+                        self._lhs_inverted = True
                 except LinAlgError:
                     raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.rhs_terms:
@@ -288,7 +317,10 @@ class Layer(object):
                     if np.any(increment != 0):
                         self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
-            self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
+            if self._lhs_inversion and not self._lhs_inverted:
+                lhs_mat_inverted = np.linalg.inv(self._lhs_mat.todense())
+                self._lhs_inverted = True
+            self.tensor = sp.COO(np.tensordot(lhs_mat_inverted, self.tensor.to_coo(), 1))
 
         else:
             b_subs = list()
@@ -299,7 +331,8 @@ class Layer(object):
             else:
                 p_subs = list()
             self.tensor = MutableSparseNDimArray(iterable={}, shape=shape)
-            lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
+            self._lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
+            lhs_mat_inverted = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 bsb = field.basis.substitutions
@@ -313,8 +346,21 @@ class Layer(object):
                 ndim = field.state.__len__()
                 try:
                     if eq.other_fields_in_lhs:
-                        raise NotImplementedError('Other fields in LHS of equations is not yer implemented.')
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inverse().simplify()
+                        if self.other_fields_in_lhs:
+                            self._lhs_inversion = False
+                            raise NotImplementedError('Fields from other layers in LHS of equations is not yer implemented.')
+                        else:
+                            for lhs_term in eq.lhs_terms:
+                                ofield = lhs_term.field
+                                ofield_order = 1
+                                for tfield in self.fields:
+                                    if ofield is tfield:
+                                        break
+                                    ofield_order += ndim
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = lhs_term.inner_products
+                    else:
+                        lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inv().simplify()
+                        self._lhs_inverted = True
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.rhs_terms:
@@ -380,7 +426,11 @@ class Layer(object):
                         increment = ImmutableSparseNDimArray(increment)
                     self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
-            self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1))
+
+            if self._lhs_inversion and not self._lhs_inverted:
+                lhs_mat_inverted = self._lhs_mat.inv().simplify()
+                self._lhs_inverted = True
+            self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, self.tensor, 1))
                            .subs(b_subs).subs(p_subs).subs(substitutions))
 
     def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
