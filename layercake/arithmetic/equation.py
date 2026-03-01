@@ -130,9 +130,10 @@ class Equation(object):
     def other_fields_in_lhs(self):
         """list(~field.Field): List of additional fields present in the LHS of the equation."""
         other_fields = list()
-        for term in self.lhs_terms:
-            if term.field is not self.field and term.field.dynamical and term.field not in other_fields:
-                other_fields.append(term.field)
+        for equation_term in self.lhs_terms:
+            for term in equation_term.terms:
+                if term.field is not self.field and term.field.dynamical and term.field not in other_fields:
+                    other_fields.append(term.field)
         return other_fields
 
     @property
