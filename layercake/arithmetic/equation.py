@@ -120,7 +120,7 @@ class Equation(object):
         """list(~field.Field): List of additional fields present in the equation."""
         other_fields = list()
         for equation_term in self.terms:
-            for term in equation_term.rhs_terms:
+            for term in equation_term.terms:
                 if term.field is not self.field and term.field.dynamical and term.field not in other_fields:
                     other_fields.append(term.field)
         other_fields = other_fields + self.other_fields_in_lhs
@@ -140,7 +140,7 @@ class Equation(object):
         """list(~field.ParameterField): List of non-dynamical parameter fields present in the equation."""
         parameter_fields = list()
         for equation_term in self.terms:
-            for term in equation_term.rhs_terms:
+            for term in equation_term.terms:
                 if term.field is not self.field and not term.field.dynamical and term.field not in parameter_fields:
                     parameter_fields.append(term.field)
         for term in self.lhs_terms:
