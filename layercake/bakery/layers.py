@@ -250,7 +250,7 @@ class Layer(object):
                     raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
-                    for term in equation_term.rhs_terms:
+                    for term in equation_term.terms:
                         term_field = term.field
                         if term_field.dynamical:
                             if self._cake is not None:
@@ -319,7 +319,7 @@ class Layer(object):
                     raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
                 for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
-                    for term in equation_term.rhs_terms:
+                    for term in equation_term.terms:
                         term_field = term.field
                         if term_field.dynamical:
                             if self._cake is not None:
