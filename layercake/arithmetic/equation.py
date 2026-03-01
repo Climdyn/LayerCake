@@ -144,9 +144,10 @@ class Equation(object):
             for term in equation_term.terms:
                 if term.field is not self.field and not term.field.dynamical and term.field not in parameter_fields:
                     parameter_fields.append(term.field)
-        for term in self.lhs_terms:
-            if term.field is not self.field and not term.field.dynamical and term.field not in parameter_fields:
-                parameter_fields.append(term.field)
+        for equation_term in self.lhs_terms:
+            for term in equation_term.terms:
+                if term.field is not self.field and not term.field.dynamical and term.field not in parameter_fields:
+                    parameter_fields.append(term.field)
         return parameter_fields
 
     @property
