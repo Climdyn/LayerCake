@@ -271,7 +271,7 @@ class Layer(object):
                                     if ofield is tfield:
                                         break
                                     ofield_order += ndim
-                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = lhs_term.inner_products
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = lhs_term.inner_products.todense()
                     else:
                         lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
                         self._lhs_inverted = True
@@ -318,7 +318,7 @@ class Layer(object):
                         self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
             if self._lhs_inversion and not self._lhs_inverted:
-                lhs_mat_inverted = np.linalg.inv(self._lhs_mat.todense())
+                lhs_mat_inverted[1:, 1:] = np.linalg.inv(self._lhs_mat.todense()[1:, 1:])
                 self._lhs_inverted = True
             self.tensor = sp.COO(np.tensordot(lhs_mat_inverted, self.tensor.to_coo(), 1))
 
