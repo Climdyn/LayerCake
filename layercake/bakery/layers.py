@@ -271,7 +271,8 @@ class Layer(object):
                                     if ofield is tfield:
                                         break
                                     ofield_order += ndim
-                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = lhs_term.inner_products.todense()
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = \
+                                    self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] + lhs_term.inner_products.todense()
                     else:
                         lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
                         self._lhs_inverted = True
@@ -357,7 +358,7 @@ class Layer(object):
                                     if ofield is tfield:
                                         break
                                     ofield_order += ndim
-                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = lhs_term.inner_products
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] += lhs_term.inner_products
                     else:
                         lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inv().simplify()
                         self._lhs_inverted = True
