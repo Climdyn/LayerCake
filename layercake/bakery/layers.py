@@ -200,7 +200,7 @@ class Layer(object):
             eq.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
 
     def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,
-                       substitutions=None, basis_subs=False, parameters_subs=None):
+                       substitutions=None, basis_subs=False, parameters_subs=None, lhs_inversion=True):
         """Compute the tensor of the symbolic or numerical representation of the ordinary differential
         equations tendencies of the layer.
         Results are stored in the :attr:`~Layer.tensor` attribute.
@@ -212,7 +212,7 @@ class Layer(object):
             Whether to compute the numerical or the symbolic tensor.
             Default to `True` (numerical tensor as output).
         compute_inner_products: bool, optional
-            Whether the inner products tensors of the layer equations' terms must be compute first.
+            Whether the inner products tensors of the layer equations' terms must be computed first.
             Default to `False`. Please note that if the inner products are not computed firsthand, the tensor computation
             will fail.
         compute_inner_products_kwargs: dict, optional
@@ -229,6 +229,8 @@ class Layer(object):
         parameters_subs: list(~parameter.Parameter), optional
             List of model's parameters to substitute in the symbolic tendencies' tensor.
             Only applies for the symbolic tendencies.
+        lhs_inversion: bool, optional
+            Try to inverse the LHS matrix and take the matricial product with the RHS. Default to `True`.
 
         """
 
@@ -260,7 +262,7 @@ class Layer(object):
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
                 if eq.other_fields_in_lhs:
-                    if self.other_fields_in_lhs:
+                    if self.other_fields_in_lhs or not lhs_inversion:
                         self._lhs_inversion = False
                         if self._cake is None:
                             raise ValueError('Field(s) in the LHS are not found in the layer or in the cake.')
@@ -376,7 +378,7 @@ class Layer(object):
                             b_subs.append(sbsb)
                 ndim = field.state.__len__()
                 if eq.other_fields_in_lhs:
-                    if self.other_fields_in_lhs:
+                    if self.other_fields_in_lhs or not lhs_inversion:
                         self._lhs_inversion = False
                         if self._cake is None:
                             raise ValueError('Field(s) in the LHS are not found in the layer or in the cake.')

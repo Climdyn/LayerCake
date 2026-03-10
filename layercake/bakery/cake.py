@@ -15,18 +15,25 @@
 
 from contextlib import redirect_stdout
 import numpy as np
+from numpy.linalg import LinAlgError
 import matplotlib.pyplot as plt
 import sparse as sp
 from numba import njit
+
+from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
+from sympy import MutableSparseMatrix
+from sympy import zeros as sympy_zeros
+from sympy import simplify, N
+from sympy.tensor.array import permutedims
+from sympy.matrices.exceptions import NonInvertibleMatrixError
+
 from layercake.utils.tensor import sparse_mul, jsparse_mul
 from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor, compute_jacobian_permutations
 from layercake.formatters.fortran import FortranJacobianEquationFormatter, FortranEquationFormatter
 from layercake.formatters.python import PythonJacobianEquationFormatter, PythonEquationFormatter
 from layercake.formatters.julia import JuliaJacobianEquationFormatter, JuliaEquationFormatter
 from layercake.utils import isin
-from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
-from sympy import simplify, N
-from sympy.tensor.array import permutedims
+from layercake.utils.symbolic_tensor import symbolic_tensordot
 
 real_eps = np.finfo(np.float64).eps
 small_number = 1.e-12
@@ -45,6 +52,7 @@ class Cake(object):
     def __init__(self):
 
         self.layers = list()
+        self._lhs_inversion = True
 
     def add_layer(self, layer):
         """Add a layer object to the cake.
@@ -150,6 +158,11 @@ class Cake(object):
             Only applies for the symbolic tendencies.
 
         """
+        self._lhs_inversion = True
+        for layer in self.layers:
+            if not layer._lhs_inversion:
+                self._lhs_inversion = False
+                break
 
         for layer in self.layers:
             layer.compute_tensor(numerical=numerical,
@@ -157,7 +170,8 @@ class Cake(object):
                                  compute_inner_products_kwargs=compute_inner_products_kwargs,
                                  substitutions=substitutions,
                                  basis_subs=basis_subs,
-                                 parameters_subs=parameters_subs
+                                 parameters_subs=parameters_subs,
+                                 lhs_inversion=self._lhs_inversion
                                  )
 
     @property
@@ -205,8 +219,12 @@ class Cake(object):
 
         if numerical:
             tensor = sp.zeros(shape, dtype=np.float64, format='dok')
+            if self._lhs_inversion:
+                lhs_mat = sp.zeros((self.ndim + 1, self.ndim + 1), dtype=np.float64, format='dok')
         else:
             tensor = MutableSparseNDimArray(iterable={}, shape=shape)
+            if self._lhs_inversion:
+                lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
 
         for i, layer in enumerate(self.layers):
             if (numerical and not isinstance(layer.tensor, sp.COO) or
@@ -225,13 +243,29 @@ class Cake(object):
             args = tuple(slices + zeros)
             if numerical:
                 tensor[args] = tensor[args] + layer.tensor.todense()[1:]
+                if self._lhs_inversion:
+                    lhs_mat[args[:2]] = lhs_mat[args[:1]] + layer._lhs_mat.todense()[1:]
             else:
                 tensor[args] = tensor[args] + layer.tensor[1:]
+                if self._lhs_inversion:
+                    lhs_mat[args[:2]] = lhs_mat[args[:2]] + layer._lhs_mat[1:]
 
         if numerical:
-            tensor = tensor.to_coo()
+            if self._lhs_inversion:
+                try:
+                    tensor = sp.COO(np.tensordot(np.linalg.inv(lhs_mat), tensor.to_coo(), 1))
+                except LinAlgError:
+                    raise LinAlgError(f'The left-hand side of the cake is not invertible with the provided basis.')
+            else:
+                tensor = tensor.to_coo()
         else:
-            tensor = ImmutableSparseNDimArray(tensor)
+            if self._lhs_inversion:
+                try:
+                    tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat.inv().simplify(), tensor, 1))
+                except NonInvertibleMatrixError:
+                    raise NonInvertibleMatrixError(f'The left-hand side of the cake is not invertible with the provided basis.')
+            else:
+                tensor = ImmutableSparseNDimArray(tensor)
 
         tensor = self.simplify_tensor(tensor, small_number)
 
