@@ -262,17 +262,38 @@ class Layer(object):
                 if eq.other_fields_in_lhs:
                     if self.other_fields_in_lhs:
                         self._lhs_inversion = False
-                        raise NotImplementedError('Fields from other layers in LHS of equations is not yer implemented.')
+                        if self._cake is None:
+                            raise ValueError('Field(s) in the LHS are not found in the layer or in the cake.')
+                        else:
+                            if np.all(self._lhs_mat.todense() == 0) and self._lhs_mat.shape[1] != self._cake.ndim + 1:
+                                self._lhs_mat = sp.zeros((self.ndim + 1, self._cake.ndim + 1), dtype=np.float64, format='dok')
+                            if np.any(self._lhs_mat.todense() != 0) and self._lhs_mat.shape[1] != self._cake.ndim + 1:
+                                raise ValueError(f'Error in the initialization of the LHS in layer {self}.')
+
+                        for lhs_term in eq.lhs_terms:
+                            ofield = lhs_term.field
+                            ofield_order = 1
+                            ondim = ofield.state.__len__()
+                            for tfield in self._cake.fields:
+                                if ofield is tfield:
+                                    break
+                                tndim = tfield.state.__len__()
+                                ofield_order += tndim
+                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] = \
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] + lhs_term.inner_products.todense()
+
                     else:
                         for lhs_term in eq.lhs_terms:
                             ofield = lhs_term.field
                             ofield_order = 1
+                            ondim = ofield.state.__len__()
                             for tfield in self.fields:
                                 if ofield is tfield:
                                     break
-                                ofield_order += ndim
-                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = \
-                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] + lhs_term.inner_products.todense()
+                                tndim = tfield.state.__len__()
+                                ofield_order += tndim
+                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] = \
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] + lhs_term.inner_products.todense()
                 else:
                     try:
                         lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
@@ -326,7 +347,11 @@ class Layer(object):
                     self._lhs_inverted = True
                 except LinAlgError:
                     raise LinAlgError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
-            self.tensor = sp.COO(np.tensordot(lhs_mat_inverted, self.tensor.to_coo(), 1))
+            if self._lhs_inverted:
+                self.tensor = sp.COO(np.tensordot(lhs_mat_inverted, self.tensor.to_coo(), 1))
+            else:
+                warnings.warn(f'LHS of layer {self} has not been inverted. Its tensor hold the RHS tendencies alone.')
+                self.tensor = self.tensor.to_coo()
 
         else:
             b_subs = list()
@@ -353,16 +378,35 @@ class Layer(object):
                 if eq.other_fields_in_lhs:
                     if self.other_fields_in_lhs:
                         self._lhs_inversion = False
-                        raise NotImplementedError('Fields from other layers in LHS of equations is not yer implemented.')
+                        if self._cake is None:
+                            raise ValueError('Field(s) in the LHS are not found in the layer or in the cake.')
+                        else:
+                            if np.all(self._lhs_mat == 0) and self._lhs_mat.shape[1] != self._cake.ndim + 1:
+                                self._lhs_mat = sp.zeros((self.ndim + 1, self._cake.ndim + 1), dtype=np.float64, format='dok')
+                            if np.any(self._lhs_mat != 0) and self._lhs_mat.shape[1] != self._cake.ndim + 1:
+                                raise ValueError(f'Error in the initialization of the LHS in layer {self}.')
+
+                        for lhs_term in eq.lhs_terms:
+                            ofield = lhs_term.field
+                            ofield_order = 1
+                            ondim = ofield.state.__len__()
+                            for tfield in self._cake.fields:
+                                if ofield is tfield:
+                                    break
+                                tndim = tfield.state.__len__()
+                                ofield_order += tndim
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
                     else:
                         for lhs_term in eq.lhs_terms:
                             ofield = lhs_term.field
                             ofield_order = 1
+                            ondim = ofield.state.__len__()
                             for tfield in self.fields:
                                 if ofield is tfield:
                                     break
-                                ofield_order += ndim
-                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] += lhs_term.inner_products
+                                tndim = tfield.state.__len__()
+                                ofield_order += tndim
+                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
                 else:
                     try:
                         lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inv().simplify()
@@ -440,8 +484,13 @@ class Layer(object):
                     self._lhs_inverted = True
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
-            self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, self.tensor, 1))
-                           .subs(b_subs).subs(p_subs).subs(substitutions))
+            if self._lhs_inverted:
+                self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, self.tensor, 1))
+                               .subs(b_subs).subs(p_subs).subs(substitutions))
+            else:
+                warnings.warn(f'LHS of layer {self} has not been inverted. Its tensor hold the RHS tendencies alone.')
+                self.tensor = ImmutableSparseNDimArray(self.tensor).subs(b_subs).subs(p_subs).subs(substitutions)
+                self._lhs_mat = self._lhs_mat.subs(b_subs).subs(p_subs).subs(substitutions)
 
     def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
         """Generate the LaTeX strings representing the layer's equations mathematically.
