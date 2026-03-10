@@ -259,7 +259,9 @@ class Cake(object):
         if numerical:
             if not self._lhs_inversion_in_layer:
                 try:
-                    tensor = sp.COO(np.tensordot(np.linalg.inv(lhs_mat.todense()), tensor.to_coo(), 1))
+                    lhs_mat_inverted = np.zeros((self.ndim + 1, self.ndim + 1))
+                    lhs_mat_inverted[1:, 1:] = np.linalg.inv(lhs_mat.todense()[1:, 1:])
+                    tensor = sp.COO(np.tensordot(lhs_mat_inverted, tensor.to_coo(), 1))
                 except LinAlgError:
                     raise LinAlgError(f'The left-hand side of the cake is not invertible with the provided basis.')
             else:
@@ -267,7 +269,9 @@ class Cake(object):
         else:
             if not self._lhs_inversion_in_layer:
                 try:
-                    tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat.inv().simplify(), tensor, 1))
+                    lhs_mat_inverted = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
+                    lhs_mat_inverted[1:, 1:] = lhs_mat[1:, 1:].inv().simplify()
+                    tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, tensor, 1))
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the cake is not invertible with the provided basis.')
             else:

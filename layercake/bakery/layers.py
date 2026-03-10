@@ -480,7 +480,7 @@ class Layer(object):
 
             if self._lhs_inversion and not self._lhs_inverted:
                 try:
-                    lhs_mat_inverted = self._lhs_mat.inv().simplify()
+                    lhs_mat_inverted[1:, 1:] = self._lhs_mat[1:, 1:].inv().simplify()
                     self._lhs_inverted = True
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
