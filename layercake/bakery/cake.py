@@ -171,7 +171,7 @@ class Cake(object):
                                  substitutions=substitutions,
                                  basis_subs=basis_subs,
                                  parameters_subs=parameters_subs,
-                                 lhs_inversion=self._lhs_inversion_in_layer
+                                 lhs_inversion_in_layer=self._lhs_inversion_in_layer
                                  )
 
     @property
