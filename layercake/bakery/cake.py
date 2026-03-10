@@ -52,7 +52,7 @@ class Cake(object):
     def __init__(self):
 
         self.layers = list()
-        self._lhs_inversion = True
+        self._lhs_inversion_in_layer = True
 
     def add_layer(self, layer):
         """Add a layer object to the cake.
@@ -158,10 +158,10 @@ class Cake(object):
             Only applies for the symbolic tendencies.
 
         """
-        self._lhs_inversion = True
+        self._lhs_inversion_in_layer = True
         for layer in self.layers:
-            if not layer._lhs_inversion:
-                self._lhs_inversion = False
+            if layer.other_fields_in_lhs:
+                self._lhs_inversion_in_layer = False
                 break
 
         for layer in self.layers:
@@ -171,7 +171,7 @@ class Cake(object):
                                  substitutions=substitutions,
                                  basis_subs=basis_subs,
                                  parameters_subs=parameters_subs,
-                                 lhs_inversion=self._lhs_inversion
+                                 lhs_inversion=self._lhs_inversion_in_layer
                                  )
 
     @property
@@ -219,11 +219,11 @@ class Cake(object):
 
         if numerical:
             tensor = sp.zeros(shape, dtype=np.float64, format='dok')
-            if self._lhs_inversion:
+            if not self._lhs_inversion_in_layer:
                 lhs_mat = sp.zeros((self.ndim + 1, self.ndim + 1), dtype=np.float64, format='dok')
         else:
             tensor = MutableSparseNDimArray(iterable={}, shape=shape)
-            if self._lhs_inversion:
+            if not self._lhs_inversion_in_layer:
                 lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
 
         for i, layer in enumerate(self.layers):
@@ -243,17 +243,17 @@ class Cake(object):
             args = tuple(slices + zeros)
             if numerical:
                 tensor[args] = tensor[args] + layer.tensor.todense()[1:]
-                if self._lhs_inversion:
+                if not self._lhs_inversion_in_layer:
                     lhs_mat[args[:2]] = lhs_mat[args[:1]] + layer._lhs_mat.todense()[1:]
             else:
                 tensor[args] = tensor[args] + layer.tensor[1:]
-                if self._lhs_inversion:
+                if not self._lhs_inversion_in_layer:
                     lhs_mat[args[:2]] = lhs_mat[args[:2]] + layer._lhs_mat[1:]
 
         if numerical:
             if self._lhs_inversion:
                 try:
-                    tensor = sp.COO(np.tensordot(np.linalg.inv(lhs_mat), tensor.to_coo(), 1))
+                    tensor = sp.COO(np.tensordot(np.linalg.inv(lhs_mat.todense()), tensor.to_coo(), 1))
                 except LinAlgError:
                     raise LinAlgError(f'The left-hand side of the cake is not invertible with the provided basis.')
             else:
