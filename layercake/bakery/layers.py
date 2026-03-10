@@ -18,6 +18,7 @@ from numpy.linalg import LinAlgError
 import matplotlib.pyplot as plt
 import sparse as sp
 from copy import deepcopy
+import warnings
 
 from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray
 from sympy import zeros as sympy_zeros
@@ -258,26 +259,27 @@ class Layer(object):
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
-                try:
-                    if eq.other_fields_in_lhs:
-                        if self.other_fields_in_lhs:
-                            self._lhs_inversion = False
-                            raise NotImplementedError('Fields from other layers in LHS of equations is not yer implemented.')
-                        else:
-                            for lhs_term in eq.lhs_terms:
-                                ofield = lhs_term.field
-                                ofield_order = 1
-                                for tfield in self.fields:
-                                    if ofield is tfield:
-                                        break
-                                    ofield_order += ndim
-                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = \
-                                    self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] + lhs_term.inner_products.todense()
+                if eq.other_fields_in_lhs:
+                    if self.other_fields_in_lhs:
+                        self._lhs_inversion = False
+                        raise NotImplementedError('Fields from other layers in LHS of equations is not yer implemented.')
                     else:
+                        for lhs_term in eq.lhs_terms:
+                            ofield = lhs_term.field
+                            ofield_order = 1
+                            for tfield in self.fields:
+                                if ofield is tfield:
+                                    break
+                                ofield_order += ndim
+                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] = \
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] + lhs_term.inner_products.todense()
+                else:
+                    try:
                         lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
                         self._lhs_inverted = True
-                except LinAlgError:
-                    raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+                    except LinAlgError:
+                        raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+
                 for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
                     for term in equation_term.terms:
@@ -319,8 +321,11 @@ class Layer(object):
                         self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
             if self._lhs_inversion and not self._lhs_inverted:
-                lhs_mat_inverted[1:, 1:] = np.linalg.inv(self._lhs_mat.todense()[1:, 1:])
-                self._lhs_inverted = True
+                try:
+                    lhs_mat_inverted[1:, 1:] = np.linalg.inv(self._lhs_mat.todense()[1:, 1:])
+                    self._lhs_inverted = True
+                except LinAlgError:
+                    raise LinAlgError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
             self.tensor = sp.COO(np.tensordot(lhs_mat_inverted, self.tensor.to_coo(), 1))
 
         else:
@@ -345,25 +350,26 @@ class Layer(object):
                         else:
                             b_subs.append(sbsb)
                 ndim = field.state.__len__()
-                try:
-                    if eq.other_fields_in_lhs:
-                        if self.other_fields_in_lhs:
-                            self._lhs_inversion = False
-                            raise NotImplementedError('Fields from other layers in LHS of equations is not yer implemented.')
-                        else:
-                            for lhs_term in eq.lhs_terms:
-                                ofield = lhs_term.field
-                                ofield_order = 1
-                                for tfield in self.fields:
-                                    if ofield is tfield:
-                                        break
-                                    ofield_order += ndim
-                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] += lhs_term.inner_products
+                if eq.other_fields_in_lhs:
+                    if self.other_fields_in_lhs:
+                        self._lhs_inversion = False
+                        raise NotImplementedError('Fields from other layers in LHS of equations is not yer implemented.')
                     else:
+                        for lhs_term in eq.lhs_terms:
+                            ofield = lhs_term.field
+                            ofield_order = 1
+                            for tfield in self.fields:
+                                if ofield is tfield:
+                                    break
+                                ofield_order += ndim
+                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ndim] += lhs_term.inner_products
+                else:
+                    try:
                         lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inv().simplify()
                         self._lhs_inverted = True
-                except NonInvertibleMatrixError:
-                    raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+                    except NonInvertibleMatrixError:
+                        raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+
                 for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
                     for term in equation_term.terms:
@@ -429,8 +435,11 @@ class Layer(object):
                 lhs_order += ndim
 
             if self._lhs_inversion and not self._lhs_inverted:
-                lhs_mat_inverted = self._lhs_mat.inv().simplify()
-                self._lhs_inverted = True
+                try:
+                    lhs_mat_inverted = self._lhs_mat.inv().simplify()
+                    self._lhs_inverted = True
+                except NonInvertibleMatrixError:
+                    raise NonInvertibleMatrixError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
             self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, self.tensor, 1))
                            .subs(b_subs).subs(p_subs).subs(substitutions))
 
