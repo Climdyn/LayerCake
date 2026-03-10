@@ -128,7 +128,7 @@ class Cake(object):
         return self.layers.__len__()
 
     def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,
-                       substitutions=None, basis_subs=False, parameters_subs=None):
+                       substitutions=None, basis_subs=False, parameters_subs=None, lhs_inversion_in_layer=True):
         """Compute the tensor of the symbolic or numerical representation of the ordinary differential
         equations tendencies of all the layers.
         Arguments are passed to the layer :meth:`~Layer.compute_tensor` method.
@@ -156,13 +156,19 @@ class Cake(object):
         parameters_subs: list(~parameter.Parameter), optional
             List of model's parameters to substitute in the symbolic tendencies' tensor.
             Only applies for the symbolic tendencies.
+        lhs_inversion_in_layer: bool, optional
+            Try to inverse the LHS matrix and take the matricial product with the RHS in each layer if possible. Default to `True`.
+            If `False`, it forces the inversion of the LHS at the cake level.
 
         """
-        self._lhs_inversion_in_layer = True
-        for layer in self.layers:
-            if layer.other_fields_in_lhs:
-                self._lhs_inversion_in_layer = False
-                break
+        if lhs_inversion_in_layer:
+            self._lhs_inversion_in_layer = True
+            for layer in self.layers:
+                if layer.other_fields_in_lhs:
+                    self._lhs_inversion_in_layer = False
+                    break
+        else:
+            self._lhs_inversion_in_layer = False
 
         for layer in self.layers:
             layer.compute_tensor(numerical=numerical,
@@ -251,7 +257,7 @@ class Cake(object):
                     lhs_mat[args[:2]] = lhs_mat[args[:2]] + layer._lhs_mat[1:]
 
         if numerical:
-            if self._lhs_inversion:
+            if not self._lhs_inversion_in_layer:
                 try:
                     tensor = sp.COO(np.tensordot(np.linalg.inv(lhs_mat.todense()), tensor.to_coo(), 1))
                 except LinAlgError:
@@ -259,7 +265,7 @@ class Cake(object):
             else:
                 tensor = tensor.to_coo()
         else:
-            if self._lhs_inversion:
+            if not self._lhs_inversion_in_layer:
                 try:
                     tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat.inv().simplify(), tensor, 1))
                 except NonInvertibleMatrixError:
