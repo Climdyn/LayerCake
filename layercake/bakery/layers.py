@@ -264,12 +264,9 @@ class Layer(object):
                 if self.other_fields_in_lhs or not lhs_inversion_in_layer:
                     self._lhs_inversion = False
                     if self._cake is None:
-                        raise ValueError('Field(s) in the LHS are not found in the layer or in the cake.')
-                    else:
-                        if np.all(self._lhs_mat.todense() == 0) and self._lhs_mat.shape[1] != self._cake.ndim + 1:
-                            self._lhs_mat = sp.zeros((self.ndim + 1, self._cake.ndim + 1), dtype=np.float64, format='dok')
-                        if np.any(self._lhs_mat.todense() != 0) and self._lhs_mat.shape[1] != self._cake.ndim + 1:
-                            raise ValueError(f'Error in the initialization of the LHS in layer {self}.')
+                        raise ValueError('Field(s) in the LHS are not found in the layer and there is no cake.')
+                    if self._lhs_mat.shape[1] != self._cake.ndim + 1:
+                        self._lhs_mat = sp.zeros((self.ndim + 1, self._cake.ndim + 1), dtype=np.float64, format='dok')
 
                     for lhs_term in eq.lhs_terms:
                         ofield = lhs_term.field
@@ -280,6 +277,8 @@ class Layer(object):
                                 break
                             tndim = tfield.state.__len__()
                             ofield_order += tndim
+                        else:
+                            raise ValueError(f'Field {ofield} not found in the cake.')
                         self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] = \
                             self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] + lhs_term.inner_products.todense()
 
@@ -380,11 +379,8 @@ class Layer(object):
                     self._lhs_inversion = False
                     if self._cake is None:
                         raise ValueError('Field(s) in the LHS are not found in the layer or in the cake.')
-                    else:
-                        if np.all(self._lhs_mat == 0) and self._lhs_mat.shape[1] != self._cake.ndim + 1:
-                            self._lhs_mat = sp.zeros((self.ndim + 1, self._cake.ndim + 1), dtype=np.float64, format='dok')
-                        if np.any(self._lhs_mat != 0) and self._lhs_mat.shape[1] != self._cake.ndim + 1:
-                            raise ValueError(f'Error in the initialization of the LHS in layer {self}.')
+                    if self._lhs_mat.shape[1] != self._cake.ndim + 1:
+                        self._lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self._cake.ndim + 1))
 
                     for lhs_term in eq.lhs_terms:
                         ofield = lhs_term.field
@@ -406,6 +402,8 @@ class Layer(object):
                                 break
                             tndim = tfield.state.__len__()
                             ofield_order += tndim
+                        else:
+                            raise ValueError(f'Field {ofield} not found in the cake.')
                         self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
                 else:
                     try:
