@@ -395,7 +395,7 @@ class Layer(object):
                                 break
                             tndim = tfield.state.__len__()
                             ofield_order += tndim
-                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
+                        self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
                 elif eq.other_fields_in_lhs:
                     for lhs_term in eq.lhs_terms:
                         ofield = lhs_term.field

@@ -254,7 +254,7 @@ class Cake(object):
             else:
                 tensor[args] = tensor[args] + layer.tensor[1:]
                 if not self._lhs_inversion_in_layer:
-                    lhs_mat[args[:2]] = lhs_mat[args[:2]] + layer._lhs_mat[1:]
+                    lhs_mat[args[:2]] = lhs_mat[args[:2]] + layer._lhs_mat[1:, :]
 
         if numerical:
             if not self._lhs_inversion_in_layer:
