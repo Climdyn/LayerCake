@@ -61,7 +61,7 @@ psi = Field("streamfunction", p, basis, s, units="[m^2][s^-2]", latex=r'\psi')
 
 # defining the LHS as the time derivative of the vorticity
 vorticity = OperatorTerm(psi, Laplacian, basis.coordinate_system)
-planetary_equation = Equation(psi, lhs_term=vorticity)
+planetary_equation = Equation(psi, lhs_terms=vorticity)
 
 # defining the advection term
 advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1)
