@@ -240,9 +240,12 @@ class FunctionField(Variable):
     latex: str, optional
         Latex string representing the variable.
         Empty by default.
-    extra_substitutions: list(tuple)
+    extra_substitutions: list(tuple), optional
         List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.
         The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
+    force_substitution: bool, optional
+        Force the substitution by the numerical values of the parameters arrays, even in the symbolic case.
+        Default to `False`.
     **parameters_array_kwargs: dict, optional
         Used to create the field state :class:`ParametersArray` object.
         Passed to the :class:`ParametersArray` class constructor.
@@ -269,17 +272,21 @@ class FunctionField(Variable):
     expression_parameters: None or list(~parameter.Parameter), optional
         List of parameters appearing in the symbolic expression.
         If `None`, assumes that no parameters are appearing there.
+    force_substitution: bool, optional
+        Force the substitution by the numerical values of the parameters arrays, even in the symbolic case.
 
     """
 
     def __init__(self, name, symbol, symbolic_expression, basis, expression_parameters=None,
-                 inner_product_definition=None, units="", latex=None, extra_substitutions=None, **parameters_array_kwargs):
+                 inner_product_definition=None, units="", latex=None, extra_substitutions=None,
+                 force_substitution=False, **parameters_array_kwargs):
 
         self.basis = basis
         self.inner_product_definition = inner_product_definition
         self.symbolic_expression = symbolic_expression
         self.expression_parameters = expression_parameters
         self.units = units
+        self.force_substitution = force_substitution
 
         Variable.__init__(self, name, symbol, self.units, latex)
 

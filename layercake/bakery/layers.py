@@ -439,10 +439,17 @@ class Layer(object):
                             for i, t in enumerate(equation_term.terms):
                                 if isinstance(t.field, (ParameterField, FunctionField)):
                                     term_symbol_list = list()
-                                    if isinstance(t.field, ParameterField):
-                                        term_symbol_list.append(list(t.field.symbols))
-                                    elif isinstance(t.field, FunctionField):
-                                        term_symbol_list.append(list(t.field.parameters))
+                                    symbols_list = None
+                                    if isinstance(t.field, FunctionField):
+                                        if t.field.force_substitution:
+                                            symbols_list = list(t.field.parameters)
+                                    if symbols_list is None:
+                                        symbols_list = list(t.field.symbols)
+                                    term_symbol_list.append(symbols_list)
+                                    # if isinstance(t.field, ParameterField):
+                                    #     term_symbol_list.append(list(t.field.symbols))
+                                    # elif isinstance(t.field, FunctionField):
+                                    #     term_symbol_list.append(list(t.field.parameters))
                                     params = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)
                                     contract[i] = params
                             if contract:
@@ -458,10 +465,13 @@ class Layer(object):
                         elif hasattr(equation_term, 'field'):
                             if isinstance(equation_term.field, (ParameterField, FunctionField)):
                                 term_symbol_list = list()
-                                if isinstance(equation_term.field, ParameterField):
-                                    term_symbol_list.append(list(equation_term.field.symbols))
-                                elif isinstance(equation_term.field, FunctionField):
-                                    term_symbol_list.append(list(equation_term.field.parameters))
+                                symbols_list = None
+                                if isinstance(equation_term.field, FunctionField):
+                                    if equation_term.field.force_substitution:
+                                        symbols_list = list(equation_term.field.parameters)
+                                if symbols_list is None:
+                                    symbols_list = list(equation_term.field.symbols)
+                                term_symbol_list.append(symbols_list)
                                 params = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)
                                 increment = symbolic_tensordot(increment, params, ((1,), (0,)))
                                 args[1] = 0
