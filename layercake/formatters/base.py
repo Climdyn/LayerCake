@@ -161,7 +161,9 @@ class JacobianEquationFormatter(EquationFormatter):
                                              f'{i + self.index_offset - 1},' \
                                              f'{j + self.index_offset - 1}{self.closing_character} = '
                 new_term = f'{val} '
-                if new_term[0] != '-':
+                if isinstance(val, Add):
+                    new_term = '+ (' + new_term + ')'
+                elif new_term[0] != '-':
                     new_term = '+' + new_term
                 for c in coords[1:]:
                     if c != 0:
