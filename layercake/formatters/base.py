@@ -13,7 +13,7 @@
     * :class:`JacobianEquationFormatter`: Base class for symbolic Jacobian equations formatting.
 
 """
-
+from sympy.core.add import Add
 from sympy import ImmutableSparseNDimArray
 from abc import ABC, abstractmethod
 from layercake.utils.symbolic_tensor import get_coords_from_index
@@ -72,7 +72,9 @@ class EquationFormatter(ABC):
             for n, val in tensor[i]._args[0].items():
                 coords = get_coords_from_index(n, ndim, shape_len-1)
                 new_term = f'{val} '
-                if new_term[0] != '-':
+                if isinstance(val, Add):
+                    new_term = '+ (' + new_term + ')'
+                elif new_term[0] != '-':
                     new_term = '+' + new_term
                 for c in coords:
                     if c != 0:
