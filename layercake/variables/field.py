@@ -13,14 +13,18 @@
 
 """
 
+import os
 from pebble import ProcessPool as Pool
 from multiprocessing import cpu_count
 import numpy as np
 from sympy import Symbol, Function
+from sympy import ImmutableSparseMatrix
 
 from layercake.variables.variable import Variable, VariablesArray
 from layercake.variables.parameter import ParametersArray
 from layercake.utils.parallel import parallel_integration
+from layercake.utils.integration import integration
+from layercake.utils.symbolic_tensor import remove_dic_zeros
 
 
 class Field(Variable):
@@ -246,6 +250,10 @@ class FunctionField(Variable):
     force_substitution: bool, optional
         Force the substitution by the numerical values of the parameters arrays, even in the symbolic case.
         Default to `False`.
+    force_symbolic_substitution: bool, optional
+        Force the substitution by the symbolic expressions resulting from the projection of the function field onto
+        the provided `basis`. Only relevant when working in the symbolic case.
+        Default to `False`.
     **parameters_array_kwargs: dict, optional
         Used to create the field state :class:`ParametersArray` object.
         Passed to the :class:`ParametersArray` class constructor.
@@ -274,12 +282,15 @@ class FunctionField(Variable):
         If `None`, assumes that no parameters are appearing there.
     force_substitution: bool, optional
         Force the substitution by the numerical values of the parameters arrays, even in the symbolic case.
+    force_symbolic_substitution: bool, optional
+        Force the substitution by the symbolic expressions resulting from the projection of the function field onto
+        the provided `basis`.
 
     """
 
     def __init__(self, name, symbol, symbolic_expression, basis, expression_parameters=None,
                  inner_product_definition=None, units="", latex=None, extra_substitutions=None,
-                 force_substitution=False, **parameters_array_kwargs):
+                 force_substitution=False, force_symbolic_substitution=False, **parameters_array_kwargs):
 
         self.basis = basis
         self.inner_product_definition = inner_product_definition
@@ -287,6 +298,7 @@ class FunctionField(Variable):
         self.expression_parameters = expression_parameters
         self.units = units
         self.force_substitution = force_substitution
+        self.force_symbolic_substitution = force_symbolic_substitution
 
         Variable.__init__(self, name, symbol, self.units, latex)
 
@@ -294,6 +306,12 @@ class FunctionField(Variable):
         if self.inner_product_definition is not None:
             self._compute_expansion(timeout=True, num_threads=None, extra_substitutions=extra_substitutions, **parameters_array_kwargs)
             if self.parameters.__len__() != len(basis):
+                raise ValueError('The number of parameters provided does not match the number of modes in the provided basis.')
+
+        self.symbolic_parameters = None
+        if self.inner_product_definition is not None:
+            self._compute_symbolic_expansion(timeout=None, num_threads=None, extra_substitutions=extra_substitutions)
+            if self.symbolic_parameters.shape[1] != len(basis):
                 raise ValueError('The number of parameters provided does not match the number of modes in the provided basis.')
 
     @property
@@ -402,9 +420,20 @@ class FunctionField(Variable):
                       (self.basis[idx].subs(substitutions), self.symbolic_expression.subs(substitutions)))
                      for idx in range(len(self.basis))]
 
-        with Pool(max_workers=num_threads) as pool:
-            output = parallel_integration(pool, args_list, substitutions, None, timeout,
-                                          symbolic_int=False, permute=False)
+        if 'LAYERCAKE_PARALLEL_INTEGRATION' not in os.environ:
+            parallel_integrations = True
+        else:
+            if os.environ['LAYERCAKE_PARALLEL_INTEGRATION'] == 'none':
+                parallel_integrations = False
+            else:
+                parallel_integrations = True
+
+        if parallel_integrations:
+            with Pool(max_workers=num_threads) as pool:
+                output = parallel_integration(pool, args_list, substitutions, None, timeout,
+                                              symbolic_int=False, permute=False)
+        else:
+            output = integration(args_list, substitutions, None, symbolic_int=False, permute=False)
 
         res = np.zeros(len(self.basis), dtype=float)
         for i in output:
@@ -417,6 +446,71 @@ class FunctionField(Variable):
         symbols_list = [Symbol(f'{symbol_name}_{i}') for i in range(len(self.basis))]
         symbols_list = np.array(symbols_list, dtype=object)
         self.parameters = ParametersArray(res, units=self.units, symbols=symbols_list, **parameters_array_kwargs)
+
+    def _compute_symbolic_expansion(self, timeout=None, num_threads=None, basis_subs=False, extra_substitutions=None):
+        """Compute the Galerkin expansion and store the result.
+
+        Parameters
+        ----------
+        timeout: None or bool or int
+            Control the switch from symbolic to numerical integration.
+            In the end, all results are converted to numerical expressions, but
+            by default, `parallel_integration` workers will try first to integrate
+            |Sympy| expressions symbolically. However, a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
+        num_threads: None or int, optional
+            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
+            Default to `None`.
+        basis_subs: bool, optional
+            Whether to substitute the parameters appearing in the definition of the basis of functions by
+            their numerical value.
+            Default to `False`.
+        extra_substitutions: list(tuple)
+            List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.
+            The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
+
+        """
+        if num_threads is None:
+            num_threads = cpu_count()
+
+        if basis_subs:
+            substitutions = self.basis.substitutions
+        else:
+            substitutions = list()
+        if extra_substitutions is not None:
+            substitutions += extra_substitutions
+
+        args_list = [(idx, self.inner_product_definition.inner_product,
+                      (self.basis[idx].subs(substitutions), self.symbolic_expression.subs(substitutions)))
+                     for idx in range(len(self.basis))]
+
+        if 'LAYERCAKE_PARALLEL_INTEGRATION' not in os.environ:
+            parallel_integrations = True
+        else:
+            if os.environ['LAYERCAKE_PARALLEL_INTEGRATION'] == 'none':
+                parallel_integrations = False
+            else:
+                parallel_integrations = True
+
+        if parallel_integrations:
+            with Pool(max_workers=num_threads) as pool:
+                output = parallel_integration(pool, args_list, substitutions, None, timeout,
+                                              symbolic_int=True, permute=False)
+        else:
+            output = integration(args_list, substitutions, None, symbolic_int=True, permute=False)
+
+        output = remove_dic_zeros(output)
+        mat_output = {(0, idx): v for idx, v in output.items()}
+        self.symbolic_parameters = ImmutableSparseMatrix(1, len(self.basis), mat_output)
+        self.symbolic_parameters = self.symbolic_parameters.subs(substitutions)
 
 
 if __name__ == "__main__":
