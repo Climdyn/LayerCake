@@ -253,6 +253,7 @@ class FunctionField(Variable):
     force_symbolic_substitution: bool, optional
         Force the substitution by the symbolic expressions resulting from the projection of the function field onto
         the provided `basis`. Only relevant when working in the symbolic case.
+        Is superseded by the `force_substitution` argument, i.e. the latter should be set to `False` for this parameter to work.
         Default to `False`.
     **parameters_array_kwargs: dict, optional
         Used to create the field state :class:`ParametersArray` object.
