@@ -26,6 +26,8 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 #  Vallis, G. K. (2006). Atmospheric and oceanic fluid dynamics. Cambridge University Press.
 #  See equation 5.86, chapter 5, pp. 226 .
 #
+#  In principle, the model conserves the potential vorticity in each layer.
+#
 ##############################################################################################
 
 # Setting some parameters
