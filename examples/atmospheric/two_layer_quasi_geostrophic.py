@@ -20,7 +20,11 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 
 ##############################################################################################
 #
-# This script defines the
+# This script defines a two-layer quasi-geostrophic model on a beta-plane with an orography
+# and is derived from Vallis book:
+#       
+#  Vallis, G. K. (2006). Atmospheric and oceanic fluid dynamics. Cambridge University Press.
+#  See equation 5.86, chapter 5, pp. 226 .
 #
 ##############################################################################################
 
@@ -76,7 +80,7 @@ y = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[1]
 # Meridional gradient of the Coriolis parameter at phi_0
 beta_nondim = Parameter(beta * L / f0, symbol=beta_symbol, units='')
 
-# Shear
+# Cross-terms
 alpha_1 = Parameter(f0 ** 2 * L ** 2 / (g * H1), symbol=Symbol("α_1"), units='')
 alphap_1 = Parameter(f0 ** 2 * L ** 2 / (gp * H1), symbol=Symbol("α'_1"), units='')
 dalpha_1 = Parameter(alpha_1 - alphap_1, symbol=Symbol("Δα_1"), units='')
@@ -87,11 +91,6 @@ alphap_2 = Parameter(f0 ** 2 * L ** 2 / (gp * H2), symbol=Symbol("α'_2"), units
 hh = np.zeros(len(atmospheric_basis))
 hh[1] = 0.2
 h = ParameterField('h', u'h', hh, atmospheric_basis, inner_products_definition)
-
-# # Equilibrium temperature
-# rr = np.zeros(len(atmospheric_basis))
-# rr[0] = 0.1
-# Tf = ParameterField('T', u'T', rr, atmospheric_basis, inner_products_definition)
 
 # Defining the fields
 #######################
@@ -107,7 +106,7 @@ psi2 = Field("psi2", p2, atmospheric_basis, inner_products_definition, units="",
 #
 # --------------------------------
 
-# defining the LHS as the time derivative of the vorticity
+# defining the LHS as the time derivative of the potential vorticity
 psi1_vorticity = OperatorTerm(psi1, Laplacian, atmospheric_basis.coordinate_system)
 dpsi12 = LinearTerm(psi2, prefactor=alphap_1)
 dpsi11 = LinearTerm(psi1, prefactor=dalpha_1)
@@ -133,7 +132,7 @@ psi1_equation.add_rhs_term(beta_term)
 #
 # --------------------------------
 
-# defining the LHS
+# defining the LHS as the time derivative of the potential vorticity
 psi2_vorticity = OperatorTerm(psi2, Laplacian, atmospheric_basis.coordinate_system)
 dpsi22 = LinearTerm(psi2, prefactor=alphap_2, sign=-1)
 dpsi21 = LinearTerm(psi1, prefactor=alphap_2)
@@ -195,10 +194,10 @@ f, Df = cake.compute_tendencies()
 
 # integrating
 ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 20000.), ic)
+res = solve_ivp(f, (0., 20000.), ic, method='DOP853')
 
 ic = res.y[:, -1]
-res = solve_ivp(f, (0., 20000.), ic)
+res = solve_ivp(f, (0., 20000.), ic, method='DOP853')
 
 # plotting
 plt.plot(res.y.T)
