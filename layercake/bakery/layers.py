@@ -18,6 +18,7 @@ from numpy.linalg import LinAlgError
 import matplotlib.pyplot as plt
 import sparse as sp
 from copy import deepcopy
+import warnings
 
 from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray
 from sympy import zeros as sympy_zeros
@@ -37,7 +38,7 @@ class Layer(object):
     Parameters
     ----------
     name: str, optional
-        Optional name for the layer.
+        Name for the layer.
 
     Attributes
     ----------
@@ -57,6 +58,9 @@ class Layer(object):
         self.name = name
         self._cake = None
         self._cake_order = 0
+        self._lhs_inversion = True
+        self._lhs_inverted = False
+        self._lhs_mat = None
 
     @property
     def _cake_first_index(self):
@@ -92,6 +96,30 @@ class Layer(object):
         for eq in self.equations:
             fields_list.append(eq.field)
         return fields_list
+
+    @property
+    def other_fields(self):
+        """list(~field.Field): Returns the list of dynamical fields of other layers, i.e. the fields whose time
+        evolution is provided by the partial differential equations of other layers."""
+        layer_fields = self.fields
+        other_fields = list()
+        for eq in self.equations:
+            for field in eq.other_fields:
+                if field not in layer_fields:
+                    other_fields.append(field)
+        return other_fields
+
+    @property
+    def other_fields_in_lhs(self):
+        """list(~field.Field): Returns the list of dynamical fields of other layers present in the LHS of the layer's equations,
+        i.e. the fields whose time evolution is provided by the partial differential equations of other layers."""
+        layer_fields = self.fields
+        other_fields = list()
+        for eq in self.equations:
+            for field in eq.other_fields_in_lhs:
+                if field not in layer_fields:
+                    other_fields.append(field)
+        return other_fields
 
     @property
     def parameters(self):
@@ -144,7 +172,7 @@ class Layer(object):
 
     def compute_inner_products(self, numerical=True, timeout=None, num_threads=None):
         """Compute the inner products tensors, either symbolic or numerical ones, of all the terms
-        of the layer equations, including the left-hand side term.
+        of the layer equations, including the left-hand side terms.
         Computations are parallelized on multiple CPUs.
 
         Parameters
@@ -153,18 +181,26 @@ class Layer(object):
             Whether to compute numerical or symbolic inner products.
             Default to `True` (numerical inner products as output).
         timeout: int or bool or None, optional
-            TODO
+            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate
+            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.
+            The options are:
+
+            * `None`: This is the "full-symbolic" mode. No timeout will be applied, and the switch to numerical integration will never happen.
+              Can result in very long and improbable computation time.
+            * `True`: This is the "full-numerical" mode. Symbolic computations do not occur, and the workers try directly to integrate
+              numerically.
+            * `False`: Same as `None`.
+            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+              numerical integration.
         num_threads: None or int, optional
             Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.
             Default to `None`.
         """
         for field, eq in zip(self.fields, self.equations):
-            eq.lhs_term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
-            for term in eq.terms:
-                term.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
+            eq.compute_inner_products(field.basis, numerical=numerical, timeout=timeout, num_threads=num_threads)
 
     def compute_tensor(self, numerical=True, compute_inner_products=False, compute_inner_products_kwargs=None,
-                       substitutions=None, basis_subs=False, parameters_subs=None):
+                       substitutions=None, basis_subs=False, parameters_subs=None, lhs_inversion_in_layer=True):
         """Compute the tensor of the symbolic or numerical representation of the ordinary differential
         equations tendencies of the layer.
         Results are stored in the :attr:`~Layer.tensor` attribute.
@@ -176,7 +212,7 @@ class Layer(object):
             Whether to compute the numerical or the symbolic tensor.
             Default to `True` (numerical tensor as output).
         compute_inner_products: bool, optional
-            Whether the inner products tensors of the layer equations' terms must be compute first.
+            Whether the inner products tensors of the layer equations' terms must be computed first.
             Default to `False`. Please note that if the inner products are not computed firsthand, the tensor computation
             will fail.
         compute_inner_products_kwargs: dict, optional
@@ -193,6 +229,8 @@ class Layer(object):
         parameters_subs: list(~parameter.Parameter), optional
             List of model's parameters to substitute in the symbolic tendencies' tensor.
             Only applies for the symbolic tendencies.
+        lhs_inversion_in_layer: bool, optional
+            Try to inverse the LHS matrix and take the matricial product with the RHS. Default to `True`.
 
         """
 
@@ -218,15 +256,52 @@ class Layer(object):
         if numerical:
 
             self.tensor = sp.zeros(shape, dtype=np.float64, format='dok')
-            lhs_mat = np.zeros((self.ndim+1, self.ndim+1))
+            self._lhs_mat = sp.zeros((self.ndim+1, self.ndim+1), dtype=np.float64, format='dok')
+            lhs_mat_inverted = np.zeros((self.ndim+1, self.ndim+1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 ndim = field.state.__len__()
-                try:
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_term.inner_products.todense())
-                except LinAlgError:
-                    raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
-                for equation_term in eq.terms:
+                if self.other_fields_in_lhs or not lhs_inversion_in_layer:
+                    self._lhs_inversion = False
+                    if self._cake is None:
+                        raise ValueError('Field(s) in the LHS are not found in the layer and there is no cake.')
+                    if self._lhs_mat.shape[1] != self._cake.ndim + 1:
+                        self._lhs_mat = sp.zeros((self.ndim + 1, self._cake.ndim + 1), dtype=np.float64, format='dok')
+
+                    for lhs_term in eq.lhs_terms:
+                        ofield = lhs_term.field
+                        ofield_order = 1
+                        ondim = ofield.state.__len__()
+                        for tfield in self._cake.fields:
+                            if ofield is tfield:
+                                break
+                            tndim = tfield.state.__len__()
+                            ofield_order += tndim
+                        else:
+                            raise ValueError(f'Field {ofield} not found in the cake.')
+                        self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] = \
+                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] + lhs_term.inner_products.todense()
+
+                elif eq.other_fields_in_lhs:
+                        for lhs_term in eq.lhs_terms:
+                            ofield = lhs_term.field
+                            ofield_order = 1
+                            ondim = ofield.state.__len__()
+                            for tfield in self.fields:
+                                if ofield is tfield:
+                                    break
+                                tndim = tfield.state.__len__()
+                                ofield_order += tndim
+                            self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] = \
+                                self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] + lhs_term.inner_products.todense()
+                else:
+                    try:
+                        lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
+                        self._lhs_inverted = True
+                    except LinAlgError:
+                        raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+
+                for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
                     for term in equation_term.terms:
                         term_field = term.field
@@ -266,7 +341,17 @@ class Layer(object):
                     if np.any(increment != 0):
                         self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
-            self.tensor = sp.COO(np.tensordot(lhs_mat, self.tensor.to_coo(), 1))
+            if self._lhs_inversion and not self._lhs_inverted:
+                try:
+                    lhs_mat_inverted[1:, 1:] = np.linalg.inv(self._lhs_mat.todense()[1:, 1:])
+                    self._lhs_inverted = True
+                except LinAlgError:
+                    raise LinAlgError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
+            if self._lhs_inverted:
+                self.tensor = sp.COO(np.tensordot(lhs_mat_inverted, self.tensor.to_coo(), 1))
+            else:
+                warnings.warn(f'LHS of layer {self} has not been inverted. Its tensor hold the RHS tendencies alone.')
+                self.tensor = self.tensor.to_coo()
 
         else:
             b_subs = list()
@@ -277,7 +362,8 @@ class Layer(object):
             else:
                 p_subs = list()
             self.tensor = MutableSparseNDimArray(iterable={}, shape=shape)
-            lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
+            self._lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
+            lhs_mat_inverted = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
             lhs_order = 1
             for field, eq in zip(self.fields, self.equations):
                 bsb = field.basis.substitutions
@@ -289,11 +375,44 @@ class Layer(object):
                         else:
                             b_subs.append(sbsb)
                 ndim = field.state.__len__()
-                try:
-                    lhs_mat[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_term.inner_products.inverse().simplify()
-                except NonInvertibleMatrixError:
-                    raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
-                for equation_term in eq.terms:
+                if self.other_fields_in_lhs or not lhs_inversion_in_layer:
+                    self._lhs_inversion = False
+                    if self._cake is None:
+                        raise ValueError('Field(s) in the LHS are not found in the layer or in the cake.')
+                    if self._lhs_mat.shape[1] != self._cake.ndim + 1:
+                        self._lhs_mat = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self._cake.ndim + 1))
+
+                    for lhs_term in eq.lhs_terms:
+                        ofield = lhs_term.field
+                        ofield_order = 1
+                        ondim = ofield.state.__len__()
+                        for tfield in self._cake.fields:
+                            if ofield is tfield:
+                                break
+                            tndim = tfield.state.__len__()
+                            ofield_order += tndim
+                        self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
+                elif eq.other_fields_in_lhs:
+                    for lhs_term in eq.lhs_terms:
+                        ofield = lhs_term.field
+                        ofield_order = 1
+                        ondim = ofield.state.__len__()
+                        for tfield in self.fields:
+                            if ofield is tfield:
+                                break
+                            tndim = tfield.state.__len__()
+                            ofield_order += tndim
+                        else:
+                            raise ValueError(f'Field {ofield} not found in the cake.')
+                        self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
+                else:
+                    try:
+                        lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inv().simplify()
+                        self._lhs_inverted = True
+                    except NonInvertibleMatrixError:
+                        raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+
+                for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
                     for term in equation_term.terms:
                         term_field = term.field
@@ -320,10 +439,15 @@ class Layer(object):
                             for i, t in enumerate(equation_term.terms):
                                 if isinstance(t.field, (ParameterField, FunctionField)):
                                     term_symbol_list = list()
-                                    if isinstance(t.field, ParameterField):
-                                        term_symbol_list.append(list(t.field.symbols))
-                                    elif isinstance(t.field, FunctionField):
-                                        term_symbol_list.append(list(t.field.parameters))
+                                    symbols_list = None
+                                    if isinstance(t.field, FunctionField):
+                                        if t.field.force_substitution:
+                                            symbols_list = list(t.field.parameters)
+                                        elif t.field.force_symbolic_substitution:
+                                            symbols_list = list(t.field.symbolic_parameters)
+                                    if symbols_list is None:
+                                        symbols_list = list(t.field.symbols)
+                                    term_symbol_list.append(symbols_list)
                                     params = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)
                                     contract[i] = params
                             if contract:
@@ -339,10 +463,15 @@ class Layer(object):
                         elif hasattr(equation_term, 'field'):
                             if isinstance(equation_term.field, (ParameterField, FunctionField)):
                                 term_symbol_list = list()
-                                if isinstance(equation_term.field, ParameterField):
-                                    term_symbol_list.append(list(equation_term.field.symbols))
-                                elif isinstance(equation_term.field, FunctionField):
-                                    term_symbol_list.append(list(equation_term.field.parameters))
+                                symbols_list = None
+                                if isinstance(equation_term.field, FunctionField):
+                                    if equation_term.field.force_substitution:
+                                        symbols_list = list(equation_term.field.parameters)
+                                    elif equation_term.field.force_symbolic_substitution:
+                                        symbols_list = list(equation_term.field.symbolic_parameters)
+                                if symbols_list is None:
+                                    symbols_list = list(equation_term.field.symbols)
+                                term_symbol_list.append(symbols_list)
                                 params = ImmutableMatrix(term_symbol_list).reshape(len(term_symbol_list[0]), 1)
                                 increment = symbolic_tensordot(increment, params, ((1,), (0,)))
                                 args[1] = 0
@@ -356,8 +485,20 @@ class Layer(object):
                         increment = ImmutableSparseNDimArray(increment)
                     self.tensor[args] = self.tensor[args] + increment
                 lhs_order += ndim
-            self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat, self.tensor, 1))
-                           .subs(b_subs).subs(p_subs).subs(substitutions))
+
+            if self._lhs_inversion and not self._lhs_inverted:
+                try:
+                    lhs_mat_inverted[1:, 1:] = self._lhs_mat[1:, 1:].inv().simplify()
+                    self._lhs_inverted = True
+                except NonInvertibleMatrixError:
+                    raise NonInvertibleMatrixError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
+            if self._lhs_inverted:
+                self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, self.tensor, 1))
+                               .subs(b_subs).subs(p_subs).subs(substitutions))
+            else:
+                warnings.warn(f'LHS of layer {self} has not been inverted. Its tensor hold the RHS tendencies alone.')
+                self.tensor = ImmutableSparseNDimArray(self.tensor).subs(b_subs).subs(p_subs).subs(substitutions)
+                self._lhs_mat = self._lhs_mat.subs(b_subs).subs(p_subs).subs(substitutions)
 
     def to_latex(self, enclose_lhs=True, drop_first_lhs_char=True, drop_first_rhs_char=False):
         """Generate the LaTeX strings representing the layer's equations mathematically.

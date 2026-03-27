@@ -229,7 +229,7 @@ class TestMaooamQgsSymbolic(TestQgsBase):
         # Defining the equation and LHS
         # Laplacian
         vorticity = OperatorTerm(psi_a, Laplacian, atmospheric_basis.coordinate_system)
-        barotropic_equation = Equation(psi_a, lhs_term=vorticity)
+        barotropic_equation = Equation(psi_a, lhs_terms=vorticity)
 
         # Defining the advection term
         advection_term1 = vorticity_advection(psi_a, psi_a, atmospheric_basis.coordinate_system, sign=-1)
@@ -264,7 +264,7 @@ class TestMaooamQgsSymbolic(TestQgsBase):
 
         lin_lhs = LinearTerm(theta_a, prefactor=a, sign=-1)
         lhs = AdditionOfTerms(lin_lhs, vorticity)
-        baroclinic_equation = Equation(theta_a, lhs_term=lhs)
+        baroclinic_equation = Equation(theta_a, lhs_terms=lhs)
 
         # Defining the advection terms
         advection_term1 = vorticity_advection(psi_a, theta_a, atmospheric_basis.coordinate_system, sign=-1)
@@ -324,7 +324,7 @@ class TestMaooamQgsSymbolic(TestQgsBase):
         vorticity = OperatorTerm(psi_o, Laplacian, oceanic_basis.coordinate_system)
         lin_lhs = LinearTerm(psi_o, prefactor=G)
         lhs = AdditionOfTerms(lin_lhs, vorticity)
-        oceanic_equation = Equation(psi_o, lhs_term=lhs)
+        oceanic_equation = Equation(psi_o, lhs_terms=lhs)
 
         # Defining the advection term
         advection_term = vorticity_advection(psi_o, psi_o, oceanic_basis.coordinate_system, sign=-1)
@@ -357,7 +357,7 @@ class TestMaooamQgsSymbolic(TestQgsBase):
         # Defining the equation and LHS
         # Laplacian
         lhs = LinearTerm(deltaT_o)
-        ocean_temperature_equation = Equation(deltaT_o, lhs_term=lhs)
+        ocean_temperature_equation = Equation(deltaT_o, lhs_terms=lhs)
 
         # Defining the advection term
         advection_term = Jacobian(psi_o, deltaT_o, oceanic_basis.coordinate_system, sign=-1)
