@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-from sympy import symbols, Symbol
+from sympy import symbols, Symbol, sin, cos
 
 import sys
 import os
@@ -14,6 +14,7 @@ else:
 # importing all that is needed to create the cake
 from layercake import *
 from layercake.arithmetic.terms.operators import OperatorTerm, ComposedOperatorsTerm
+from layercake.arithmetic.terms.operations import ProductOfTerms
 
 # importing specific modules to create the model basis of functions
 from layercake.basis.spherical_harmonics import SphericalHarmonicsBasis
@@ -90,13 +91,34 @@ tau_Ep = Parameter(tau_E / T, symbol=Symbol(u"τ'_E"), units='')
 
 # Products
 a_R1 = Parameter(R1d / tau_Rp, symbol=Symbol('a_R1'), units='', latex='a_{R1}')
+a_R2 = Parameter(R2d / tau_Rp, symbol=Symbol('a_R2'), units='', latex='a_{R2}')
 a_H = Parameter((21 * 2) ** -4 / tau_Hp, symbol=Symbol("a_H"), units='')
 a_H1 = Parameter((21 * 2) ** -4 * R1d / tau_Hp, symbol=Symbol("a_H1"), units='', latex='a_{H1}')
+a_H2 = Parameter((21 * 2) ** -4 * R2d / tau_Hp, symbol=Symbol("a_H2"), units='', latex='a_{H2}')
 
 # Climatological forcings
 s1r = np.zeros(len(basis))
 s1r[0] = 0.1
 S1p = ParameterField("S1p", "S'_1", s1r, basis, inner_products_definition, latex="S'_1")
+
+s2r = np.zeros(len(basis))
+s2r[0] = 0.1
+S2p = ParameterField("S2p", "S'_2", s2r, basis, inner_products_definition, latex="S'_2")
+
+s3r = np.zeros(len(basis))
+s3r[0] = 0.1
+S3p = ParameterField("S3p", "S'_3", s3r, basis, inner_products_definition, latex="S'_3")
+
+# Orography (non-dimensional)
+# (could be obtained with dimensional orography rescaled by H)
+hh = np.zeros(len(basis))
+hh[1] = 0.2
+hp = ParameterField("h'", u"h'", hh, basis, inner_products_definition)
+
+# Ekman friction (non-dimensional)
+kk = np.zeros(len(basis))
+kk[1] = 0.2
+kp = ParameterField("k'", u"k'", kk, basis, inner_products_definition)
 
 
 # Defining the fields
@@ -136,22 +158,22 @@ psi12_jacobian = Jacobian(psi_1, psi_2, basis.coordinate_system, prefactors=(R1d
 psi1_equation.add_rhs_terms(psi12_jacobian)
 
 # adding the beta term
-beta_term = OperatorTerm(psi_1, D, llambda, sign=-1)
-psi1_equation.add_rhs_term(beta_term)
+psi1_beta_term = OperatorTerm(psi_1, D, llambda, sign=-1)
+psi1_equation.add_rhs_term(psi1_beta_term)
 
-# radiative linear terms (could reuse LHS ones in a second pass)
+# radiative linear dissipation terms (could reuse LHS ones in a second pass)
 lin_rad_rhs11 = LinearTerm(psi_1, prefactor=a_R1)
 lin_rad_rhs12 = LinearTerm(psi_2, prefactor=a_R1, sign=-1)
 psi1_equation.add_rhs_terms([lin_rad_rhs11, lin_rad_rhs12])
 
 # horizontal PV diffusion terms
-operators = (Laplacian,) * 10
-operators_args = (basis.coordinate_system,) * 10
+operators = (Laplacian,) * 5
+operators_args = (basis.coordinate_system,) * 5
 psi1_hdiffv = ComposedOperatorsTerm(psi_1, operators, operators_args, prefactor=a_H, sign=-1)
 psi1_equation.add_rhs_term(psi1_hdiffv)
 
-operators = (Laplacian,) * 8
-operators_args = (basis.coordinate_system,) * 8
+operators = (Laplacian,) * 4
+operators_args = (basis.coordinate_system,) * 4
 psi1_hdiff1 = ComposedOperatorsTerm(psi_1, operators, operators_args, prefactor=a_H1)
 psi1_equation.add_rhs_term(psi1_hdiff1)
 
@@ -161,6 +183,112 @@ psi1_equation.add_rhs_term(psi1_hdiff2)
 # climatological forcing
 psi1_forcing = LinearTerm(S1p)
 psi1_equation.add_rhs_term(psi1_forcing)
+
+# --------------------------------------------------------
+#
+#   Third layer equation (800 hPa)
+#
+# --------------------------------------------------------
+
+# defining LHS as the time derivative of the vorticity
+psi3_vorticity = OperatorTerm(psi_3, Laplacian, basis.coordinate_system)
+lin_lhs33 = LinearTerm(psi_3, prefactor=R2d, sign=-1)
+lin_lhs32 = LinearTerm(psi_2, prefactor=R2d)
+psi3_equation = Equation(psi_3, lhs_terms=[psi3_vorticity, lin_lhs32, lin_lhs32])
+
+# defining the advection term
+psi3_advection_term = vorticity_advection(psi_3, psi_3, basis.coordinate_system, sign=-1)
+psi3_equation.add_rhs_terms(psi3_advection_term)
+
+# defining the Jacobian term
+psi32_jacobian = Jacobian(psi_3, psi_2, basis.coordinate_system, prefactors=(R2d, R2d), sign=-1)
+psi3_equation.add_rhs_terms(psi32_jacobian)
+
+# adding the beta term
+psi3_beta_term = OperatorTerm(psi_3, D, llambda, sign=-1)
+psi3_equation.add_rhs_term(psi3_beta_term)
+
+# radiative linear dissipation terms (could reuse LHS ones in a second pass)
+lin_rad_rhs23 = LinearTerm(psi_3, prefactor=a_R2)
+lin_rad_rhs22 = LinearTerm(psi_2, prefactor=a_R2, sign=-1)
+psi3_equation.add_rhs_terms([lin_rad_rhs23, lin_rad_rhs22])
+
+# horizontal PV diffusion terms
+operators = (Laplacian,) * 5
+operators_args = (basis.coordinate_system,) * 5
+psi3_hdiffv = ComposedOperatorsTerm(psi_3, operators, operators_args, prefactor=a_H, sign=-1)
+psi3_equation.add_rhs_term(psi3_hdiffv)
+
+operators = (Laplacian,) * 4
+operators_args = (basis.coordinate_system,) * 4
+psi3_hdiff1 = ComposedOperatorsTerm(psi_3, operators, operators_args, prefactor=a_H2)
+psi3_equation.add_rhs_term(psi3_hdiff1)
+
+psi3_hdiff2 = ComposedOperatorsTerm(psi_2, operators, operators_args, prefactor=a_H2, sign=-1)
+psi3_equation.add_rhs_term(psi3_hdiff2)
+
+# orographic forcing
+oro_hp = LinearTerm(hp)
+psi3_oro1 = ProductOfTerms(oro_hp, OperatorTerm(psi_3, D, llambda), sign=-1)
+sin_phi = Expression(sin(phi))
+psi3_oro2 = Jacobian(psi_3, hp, basis.coordinate_system, sign=-1, prefactors=(sin_phi, sin_phi))
+psi3_equation.add_rhs_terms((psi3_oro1,) + psi3_oro2)
+
+# Ekman dissipation
+inv_cos_phi = Expression(1 / cos(phi), latex=r'\frac{1}{\cos(\phi)}')
+inv_cos_phi2 = Expression(1 / cos(phi) ** 2, latex=r'\frac{1}{\cos(\phi)^2}')
+ek_kp = LinearTerm(kp)
+ek311 = ProductOfTerms(ek_kp, OperatorTerm(psi_3, D, (llambda, llambda), prefactor=inv_cos_phi2), sign=-1)
+ek312 = ProductOfTerms(OperatorTerm(kp, D, llambda, prefactor=inv_cos_phi2), OperatorTerm(psi_3, D, llambda), sign=-1)
+ek321 = ProductOfTerms(ek_kp, OperatorTerm(psi_3, D, (phi, phi), prefactor=inv_cos_phi), sign=-1)
+ek322 = ProductOfTerms(OperatorTerm(kp, D, phi, prefactor=inv_cos_phi), OperatorTerm(psi_3, D, phi), sign=-1)
+psi3_equation.add_rhs_terms([ek311, ek312, ek322, ek321])
+
+# climatological forcing
+psi3_forcing = LinearTerm(S3p)
+psi3_equation.add_rhs_term(psi3_forcing)
+
+# --------------------------------------------------------
+#
+#   Second layer equation (500 hPa)
+#
+# --------------------------------------------------------
+
+# defining LHS as the time derivative of the vorticity
+psi2_vorticity = OperatorTerm(psi_2, Laplacian, basis.coordinate_system)
+lin_lhs23 = LinearTerm(psi_3, prefactor=R2d, sign=-1)
+lin_lhs22 = LinearTerm(psi_2, prefactor=R2d)
+psi2_equation = Equation(psi_2, lhs_terms=[psi2_vorticity, - lin_lhs12,
+                                           - lin_lhs11, - lin_lhs22, - lin_lhs23])
+# (could reuse the linear terms above in a second pass)
+
+# defining the advection term
+psi2_advection_term = vorticity_advection(psi_2, psi_2, basis.coordinate_system, sign=-1)
+psi2_equation.add_rhs_terms(psi2_advection_term)
+
+# defining the Jacobian term
+psi21_jacobian = list(map(lambda x: -x, psi12_jacobian))
+psi2_equation.add_rhs_terms(psi21_jacobian)
+psi23_jacobian = list(map(lambda x: -x, psi32_jacobian))
+psi2_equation.add_rhs_terms(psi23_jacobian)
+
+# adding the beta term
+psi2_beta_term = OperatorTerm(psi_2, D, llambda, sign=-1)
+psi2_equation.add_rhs_term(psi2_beta_term)
+
+# radiative linear terms (could reuse psi1 and psi3 ones in a second pass)
+psi2_equation.add_rhs_terms([- lin_rad_rhs11, - lin_rad_rhs12, - lin_rad_rhs23, - lin_rad_rhs22])
+
+# horizontal PV diffusion terms
+operators = (Laplacian,) * 5
+operators_args = (basis.coordinate_system,) * 5
+psi2_hdiffv = ComposedOperatorsTerm(psi_2, operators, operators_args, prefactor=a_H, sign=-1)
+psi2_equation.add_rhs_term(psi2_hdiffv)
+psi2_equation.add_rhs_terms([- psi1_hdiff1, - psi1_hdiff2, - psi3_hdiff1, - psi3_hdiff2])
+
+# climatological forcing
+psi2_forcing = LinearTerm(S2p)
+psi2_equation.add_rhs_term(psi2_forcing)
 
 
 # --------------------------------
@@ -172,6 +300,11 @@ psi1_equation.add_rhs_term(psi1_forcing)
 layer1 = Layer(name='Top layer (200 hPa)')
 layer1.add_equation(psi1_equation)
 
+layer2 = Layer(name='Middle layer (500 hPa)')
+layer2.add_equation(psi2_equation)
+
+layer3 = Layer(name='Lower layer (800 hPa)')
+layer3.add_equation(psi3_equation)
 # --------------------------------
 #
 #   Constructing the cake
@@ -180,6 +313,8 @@ layer1.add_equation(psi1_equation)
 
 cake = Cake()
 cake.add_layer(layer1)
+cake.add_layer(layer2)
+cake.add_layer(layer3)
 
 
 # --------------------------------
