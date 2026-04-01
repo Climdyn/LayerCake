@@ -35,13 +35,9 @@ R = Parameter(6371e3, symbol=Symbol('R'), units='[m]')
 
 # Rossby deformation radius for the 200-500-hPa layer
 R1 = Parameter(700.e3, symbol=Symbol('R_1'), units='[m]')
-# Derived parameter
-R1d = Parameter(1/float(R1)**2, symbol=Symbol('R_1^-2'), units='[m]')
 
 # Rossby deformation radius for the 500-800-hPa layer
 R2 = Parameter(450.e3, symbol=Symbol('R_2'), units='[m]')
-# Derived parameter
-R2d = Parameter(1/float(R2)**2, symbol=Symbol('R_2^-2'), units='[m]')
 
 # Scale height
 H0 = Parameter(9e3, symbol=Symbol('H_0'), units='[m]')
@@ -49,22 +45,48 @@ H0 = Parameter(9e3, symbol=Symbol('H_0'), units='[m]')
 # Earth rotation angular speed
 omega = Parameter(7.292e-5, symbol=Symbol(u'ω'), units='[s^-1]')
 
+# Radiative timescales
+tau_R = Parameter(25 * 24 * 3600, symbol=Symbol(u'τ_R'), units='[s]')
+
+# Horizontal diffusion timescale
+tau_H = Parameter(2 * 24 * 3600, symbol=Symbol(u'τ_H'), units='[s]')
+
+# Ekman dissipation timescale
+tau_E = Parameter(3 * 24 * 3600, symbol=Symbol(u'τ_E'), units='[s]')
+
+
 # Defining the domain
 ######################
 
-parameters = [R]
+# Adimensional Earth sphere radius parameter
+Rp = Parameter(1., symbol=Symbol("R'"), units='')
+parameters = [Rp]
 
 basis = SphericalHarmonicsBasis(parameters, {'M': 4})
 inner_products_definition = StandardSymbolicInnerProductDefinition(coordinate_system=basis.coordinate_system,
                                                                    optimizer='trig', kwargs={'conds': 'none'})
-
 # coordinates
 llambda = basis.coordinate_system.coordinates_symbol_as_list[0]
 phi = basis.coordinate_system.coordinates_symbol_as_list[1]
 
+# Derived dimensional parameters
+################################
+
+# Timescale parameter
+T = Parameter(1. / (2. * float(omega)), symbol=symbols('T'), units='[s]')
 
 # Derived (non-dimensional) parameters
 #######################################
+
+# Inverse of the square of the rescaled Rossby radius
+R1d = Parameter(R**2 / R1**2, symbol=Symbol("R'_1^-2"), units='')
+R2d = Parameter(R**2 / R2**2, symbol=Symbol("R'_2^-2"), units='')
+
+# Rescaled timescales
+tau_Rp = Parameter(tau_R / T, symbol=Symbol(u'τ_R'), units='[s]')
+tau_Hp = Parameter(tau_H / T, symbol=Symbol(u'τ_H'), units='[s]')
+tau_Ep = Parameter(tau_E / T, symbol=Symbol(u'τ_E'), units='[s]')
+
 
 # Defining the fields
 #######################
@@ -81,6 +103,7 @@ psi_2 = Field("psi_2", p2, basis, inner_products_definition, units="[m^2][s^-2]"
 p3 = u'ψ_3'
 psi_3 = Field("psi_3", p3, basis, inner_products_definition, units="[m^2][s^-2]", latex=r'\psi_3')
 
+
 # --------------------------------------------------------
 #
 #   First layer equation (200 hPa)
@@ -88,32 +111,28 @@ psi_3 = Field("psi_3", p3, basis, inner_products_definition, units="[m^2][s^-2]"
 # --------------------------------------------------------
 
 # defining LHS as the time derivative of the vorticity
-vorticity = OperatorTerm(psi_1, Laplacian, basis.coordinate_system)
-
-lin_lhs1 = LinearTerm(psi_1, prefactor=R1d, sign=-1)
-lin_lhs2 = LinearTerm(psi_2, prefactor=R1d)
-lhs = AdditionOfTerms(lin_lhs1, lin_lhs2, vorticity)
-
-psi1_equation = Equation(psi_1, lhs_term=vorticity)
+psi1_vorticity = OperatorTerm(psi_1, Laplacian, basis.coordinate_system)
+lin_lhs11 = LinearTerm(psi_1, prefactor=R1d, sign=-1)
+lin_lhs12 = LinearTerm(psi_2, prefactor=R1d)
+psi1_equation = Equation(psi_1, lhs_terms=[psi1_vorticity, lin_lhs12, lin_lhs11])
 
 # Defining the advection term
-advection_term = vorticity_advection(psi_1, psi_1, basis.coordinate_system, sign=-1)
-
-psi1_equation.add_rhs_terms(advection_term)
+psi1_advection_term = vorticity_advection(psi_1, psi_1, basis.coordinate_system, sign=-1)
+psi1_equation.add_rhs_terms(psi1_advection_term)
 
 # Defining the Jacobian term
-
-jacobian1 = Jacobian(psi_1, psi_1, basis.coordinate_system, prefactors=(R1d, R1d))
-jacobian2 = Jacobian(psi_1, psi_2, basis.coordinate_system, prefactors=(R1d, R1d), sign=-1)
-
-psi1_equation.add_rhs_terms(jacobian1)
-psi1_equation.add_rhs_terms(jacobian2)
+psi12_jacobian = Jacobian(psi_1, psi_2, basis.coordinate_system, prefactors=(R1d, R1d), sign=-1)
+psi1_equation.add_rhs_terms(psi12_jacobian)
 
 # adding the beta term
-# to check for inversion of R^2
-a = Parameter(2. * float(omega), symbol=symbols('a'))
-beta_term = OperatorTerm(psi_1, D, llambda, prefactor=a, sign=-1)
+beta_term = OperatorTerm(psi_1, D, llambda, sign=-1)
 psi1_equation.add_rhs_term(beta_term)
+
+# linear terms
+a12 = Parameter()
+lin_rhs11 = LinearTerm(psi_1, prefactor=R1d, sign=-1)
+lin_rhs12 = LinearTerm(psi_2, prefactor=R1d)
+
 
 # --------------------------------
 #
