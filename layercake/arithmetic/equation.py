@@ -281,6 +281,8 @@ class Equation(object):
             The LaTeX string representing the equation.
         """
         lhs = self.lhs_terms[0].latex
+        for term in self.lhs_terms[1:]:
+            lhs += term.latex
         if drop_first_lhs_char:
             lhs = lhs[2:]
         if enclose_lhs:
