@@ -153,6 +153,11 @@ class ArithmeticTerms(ABC):
         """Returns the list of all the integrations to be computed to get the full tensor of inner products related to the term(s).
         Elements of the list includes indices locating the inner products in the tensor, inner product Sympy expression, and inner products integral arguments."""
 
+        # optimal number found for Sympy symbolic
+        # calculations, can still be sets by the user
+        if num_threads is None:
+            num_threads = 20
+
         if len(basis) == 1:
             nmod = len(basis[0])
             nmodr = (range(nmod),) * self._rank
@@ -168,7 +173,6 @@ class ArithmeticTerms(ABC):
         if parallelize:
             if num_threads is None:
                 num_threads = cpu_count()
-            # with Pool(max_workers=num_threads) as pool:
             with Pool(max_workers=num_threads) as pool:
                 args_list = parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numerical, self)
         else:
