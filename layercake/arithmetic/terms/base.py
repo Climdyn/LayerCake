@@ -167,10 +167,7 @@ class ArithmeticTerms(ABC):
         indices_list = [indices for indices in product(*nmodr)]
         if parallelize:
             if num_threads is None:
-                # num_threads = cpu_count()
-                # optimal number found for Sympy symbolic
-                # calculations, can still be sets by the user
-                num_threads = 20
+                num_threads = cpu_count()
             with Pool(max_workers=num_threads) as pool:
                 args_list = parallel_symbolic_evaluation(pool, indices_list, inner_product, basis, numerical, self)
         else:
@@ -281,7 +278,7 @@ class ArithmeticTerms(ABC):
         args_list = self._integrations(*basis,
                                        inner_product=self.inner_product_definition.inner_product,
                                        numerical=numerical, parallelize=parallelize,
-                                       num_threads=num_threads)
+                                       num_threads=12)  # optimal tuning of the symbolic sympy parallel computations
         if len(basis) == 1:
             basis = basis[0]
             nmod = len(basis)
