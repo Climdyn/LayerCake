@@ -7,7 +7,7 @@
     .. _Spherical Harmonics: https://en.wikipedia.org/wiki/Spherical_harmonics
 
 """
-from sympy import assoc_legendre, exp, I, sin, cos, sqrt, pi
+from sympy import assoc_legendre, exp, I, sin, cos, sqrt, pi, symbols
 from sympy import factorial as symb_factorial
 from math import factorial as num_factorial
 
@@ -73,6 +73,14 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
         llambda = coordinate_system.coordinates_symbol['lambda']
         phi = coordinate_system.coordinates_symbol['phi']
+
+        if complex:
+            ns, ms = symbols('n m')
+            self.general_basis_function = (sqrt(2) * pi * sqrt(((2 * ns + 1) / (4 * pi)) *
+                                                               (symb_factorial(ns - ms) / symb_factorial(ns + ms)))
+                                           * assoc_legendre(ns, ms, sin(phi)) * exp(I * ms * llambda))
+            self.general_basis_function_arguments.append(ns)
+            self.general_basis_function_arguments.append(ms)
 
         if truncation == 'T':
             M = truncation_parameters['M']
@@ -161,6 +169,6 @@ if __name__ == "__main__":
     _R = symbols('R')
     R = Parameter(1., symbol=_R)
     parameters = [R]
-    basis = SphericalHarmonicsBasis(parameters, {'M': 4})  # , complex=True)
+    basis = SphericalHarmonicsBasis(parameters, {'M': 4}, complex=True)
     s = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer='trig')  # , complex=True)
     sn = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer=None)  # , complex=True)

@@ -75,6 +75,11 @@ class SymbolicBasis(Basis):
         Coordinate system on which the basis is defined.
     parameters: list(~parameter.Parameter)
         Dictionary holding the parameters appearing in the equations defining the basis.
+    general_basis_function: ~sympy.core.expr.Expr or None
+        General definition of the basis function, if possible.
+        Must be defined in subclasses. Not used if set to `None`.
+    general_basis_function_arguments: list(~sympy.core.symbol.Symbol)
+        List of arguments of the `generalized_function`.
 
     """
 
@@ -84,6 +89,8 @@ class SymbolicBasis(Basis):
         self.substitutions = list()
         self.parameters = None
         self.set_parameters(parameters)
+        self.general_basis_function = None
+        self.general_basis_function_arguments = list()
 
     @property
     def parameters_symbols(self):
