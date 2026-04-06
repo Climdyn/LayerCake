@@ -75,7 +75,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
         phi = coordinate_system.coordinates_symbol['phi']
 
         if complex:
-            ns, ms = symbols('n m')
+            ns, ms = symbols('n m', real=True)
             self.general_basis_function = (sqrt(2) * pi * sqrt(((2 * ns + 1) / (4 * pi)) *
                                                                (symb_factorial(ns - ms) / symb_factorial(ns + ms)))
                                            * assoc_legendre(ns, ms, sin(phi)) * exp(I * ms * llambda))
@@ -170,5 +170,5 @@ if __name__ == "__main__":
     R = Parameter(1., symbol=_R)
     parameters = [R]
     basis = SphericalHarmonicsBasis(parameters, {'M': 4}, complex=True)
-    s = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer='trig')  # , complex=True)
-    sn = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer=None)  # , complex=True)
+    s = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer='trig', complex=True)
+    sn = StandardSymbolicInnerProductDefinition(basis.coordinate_system, optimizer=None, complex=True)

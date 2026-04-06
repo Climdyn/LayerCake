@@ -134,8 +134,8 @@ class SphericalCoordinateSystem(CoordinateSystem):
         if extent is None:
             extent = ((-pi, pi), (-pi / 2, pi / 2))
 
-        llambdas = Symbol(u'λ')
-        phis = Symbol(u'ϕ')
+        llambdas = Symbol(u'λ', real=True)
+        phis = Symbol(u'ϕ', real=True)
 
         llambda = Coordinate('lambda', llambdas, extent=extent[0], infinitesimal_length=R * cos(phis), latex=r'\lambda')
         phi = Coordinate("phi", phis, extent=extent[1], infinitesimal_length=R, latex=r'\phi')
