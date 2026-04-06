@@ -1,5 +1,3 @@
-# As of Jan 2025, llvmlite must be compiled from https://github.com/ngoldbaum/llvmlite/tree/3.14t using LLVM 20
-# numba and sparse must be installed afterward with --no-deps
 name: layercake_ft
 channels:
   - conda-forge
@@ -12,5 +10,6 @@ dependencies:
     - scipy
     - sympy
     - pebble
-    - cmake #(temporary to install llvmlite)
+    - numba
+    - sparse
 
