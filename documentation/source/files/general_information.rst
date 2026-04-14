@@ -2,7 +2,7 @@
 General Information
 ===================
 
-LayerCake is framework to design models based on systems of partial differential equations (PDEs),
+LayerCake is a framework to design models based on systems of partial differential equations (PDEs),
 and convert them to ordinary differential equations (ODEs) via Galerkin-type expansions.
 
 LayerCake allows you to construct systems of PDEs, and to specify coordinate systems and basis functions to build the
@@ -17,7 +17,7 @@ LayerCake has been designed with geophysics in mind, although it may be useful f
 About
 -----
 
-(c) 2025 Jonathan Demaeyer
+(c) 2025-2026 Jonathan Demaeyer
 
 See `LICENSE.txt <../../../../LICENSE.txt>`_ for license information.
 
