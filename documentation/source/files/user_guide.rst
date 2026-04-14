@@ -14,7 +14,12 @@ with an automated `Galerkin method`_. This method projects all the fields :math:
     \psi_j = \sum_{k=1}^{n_j} \psi_{j, k} \,\, \phi_{j,k}
 
 and the resulting discrete representation of the spatially continuous model defined by the PDEs is sometimes called its
-(truncated) representation in the spectral domain.
+(truncated) representation in the spectral domain [#basis]_. The spectral coefficients :math:`\psi_{j,k}` are determined by taking a specific inner product
+:math:`\langle \, , \rangle` between the fields :math:`\psi_j` and the basis of functions :math:`\phi_{j,k}`:
+
+.. math::
+
+    \psi_{j,k} = \left\langle \phi_{j,k} , \psi_j \right\rangle
 
 The full system of PDEs is called the `cake`, and the system of equations can be divide
 into different subsets called `layers`.
@@ -90,6 +95,9 @@ References
     :labelprefix: USER-
     :keyprefix: user-
 
+.. rubric:: Footnotes
+
+.. [#basis] Note that noting prevent the users from using the same basis of function :math:`\phi_k` to decompose all the fields :math:`\psi_j`.
 
 .. _Galerkin method: https://en.wikipedia.org/wiki/Galerkin_method
 .. _orography: https://en.wikipedia.org/wiki/Orography
