@@ -7,8 +7,18 @@ This guide explains how the LayerCake framework can be used to transform a set o
 
     \partial_t \mathcal{F}^{\mathrm LHS}_i (\psi_1, \ldots, \psi_N) = \mathcal{F}^{\mathrm{RHS}}_i (\psi_1, \ldots, \psi_N) \qquad , \quad i = 1,\ldots,N
 equations (PDEs) defined on a particular domain into a system of ordinary differential equations (ODEs)
-with an automated `Galerkin method`_.
-(
+with an automated `Galerkin method`_. This method projects all the fields :math:`\psi_j` on given function basis :math:`\phi_{j,k}`:
+
+.. math::
+
+    \psi_j = \sum_{k=1}^{n_j} \psi_{j, k} \,\, \phi_{j,k}
+
+and the resulting discrete representation of the spatially continuous model defined by the PDEs is sometimes called its
+(truncated) representation in the spectral domain.
+
+The full system of PDEs is called the `cake`, and the system of equations can be divide
+into different subsets called `layers`.
+
 
 1. Rationale behind LayerCake
 -----------------------------
@@ -17,7 +27,8 @@ The obtained ODEs
 
 .. math:: \dot{\boldsymbol{x}} = \boldsymbol{f}(t, \boldsymbol{x})
 
-are considered to be the model that the user is looking after.
+are considered to be the model that the user is looking after, and :math:`\boldsymbol{x}` is a state vector consisting
+of the stacked spectral coefficients :math:`\boldsymbol{x} = (\psi_{1,1},\ldots,\psi_{1,n_1}, \ldots, \psi_{N,1},\ldots,\psi_{N,n_N})`.
 The purpose of LayerCake is then to provide a Python callable or a set of strings representing
 the model's tendencies :math:`\boldsymbol{f}` (and also its Jacobian matrix :math:`\boldsymbol{D f}`) that can be
 used for example to
@@ -30,7 +41,7 @@ To obtain these ODEs, the user must first specifies the PDEs system, its paramet
 (represented by a coordinate system and a set of basis functions).
 In particular, the specification of the PDEs system is done by constructing each PDE one by one, adding terms to
 a couple of lists representing the LHS and RHS part of the equation.
-These terms are provided as :class:`~arithmetic.terms.base.ArithmeticTerms` objects representing various specific
+These terms are provided as :class:`~layercake.arithmetic.terms.base.ArithmeticTerms` objects representing various specific
 functionals of the both fields :math:`\psi_j` of the equations and the model's spatial parameter fields.
 
 2. Starting a new model
@@ -41,6 +52,12 @@ the needed classes and functions.
 
 2.1 Importing LayerCake classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Importing all the classes needed to specify the PDEs can be done by simply typing:
+
+.. code:: ipython3
+
+    from layercake import *
 
 
 
