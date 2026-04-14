@@ -121,9 +121,6 @@ psi1_equation.add_rhs_terms(advection_term)
 psi2_advec = Jacobian(psi1, psi2, atmospheric_basis.coordinate_system, sign=-1, prefactors=(alphap_1, alphap_1))
 psi1_equation.add_rhs_terms(psi2_advec)
 
-psi1_advec = Jacobian(psi1, psi1, atmospheric_basis.coordinate_system, sign=-1, prefactors=(dalpha_1, dalpha_1))
-psi1_equation.add_rhs_terms(psi1_advec)
-
 # adding the beta term
 beta_term = OperatorTerm(psi1, D, x, prefactor=beta_nondim, sign=-1)
 psi1_equation.add_rhs_term(beta_term)
@@ -143,9 +140,6 @@ psi2_equation = Equation(psi2, lhs_terms=[psi2_vorticity, dpsi22, dpsi21])
 # Defining the advection terms
 advection_term = vorticity_advection(psi2, psi2, atmospheric_basis.coordinate_system, sign=-1)
 psi2_equation.add_rhs_terms(advection_term)
-
-psi2_advec = Jacobian(psi2, psi2, atmospheric_basis.coordinate_system, sign=1, prefactors=(alphap_2, alphap_2))
-psi2_equation.add_rhs_terms(psi2_advec)
 
 psi1_advec = Jacobian(psi2, psi1, atmospheric_basis.coordinate_system, sign=-1, prefactors=(alphap_2, alphap_2))
 psi2_equation.add_rhs_terms(psi1_advec)
