@@ -47,8 +47,15 @@ functionals of the both fields :math:`\psi_j` of the equations and the model's s
 2. Starting a new model
 -----------------------
 
-In general, one will start a new Python script to define a new model. The script starts with the classic import of
-the needed classes and functions.
+In general, one will start a new Python script to define a new model.
+Here, we are going to detail a simple model available in the `examples/atmospheric <../../../examples/atmospheric/>`_ folder,
+i.e. a two-layer quasi-geostrophic model on a beta-plane with an orography described in Vallis book :cite:`user-V2017` :
+
+.. math::
+
+
+
+The script starts with the classic import of the needed classes and functions.
 
 2.1 Importing LayerCake classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,6 +66,14 @@ Importing all the classes needed to specify the PDEs can be done by simply typin
 
     from layercake import *
 
+This will import most of what is needed to build the `cake`, but a more specific
+
+References
+----------
+
+.. bibliography:: bib/ref.bib
+    :labelprefix: USER-
+    :keyprefix: user-
 
 
 .. _Galerkin method: https://en.wikipedia.org/wiki/Galerkin_method

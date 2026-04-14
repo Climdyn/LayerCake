@@ -40,7 +40,7 @@ extensions = [
     #    'nbsphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
-    # 'sphinxcontrib.bibtex'
+    'sphinxcontrib.bibtex'
 ]
 
 templates_path = ['_templates']
@@ -115,7 +115,7 @@ autosectionlabel_prefix_document = True
 
 # bibtex config
 
-# bibtex_bibfiles = ['files/model/ref.bib']
+bibtex_bibfiles = ['files/bib/ref.bib']
 
 # -- Global links definition -----------------
 
