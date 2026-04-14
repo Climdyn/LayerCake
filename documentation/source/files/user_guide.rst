@@ -80,6 +80,7 @@ This is imposed by the choice of the basis of function:
     &F^K_{M,P} (x, y) =  2\cos(M nx)\, \sin(P y), \\
     &F^L_{H,P} (x, y) = 2\sin(H nx)\, \sin(P y)
 
+!! talk here about wavenumber !!
 which are specific Fourier mode respecting these boundary conditions, and where :math:`n` is the aspect ratio of the domain, i.e. the
 ratio between the :math:`x`- and :math:`y`-extend of the domain.
 
@@ -164,7 +165,7 @@ parameters):
     alphap_2 = Parameter(f0 ** 2 * L ** 2 / (gp * H2), symbol=Symbol("α'_2"))
 
 We can the move to the definition of the domain, using a dedicated function :func:`~layercake.basis.planar_fourier.contiguous_channel_basis` which
-create a basis object :class:`~layercake.basis.planar_fourierPlanarChannelFourierBasis` with the right set of basis functions mentioned above.
+create a basis object :class:`~layercake.basis.planar_fourier.PlanarChannelFourierBasis` with the right set of basis functions mentioned above.
 The only parameter we need to pass to this function is the number of wavenumbers that we want in each direction, and the aspect ratio parameter :math:`n`
 that we have previously defined:
 
@@ -176,6 +177,7 @@ that we have previously defined:
     parameters = [n]
     atmospheric_basis = contiguous_channel_basis(2, 2, parameters)
 
+where we ask a basis with functions up to wavenumber 2 in both :math:`x` and :math:`y` directions.
 Note that this function also create directly a :class:`~layercake.variables.systems.PlanarCartesianCoordinateSystem` object for you, representing
 the :math:`x, y` coordinate system of the beta plane, and embedded in the :code:`atmospheric_basis` object.
 
