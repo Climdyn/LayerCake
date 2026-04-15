@@ -6,6 +6,7 @@ This guide explains how the LayerCake framework can be used to transform a set o
 .. math::
 
     \partial_t \mathcal{F}^{\mathrm LHS}_i (\psi_1, \ldots, \psi_N) = \mathcal{F}^{\mathrm{RHS}}_i (\psi_1, \ldots, \psi_N) \qquad , \quad i = 1,\ldots,N
+
 equations (PDEs) defined on a particular domain into a system of ordinary differential equations (ODEs)
 with an automated `Galerkin method`_. This method projects all the fields :math:`\psi_j` on given function basis :math:`\phi_{j,k}`:
 
@@ -36,10 +37,10 @@ The goal of LayerCake is to produce numerical or symbolic representation of the 
 
 The ODEs resulting from the Galerkin procedure
 
-.. math:: \dot{\boldsymbol{x}} = \boldsymbol{f}(t, \boldsymbol{x})
+.. math:: \dot{\boldsymbol{u}} = \boldsymbol{f}(t, \boldsymbol{u})
 
-are considered to be the model that the user is looking after, and :math:`\boldsymbol{x}` is a state vector consisting
-of the stacked spectral coefficients :math:`\boldsymbol{x} = (\psi_{1,1},\ldots,\psi_{1,n_1}, \ldots, \psi_{N,1},\ldots,\psi_{N,n_N})`.
+are considered to be the model that the user is looking after, and :math:`\boldsymbol{u}` is a state vector consisting
+of the stacked spectral coefficients :math:`\boldsymbol{u} = (\psi_{1,1},\ldots,\psi_{1,n_1}, \ldots, \psi_{N,1},\ldots,\psi_{N,n_N})`.
 The purpose of LayerCake is then to provide a Python callable or a set of strings representing
 the model's tendencies :math:`\boldsymbol{f}` (and also its Jacobian matrix :math:`\boldsymbol{D f}`) that can be
 used for example to
@@ -72,17 +73,23 @@ where :math:`\psi_1, \psi_2` are the non-dimensional fields of the problem, and 
 :math:`x` and :math:`y` are the non-dimensional coordinates on the beta-plane, and :math:`J(S,G) = \partial_x S \partial_y G - \partial_y S \partial_x G` is the Jacobian of the
 fields, typically representing the advection of physical quantities (like the vorticity) in the model.
 This model will be defined on a plane with as boundary conditions walls in the :math:`y` direction at the border, and periodicity in the :math:`x` direction.
-This is imposed by the choice of the basis of function:
+This is imposed by the choice of the basis of function :math:`\phi_k`.
+Each of the :math:`\phi_k`'s can be one of the three following fields:
 
 .. math::
 
-    &F^A_{P} (x, y)   =  \sqrt{2}\, \cos(P y), \\
-    &F^K_{M,P} (x, y) =  2\cos(M nx)\, \sin(P y), \\
-    &F^L_{H,P} (x, y) = 2\sin(H nx)\, \sin(P y)
+    &\sqrt{2}\, \cos(P_k y), \\
+    &2\cos(M_k nx)\, \sin(P_k y), \\
+    &2\sin(H_k nx)\, \sin(P_k y)
 
-!! talk here about wavenumber !!
-which are specific Fourier mode respecting these boundary conditions, and where :math:`n` is the aspect ratio of the domain, i.e. the
-ratio between the :math:`x`- and :math:`y`-extend of the domain.
+which are specific Fourier modes respecting these boundary conditions, and where :math:`n` is the aspect ratio of the domain, i.e. the
+ratio between the :math:`x`- and :math:`y`-extend of the domain. The integers :math:`P_k` and :math:`M_k` or :math:`H_k` are the wavenumbers of the
+modes. See :cite:`user-DDV2016` for more details on this kind of basis.
+
+.. note::
+
+    Here we will use the same basis of functions :math:`\phi_k` to decompose both the fields :math:`\psi_1` and :math:`\psi_2`, but in
+    LayerCake, it is perfectly possible to decompose each field :math:`\psi_j` on its own - different - basis :math:`\phi_{j,k}`.
 
 As a first step to implement this model in LayerCake, the script starts with the classic import of the needed classes and functions.
 
@@ -164,8 +171,9 @@ parameters):
     dalpha_1 = Parameter(alpha_1 - alphap_1, symbol=Symbol("Δα_1"))
     alphap_2 = Parameter(f0 ** 2 * L ** 2 / (gp * H2), symbol=Symbol("α'_2"))
 
-We can the move to the definition of the domain, using a dedicated function :func:`~layercake.basis.planar_fourier.contiguous_channel_basis` which
-create a basis object :class:`~layercake.basis.planar_fourier.PlanarChannelFourierBasis` with the right set of basis functions mentioned above.
+These are the :math:`\alpha_i` and :math:`\alpha'_i` coefficients encountered in the PDEs above.
+We can then move to the definition of the domain, using a dedicated function :func:`~layercake.basis.planar_fourier.contiguous_channel_basis` which
+create a basis object :class:`~layercake.basis.planar_fourier.PlanarChannelFourierBasis` with the right set of basis functions :math:`\phi_k` mentioned above.
 The only parameter we need to pass to this function is the number of wavenumbers that we want in each direction, and the aspect ratio parameter :math:`n`
 that we have previously defined:
 
@@ -180,6 +188,13 @@ that we have previously defined:
 where we ask a basis with functions up to wavenumber 2 in both :math:`x` and :math:`y` directions.
 Note that this function also create directly a :class:`~layercake.variables.systems.PlanarCartesianCoordinateSystem` object for you, representing
 the :math:`x, y` coordinate system of the beta plane, and embedded in the :code:`atmospheric_basis` object.
+
+The resulting basis is now defined as:
+
+.. code:: ipython3
+
+    In[4]: atmospheric_basis
+    Out[4]: [sqrt(2)*cos(y), 2*sin(y)*cos(n*x), 2*sin(y)*sin(n*x), sqrt(2)*cos(2*y), 2*sin(2*y)*cos(n*x), 2*sin(2*y)*sin(n*x), 2*sin(y)*cos(2*n*x), 2*sin(y)*sin(2*n*x), 2*sin(2*y)*cos(2*n*x), 2*sin(2*y)*sin(2*n*x)]
 
 We also need to create an inner product definition so that LayerCake knows how you want your PDEs to be projected.
 In general, using the :class:`~layercake.inner_products.definition.StandardSymbolicInnerProductDefinition` definition is sufficient for most model:
@@ -199,6 +214,45 @@ To simplify the writing of the code downstream, we can also save the symbols of 
     x = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[0]
     y = atmospheric_basis.coordinate_system.coordinates_symbol_as_list[1]
 
+We can finally define the non-dimensional fields :math:`\psi_1` and :math:`\psi_2` over which the PDEs act, using the
+:class:`~layercake.variables.field.Field` object:
+
+.. code:: ipython3
+
+
+    # Defining the fields
+    #######################
+    p1 = u'ψ_1'
+    psi1 = Field("psi1", p1, atmospheric_basis, inner_products_definition, units="", latex=r'\psi_1')
+    p2 = u'ψ_2'
+    psi2 = Field("psi2", p2, atmospheric_basis, inner_products_definition, units="", latex=r'\psi_2')
+
+This object creation needs a name, a |Sympy| symbol, a basis of functions (:class:`~layercake.basis.base.SymbolicBasis` object)
+and an inner product definition object (:class:`~layercake.inner_products.definition.InnerProductDefinition` object). Optionally,
+one can provide units and a latex representation string (more on than below).
+
+.. note::
+
+    In general, if not provided, LayerCake will try to infer the latex representation string from the |Sympy| symbol of a given object.
+
+In addition to the dynamical fields :math:`\psi_j`, the second PDE also involves a fixed spatial field :math:`h` representing the orography
+of the model. Layercake represents fixed (non-dynamical) spatial fields with the :class:`~layercake.variables.field.ParameterField` in which
+the fields are specified as decomposition on a given basis of functions. For example, for :math:`h`, its decomposition will be
+
+.. math::
+
+    h = \sum_{k=1}^{n} h_k \, \, \phi_k
+
+
+and this translates in LayerCake as:
+
+.. code:: ipython3
+
+    hh = np.zeros(len(atmospheric_basis))
+    hh[1] = 0.2
+    h = ParameterField('h', u'h', hh, atmospheric_basis, inner_products_definition)
+
+where we have set only :math:`h_2` different from zero, corresponding to an orography in
 
 References
 ----------
@@ -210,6 +264,7 @@ References
 .. rubric:: Footnotes
 
 .. [#basis] Note that noting prevent the users from using the same basis of function :math:`\phi_k` to decompose all the fields :math:`\psi_j`.
+
 
 .. _Galerkin method: https://en.wikipedia.org/wiki/Galerkin_method
 .. _orography: https://en.wikipedia.org/wiki/Orography
