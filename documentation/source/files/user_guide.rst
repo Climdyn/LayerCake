@@ -37,7 +37,7 @@ The goal of LayerCake is to produce numerical or symbolic representation of the 
 
 The ODEs resulting from the Galerkin procedure
 
-.. math:: \dot{\boldsymbol{u}} = \boldsymbol{f}(t, \boldsymbol{u})
+.. math:: \dot{\boldsymbol{u}} = \boldsymbol{f}(\boldsymbol{u})
 
 are considered to be the model that the user is looking after, and :math:`\boldsymbol{u}` is a state vector consisting
 of the stacked spectral coefficients :math:`\boldsymbol{u} = (\psi_{1,1},\ldots,\psi_{1,n_1}, \ldots, \psi_{N,1},\ldots,\psi_{N,n_N})`.
@@ -71,7 +71,7 @@ i.e. a two-layer quasi-geostrophic model on a `beta-plane`_ with an orography de
 
 where :math:`\psi_1, \psi_2` are the non-dimensional fields of the problem, and :math:`h` is the non-dimensional `orography`_ of the model.
 :math:`\beta` is the non-dimensional `beta coefficient`_ and the :math:`\alpha_i, \alpha'_i` are coefficients of the model.
-:math:`x` and :math:`y` are the non-dimensional coordinates on the beta-plane, and :math:`J(S,G) = \partial_x S \partial_y G - \partial_y S \partial_x G` is the Jacobian of the
+:math:`x` and :math:`y` are the non-dimensional coordinates on the beta-plane, and :math:`J(S,G) = \partial_x \, S \partial_y G - \partial_y S \, \partial_x G` is the Jacobian of the
 fields, typically representing the advection of physical quantities (like the vorticity) in the model.
 This model will be defined on a plane with as boundary conditions walls in the :math:`y` direction at the border, and periodicity in the :math:`x` direction.
 This is imposed by the choice of the basis of function :math:`\phi_k`.
@@ -315,7 +315,7 @@ So let's define the RHS. First we need to add the Jacobian term responsible for 
 
    - J \left(\psi_1, \nabla^2 \psi_1\right)
 
-with again :math:`J(S,G) = \partial_x S \partial_y G - \partial_y S \partial_x G`.
+with again :math:`J(S,G) = \partial_x S \, \partial_y G - \partial_y S \, \partial_x G`.
 Since its form is quite complicated, it has been precoded in Layercake as a
 function :class:`~layercake.arithmetic.terms.jacobian.vorticity_advection` returning the terms composing its formula:
 
@@ -407,7 +407,131 @@ We can now move to the next step, which is to compose the layers and the cake of
 3.2 The layers and the cake
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-blabla
+The remaining steps are quite easy, one needs to group the equations in subsets called layers, and then add each layer
+to the `cake`.
+
+To create a Layer, simply instantiate a :class:`~layercake.bakery.layer.Layer` object. You can optionally provide it a
+name. Then you can start adding :class:`~layercake.arithmetic.equation.Equation` objects to it:
+
+.. code:: ipython3
+
+    # --------------------------------
+    #
+    #   Constructing the layer
+    #
+    # --------------------------------
+
+    layer1 = Layer("Top layer")
+    layer1.add_equation(psi1_equation)
+
+    layer2 = Layer("Bottom layer")
+    layer2.add_equation(psi2_equation)
+
+Here we have created one layer per level (per PDE), but this is arbitrary and we could have created a single layer and added the
+two equations to it. However, this has consequences on the way the equations are displayed later.
+
+Once we have our layers, it is time to create the `cake`, i.e. the :class:`~layercake.bakery.cake.Cake` object, and add them to it:
+
+.. code:: ipython3
+
+    # --------------------------------
+    #
+    #   Constructing the cake
+    #
+    # --------------------------------
+
+    cake = Cake()
+    cake.add_layer(layer1)
+    cake.add_layer(layer2)
+
+Once this is done, the users can check that its model is complete by using the method :class:`~layercake.bakery.cake.Cake.show_latex` which
+will use |Matplotlib| to show the partial differential equations in the :math:`\LaTeX` format:
+
+.. code:: ipython3
+
+    >>> cake.show_latex()
+
+.. figure:: user_guide/PDEs.png
+    :scale: 100%
+    :align: center
+
+3.3 Computing the tensorial representation of the model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The cake regroups the layers, but also provide functions to create the tendencies of the model that the user is ultimately
+looking after.
+
+But first, before computing these tendencies, the user must first ask the `cake` to compute the tensorial representation of the tendencies.
+Indeed, the tendencies :math:`\boldsymbol{f}(\boldsymbol{u})` can be expressed as:
+
+.. math::
+
+    f_m(\boldsymbol{u}) = \sum_{k_1,\ldots,k_R=0}^{n_\mathrm{dim}} \mathcal{T}_{m, k_1,\ldots,k_R} \, U_{k_1} \, U_{k_2} \, \ldots \, U_{k_R}
+
+with
+
+.. math::
+
+    & U_0 = 1 \\
+    & U_k = u_k \quad \mathrm{for} \, k=1, \ldots, n_\mathrm{dim}
+
+and where :math:`R+1` is the maximal rank of the tensor (depending on the complexity of the terms in your PDEs) and :math:`n_\mathrm{dim} = \sum_{j=1}^N n_j` is the total dimension of
+the ODEs model.
+The computation of the tensor :math:`\boldsymbol{\mathcal{T}}` can be done in `numerical` or `symbolic` fashion, and this choice impacts the kind of the output that the user will get for the
+tendencies. Let's first consider the `numerical` case, the tensor of the model can be computed
+by calling the :class:`~layercake.bakery.cake.Cake.compute_tensor` method:
+
+.. code:: ipython3
+
+    # computing the tensor
+    cake.compute_tensor(numerical=True, compute_inner_products=True)
+
+
+where we have stated that we want the `numerical` output, and that in addition, the inner products for each term of the `cake`
+must be computed.
+
+.. warning::
+
+    Whether you select `numerical` or `symbolic` output, by far this is the most computationally intensive task performed by LayerCake.
+    Therefore, even if the code is parallelized, depending on the model you are computing, expect this call to last a long time, between
+    minutes and hours.
+
+Once the tensor is computed, one can visualize it by calling the :class:`~layercake.bakery.cake.Cake.print_tensor` method:
+
+.. code:: ipython3
+
+    >>> cake.print_tensor()
+    Tensor[1][0][13] =  1.52316E-01
+    Tensor[1][2][13] = -7.61579E-01
+    Tensor[1][3][12] =  7.61579E-01
+    Tensor[1][5][16] = -6.09263E-01
+    Tensor[1][6][15] =  6.09263E-01
+    Tensor[1][7][18] = -1.52316E+00
+    Tensor[1][8][17] =  1.52316E+00
+    Tensor[1][9][20] = -1.21853E+00
+    Tensor[1][10][19] =  1.21853E+00
+    Tensor[2][0][3] =  9.77988E-02
+    Tensor[2][0][13] =  2.27457E-02
+    Tensor[2][1][3] = -9.46368E-01
+    Tensor[2][1][13] =  3.50342E-01
+    Tensor[2][3][11] = -3.50342E-01
+    Tensor[2][4][6] = -1.51419E+00
+    Tensor[2][4][16] =  5.60547E-01
+    Tensor[2][5][8] = -1.44844E+00
+    Tensor[2][5][18] =  4.37773E-01
+    Tensor[2][6][7] =  1.44844E+00
+    Tensor[2][6][14] = -5.60547E-01
+    Tensor[2][6][17] = -4.37773E-01
+    Tensor[2][7][16] =  4.37773E-01
+    ...
+
+Where one can see entries of the rank-3 tensor of the model for :math:`u_1` and :math:`u_2`.
+
+Continue with description of symbolic case...
+
+
+3.4 Getting the tendencies of the model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 References
 ----------
