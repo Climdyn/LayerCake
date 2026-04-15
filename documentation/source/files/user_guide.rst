@@ -303,7 +303,7 @@ At this point, if one type :code:`psi1_equation` in the Python console, he would
 
 .. code:: ipython3
 
-    >>>psi1_equation
+    >>> psi1_equation
     Derivative(Δα_1*ψ_1 + α'_1*ψ_2 + (D(x, x) + D(y, y))*ψ_1, t) = 0
 
 showing the LHS. The right-hand side (RHS) of the equation is 0 as we have not yet defined it.
@@ -326,7 +326,7 @@ function :class:`~layercake.arithmetic.terms.jacobian.vorticity_advection` retur
 
 .. code:: ipython3
 
-    >>>advection_term
+    >>> advection_term
     (-D(x)*ψ_1*1*((D(y)*(D(x, x) + D(y, y)))*ψ_1),
      1*((D(y)*ψ_1)*(1*((D(x)*(D(x, x) + D(y, y)))*ψ_1))))
 
@@ -341,7 +341,7 @@ Our equation now reads
 
 .. code:: ipython3
 
-    >>>psi1_equation
+    >>> psi1_equation
     Derivative(Δα_1*ψ_1 + α'_1*ψ_2 + (D(x, x) + D(y, y))*ψ_1, t) = -D(x)*ψ_1*1*((D(y)*(D(x, x) + D(y, y)))*ψ_1) + (D(y)*ψ_1)*(1*((D(x)*(D(x, x) + D(y, y)))*ψ_1))
 
 i.e. both terms have been appended on the right-hand side.
@@ -380,7 +380,7 @@ and the equation is now complete, as shown by typing :code:`psi1_equation` one l
 
 .. code:: ipython3
 
-    >>>psi1_equation
+    >>> psi1_equation
     Derivative(Δα_1*ψ_1 + α'_1*ψ_2 + (D(x, x) + D(y, y))*ψ_1, t) = ((-β)*D(x))*ψ_1 - (α'_1*D(x))*ψ_1*D(y)*ψ_2 + ((α'_1*D(y))*ψ_1)*(D(x)*ψ_2) - D(x)*ψ_1*1*((D(y)*(D(x, x) + D(y, y)))*ψ_1) + (D(y)*ψ_1)*(1*((D(x)*(D(x, x) + D(y, y)))*ψ_1))
 
 The `"composition"` of the equation :code:`psi2_equation` for :math:`\psi_2` proceeds almost in the same way,
