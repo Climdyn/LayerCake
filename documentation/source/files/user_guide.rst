@@ -54,13 +54,14 @@ To obtain these ODEs, the user must first specifies the PDEs system, its paramet
 In particular, the specification of the PDEs system is done by constructing each PDE one by one, adding terms to
 a couple of lists representing the LHS and RHS part of the equation.
 These terms are provided as :class:`~layercake.arithmetic.terms.base.ArithmeticTerms` objects representing various specific
-functionals of the both fields :math:`\psi_j` of the equations and the model's spatial parameter fields.
+functionals of both the fields :math:`\psi_j` of the equations and the model's static spatial fields.
 
 2. Starting a new model
 -----------------------
 
-In general, one will start a new Python script to define a new model.
-Here, we are going to detail a simple model available in the `examples/atmospheric <../../../examples/atmospheric/>`_ folder,
+In general, one starts a new Python script to define a new model.
+Here, we are going to detail the step of the construction of a simple model available in
+the `examples/atmospheric <../../../examples/atmospheric/>`_ folder,
 i.e. a two-layer quasi-geostrophic model on a `beta-plane`_ with an orography described in Vallis book :cite:`user-V2017` :
 
 .. math::
@@ -111,7 +112,7 @@ This will import most of what is needed to build the `cake`, but a more specific
     from layercake.basis.planar_fourier import contiguous_channel_basis
     from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 
-where we have imported a specific basis of functions definition, and the standard inner product definitions for them.
+where we have imported the definition of a specific basis of functions, and the standard inner product definitions for them.
 
 2.2 Defining coordinates, parameters and fields of the model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
