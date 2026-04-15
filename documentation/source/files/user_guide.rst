@@ -188,13 +188,12 @@ that we have previously defined:
 where we ask a basis with functions up to wavenumber 2 in both :math:`x` and :math:`y` directions.
 Note that this function also create directly a :class:`~layercake.variables.systems.PlanarCartesianCoordinateSystem` object for you, representing
 the :math:`x, y` coordinate system of the beta plane, and embedded in the :code:`atmospheric_basis` object.
-
-The resulting basis is now defined as:
+If one type :code:`atmospheric_basis` in a terminal after defining it way above, one gets the resulting basis:
 
 .. code:: ipython3
 
-    In[4]: atmospheric_basis
-    Out[4]: [sqrt(2)*cos(y), 2*sin(y)*cos(n*x), 2*sin(y)*sin(n*x), sqrt(2)*cos(2*y), 2*sin(2*y)*cos(n*x), 2*sin(2*y)*sin(n*x), 2*sin(y)*cos(2*n*x), 2*sin(y)*sin(2*n*x), 2*sin(2*y)*cos(2*n*x), 2*sin(2*y)*sin(2*n*x)]
+    >>> atmospheric_basis
+    [sqrt(2)*cos(y), 2*sin(y)*cos(n*x), 2*sin(y)*sin(n*x), sqrt(2)*cos(2*y), 2*sin(2*y)*cos(n*x), 2*sin(2*y)*sin(n*x), 2*sin(y)*cos(2*n*x), 2*sin(y)*sin(2*n*x), 2*sin(2*y)*cos(2*n*x), 2*sin(2*y)*sin(2*n*x)]
 
 We also need to create an inner product definition so that LayerCake knows how you want your PDEs to be projected.
 In general, using the :class:`~layercake.inner_products.definition.StandardSymbolicInnerProductDefinition` definition is sufficient for most model:
@@ -241,7 +240,7 @@ the fields are specified as decomposition on a given basis of functions. For exa
 
 .. math::
 
-    h = \sum_{k=1}^{n} h_k \, \, \phi_k
+    h = \sum_{k=1}^{n} h_k \, \phi_k
 
 
 and this translates in LayerCake as:
@@ -252,7 +251,65 @@ and this translates in LayerCake as:
     hh[1] = 0.2
     h = ParameterField('h', u'h', hh, atmospheric_basis, inner_products_definition)
 
-where we have set only :math:`h_2` different from zero, corresponding to an orography in
+where we have set only :math:`h_2` different from zero, corresponding to an orography given by the field :math:`2 \, h_2 \sin(y) \cos(n x)`.
+We are now ready to specify the partial differential equations and build the cake.
+
+3. Building the cake
+--------------------
+
+To build a `cake`, one has to first specify equations (PDEs) with the :class:`~layercake.arithmetic.equation.Equation` object, then group them
+into layers with the :class:`~layercake.bakery.layer.Layer` object, and finally add the layers to a :class:`~layercake.bakery.cake.Cake` object.
+
+Let's first start by creating the equation for :math:`\psi_1`.
+
+3.1 Defining the equations
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Defining an equation starts by instantiating an :class:`~layercake.arithmetic.equation.Equation` object with the terms composing its
+left-hand side. In the case of the equation for :math:`\psi_1`, the left-hand side (LHS) is composed of three terms:
+
+.. math::
+
+    \partial_t \left( \nabla^2 \psi_1 + \alpha'_1 \psi_2 + (\alpha_1 - \alpha'_1) \psi_1 \right)
+
+In LayerCake, all the terms in the LHS are supposed to be derived over time, so you don't have to take care of specifying this.
+
+The first term inside the time derivative is the vorticity in the first layer, given by :math:`\nabla^2 \psi_1` where :math:`\nabla^2` is the `Laplacian`_.
+In LayerCake, this is obtained by using the :class:`~layercake.arithmetic.terms.operators.Operator` term:
+
+.. code:: ipython3
+
+   psi1_vorticity = OperatorTerm(psi1, Laplacian, atmospheric_basis.coordinate_system)
+
+where we have specified that we want to use the :class:`~layercake.arithmetic.symbolic.operators.Laplacian` operator.
+The two remaining terms are linear in :math:`\psi_1` and :math:`\psi_2`. For this, one can use the :class:`~layercake.arithmetic.terms.linear.LinearTerm` term:
+
+.. code:: ipython3
+
+    dpsi12 = LinearTerm(psi2, prefactor=alphap_1)
+    dpsi11 = LinearTerm(psi1, prefactor=dalpha_1)
+
+where `prefactor` argument has been provided, yielding for example the term :math:`\alpha'_1 \psi_2` in the first case.
+Now that we have created all the needed terms, we can proceed with the creation of
+the :class:`~layercake.arithmetic.equation.Equation` object, providing the list of LHS terms:
+
+
+.. code:: ipython3
+
+    # defining the LHS as the time derivative of the potential vorticity
+    psi1_equation = Equation(psi1, lhs_terms=[psi1_vorticity, dpsi12, dpsi11])
+
+At this point, if one type :code:`psi1_equation` in the Python console, he would get
+
+.. code:: ipython3
+
+    >>>psi1_equation
+    Derivative(Δα_1*ψ_1 + α'_1*ψ_2 + (D(x, x) + D(y, y))*ψ_1, t) = 0
+
+showing the LHS. The right-hand side (RHS) of the equation is 0 as we have not yet defined it.
+
+
+
 
 References
 ----------
@@ -270,3 +327,4 @@ References
 .. _orography: https://en.wikipedia.org/wiki/Orography
 .. _beta coefficient: https://en.wikipedia.org/wiki/Beta_plane
 .. _beta-plane: https://en.wikipedia.org/wiki/Beta_plane
+.. _Laplacian: https://en.wikipedia.org/wiki/Laplace_operator
