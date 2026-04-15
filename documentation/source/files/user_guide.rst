@@ -308,8 +308,105 @@ At this point, if one type :code:`psi1_equation` in the Python console, he would
 
 showing the LHS. The right-hand side (RHS) of the equation is 0 as we have not yet defined it.
 
+So let's define the RHS. First we need to add the Jacobian term responsible for the advection of the vorticity:
 
+.. math::
 
+   - J \left(\psi_1, \nabla^2 \psi_1\right)
+
+with again :math:`J(S,G) = \partial_x S \partial_y G - \partial_y S \partial_x G`.
+Since its form is quite complicated, it has been precoded in Layercake as a
+function :class:`~layercake.arithmetic.terms.jacobian.vorticity_advection` returning the terms composing its formula:
+
+.. code:: ipython3
+
+   advection_term = vorticity_advection(psi1, psi1, atmospheric_basis.coordinate_system, sign=-1)
+
+(note the negative :code:`sign` argument). Inspecting :code:`advection_term` gives us
+
+.. code:: ipython3
+
+    >>>advection_term
+    (-D(x)*ψ_1*1*((D(y)*(D(x, x) + D(y, y)))*ψ_1),
+     1*((D(y)*ψ_1)*(1*((D(x)*(D(x, x) + D(y, y)))*ψ_1))))
+
+a tuple with the two complicated terms composing this Jacobian.
+We can now add these terms directly to the RHS of our equation by typing:
+
+.. code:: ipython3
+
+   psi1_equation.add_rhs_terms(advection_term)
+
+Our equation now reads
+
+.. code:: ipython3
+
+    >>>psi1_equation
+    Derivative(Δα_1*ψ_1 + α'_1*ψ_2 + (D(x, x) + D(y, y))*ψ_1, t) = -D(x)*ψ_1*1*((D(y)*(D(x, x) + D(y, y)))*ψ_1) + (D(y)*ψ_1)*(1*((D(x)*(D(x, x) + D(y, y)))*ψ_1))
+
+i.e. both terms have been appended on the right-hand side.
+
+The next term to add is again a Jacobian, involving both :math:`\psi_1` and :math:`\psi_2`:
+
+.. math::
+
+    - J \left(\psi_1, \alpha'_1  \psi_2\right)
+
+which again have been precoded as a function :class:`~layercake.arithmetic.terms.jacobian.Jacobian`:
+
+.. code:: ipython3
+
+    psi2_advec = Jacobian(psi1, psi2, atmospheric_basis.coordinate_system, sign=-1, prefactors=(alphap_1, alphap_1))
+    psi1_equation.add_rhs_terms(psi2_advec)
+
+In addition to the :code:`sign` argument, notice the :code:`prefactor` one, which allow to specify a prefactor :math:`\alpha'_1` for
+each one of the term composing the formula.
+
+The last term that we need to add to this equation is the so-called `beta term`:
+
+.. math::
+
+    - \beta \, \partial_x \psi_1
+
+which can be coded as an :class:`~layercake.arithmetic.terms.operators.Operator` term:
+
+.. code:: ipython3
+
+    # adding the beta term
+    beta_term = OperatorTerm(psi1, D, x, prefactor=beta_nondim, sign=-1)
+    psi1_equation.add_rhs_term(beta_term)
+
+and the equation is now complete, as shown by typing :code:`psi1_equation` one last time in the Python console:
+
+.. code:: ipython3
+
+    >>>psi1_equation
+    Derivative(Δα_1*ψ_1 + α'_1*ψ_2 + (D(x, x) + D(y, y))*ψ_1, t) = ((-β)*D(x))*ψ_1 - (α'_1*D(x))*ψ_1*D(y)*ψ_2 + ((α'_1*D(y))*ψ_1)*(D(x)*ψ_2) - D(x)*ψ_1*1*((D(y)*(D(x, x) + D(y, y)))*ψ_1) + (D(y)*ψ_1)*(1*((D(x)*(D(x, x) + D(y, y)))*ψ_1))
+
+The `"composition"` of the equation :code:`psi2_equation` for :math:`\psi_2` proceeds almost in the same way,
+except that we must add a term for the orography static field :math:`h`:
+
+.. math::
+
+    - J \left(\psi_2, h\right)
+
+which actually proceeds in the same way:
+
+.. code:: ipython3
+
+    # adding an orographic term
+    orographic_term = Jacobian(psi2, h, atmospheric_basis.coordinate_system, sign=-1)
+    psi2_equation.add_rhs_terms(orographic_term)
+
+because LayerCake treats the static fields in the same way, it will not accept to take its time derivative, but any
+spatial differential operator will work.
+
+We can now move to the next step, which is to compose the layers and the cake of the model.
+
+3.2 The layers and the cake
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+blabla
 
 References
 ----------
