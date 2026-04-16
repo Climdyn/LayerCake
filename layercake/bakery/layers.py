@@ -61,7 +61,7 @@ class Layer(object):
         self._lhs_inversion = True
         self._lhs_inverted = False
         self._lhs_mat = None
-        self._simplify_after_inversion = True
+        self._simplify_after_LHS_inversion = True
 
     @property
     def _cake_first_index(self):
@@ -409,10 +409,11 @@ class Layer(object):
                 else:
                     warnings.warn(f'Inverting the LHS of layer {self} without checking that it is invertible. '
                                   'Be cautious about the result.')
-                    blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), list(self._fields_layer_tensor_extent.values())))
-                    lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = block_matrix_inverse(eq.lhs_inner_products_addition, blocks_extent)
-                    if self._simplify_after_inversion:
-                        lhs_mat_inverted = lhs_mat_inverted.simplify()
+                    blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), self._fields_layer_tensor_extent.values()))
+                    block_inverse = block_matrix_inverse(eq.lhs_inner_products_addition, blocks_extent)
+                    if self._simplify_after_LHS_inversion:
+                        block_inverse = block_inverse.simplify()
+                    lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = block_inverse
                     self._lhs_inverted = True
 
                 for equation_term in eq.rhs_terms:
@@ -492,9 +493,9 @@ class Layer(object):
             if self._lhs_inversion and not self._lhs_inverted:
                 warnings.warn(f'Inverting the LHS of layer {self} without checking that it is invertible. '
                               'Be cautious about the result.')
-                blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), list(self._fields_layer_tensor_extent.values())))
+                blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), self._fields_layer_tensor_extent.values()))
                 lhs_mat_inverted[1:, 1:] = block_matrix_inverse(self._lhs_mat[1:, 1:], blocks_extent)
-                if self._simplify_after_inversion:
+                if self._simplify_after_LHS_inversion:
                     lhs_mat_inverted = lhs_mat_inverted.simplify()
                 self._lhs_inverted = True
             if self._lhs_inverted:

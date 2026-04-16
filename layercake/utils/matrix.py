@@ -42,7 +42,7 @@ def block_matrix_inverse(P, blocks_extent):
         ret = be[0][1]
         be = list(map(lambda p: (p[0]-ret, p[1]-ret), be[1:]))
 
-    PP = PP.adjugate()/PP.det()
+    PP = PP.adjugate() / PP.det()
     for Am1, B, C in zip(Am1_list[::-1], B_list[::-1], C_list[::-1]):
         Ashape = Am1.shape[0]
         Pshape = PP.shape[0]

@@ -53,7 +53,7 @@ class Cake(object):
 
         self.layers = list()
         self._lhs_inversion_in_layer = True
-        self._simplify_after_inversion = True
+        self._simplify_after_LHS_inversion = True
 
     def add_layer(self, layer):
         """Add a layer object to the cake.
@@ -269,12 +269,12 @@ class Cake(object):
                 tensor = tensor.to_coo()
         else:
             if not self._lhs_inversion_in_layer:
-                warnings.warn('Inverting the LHS without checking that it is invertible. '
+                warnings.warn('Inverting the cake LHS without checking that it is invertible. '
                               'Be cautious about the result.')
                 lhs_mat_inverted = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
-                blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), list(self.fields_tensor_extent.values())))
+                blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), self.fields_tensor_extent.values()))
                 lhs_mat_inverted[1:, 1:] = block_matrix_inverse(lhs_mat[1:, 1:], blocks_extent)
-                if self._simplify_after_inversion:
+                if self._simplify_after_LHS_inversion:
                     lhs_mat_inverted = lhs_mat_inverted.simplify()
                 tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, tensor, 1))
             else:
