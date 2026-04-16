@@ -477,9 +477,14 @@ with
 
 and where :math:`R+1` is the maximal rank of the tensor (depending on the complexity of the terms in your PDEs) and :math:`n_\mathrm{dim} = \sum_{j=1}^N n_j` is the total dimension of
 the ODEs model.
-The computation of the tensor :math:`\boldsymbol{\mathcal{T}}` can be done in `numerical` or `symbolic` fashion, and this choice impacts the kind of the output that the user will get for the
-tendencies. Let's first consider the `numerical` case, the tensor of the model can be computed
-by calling the :class:`~layercake.bakery.cake.Cake.compute_tensor` method:
+The computation of the tensor :math:`\boldsymbol{\mathcal{T}}` can be done in `numerical` or `symbolic` fashion, and this choice impacts
+the kind of output that the user will get for the tendencies.
+
+The numerical case
+""""""""""""""""""
+
+Let's first consider the `numerical` case, the tensor of
+the model can be computed by calling the :class:`~layercake.bakery.cake.Cake.compute_tensor` method:
 
 .. code:: ipython3
 
@@ -488,7 +493,7 @@ by calling the :class:`~layercake.bakery.cake.Cake.compute_tensor` method:
 
 
 where we have stated that we want the `numerical` output, and that in addition, the inner products for each term of the `cake`
-must be computed.
+must still be computed.
 
 .. warning::
 
@@ -527,8 +532,25 @@ Once the tensor is computed, one can visualize it by calling the :class:`~layerc
 
 Where one can see entries of the rank-3 tensor of the model for :math:`u_1` and :math:`u_2`.
 
-Continue with description of symbolic case...
+The symbolic case
+"""""""""""""""""
 
+Alternatively, the tensor can be computed in `symbolic` mode:
+
+
+.. code:: ipython3
+
+    # computing the tensor
+    cake.compute_tensor(numerical=False, compute_inner_products=True)
+
+.. note::
+
+    These `symbolic` computations (integrations) are done with |Sympy| and can take an even longer time than the
+    `numerical` ones. To optimize these integrations and reduce the computation time, one needs to carefully
+    choose an `optimizer` for their :class:`~layercake.inner_products.definition.StandardSymbolicInnerProductDefinition`
+    inner product definition. Some testing might be needed there to obtain the best solution.
+
+Again, once the tensor is computed, one can visualize it by calling the :class:`~layercake.bakery.cake.Cake.print_tensor` method:
 
 3.4 Getting the tendencies of the model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
