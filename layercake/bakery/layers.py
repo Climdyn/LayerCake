@@ -22,13 +22,13 @@ import warnings
 
 from sympy import MutableSparseNDimArray, MutableSparseMatrix, ImmutableMatrix, ImmutableSparseNDimArray
 from sympy import zeros as sympy_zeros
-from sympy.matrices.exceptions import NonInvertibleMatrixError
 
 from layercake.arithmetic.terms.constant import ConstantTerm
 from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.variables.field import ParameterField, FunctionField
 from layercake.utils.symbolic_tensor import symbolic_tensordot
 from layercake.utils import isin
+from layercake.utils.matrix import block_matrix_inverse
 
 
 class Layer(object):
@@ -61,6 +61,7 @@ class Layer(object):
         self._lhs_inversion = True
         self._lhs_inverted = False
         self._lhs_mat = None
+        self._simplify_after_inversion = True
 
     @property
     def _cake_first_index(self):
@@ -406,11 +407,13 @@ class Layer(object):
                             raise ValueError(f'Field {ofield} not found in the cake.')
                         self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
                 else:
-                    try:
-                        lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inv().simplify()
-                        self._lhs_inverted = True
-                    except NonInvertibleMatrixError:
-                        raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+                    warnings.warn(f'Inverting the LHS of layer {self} without checking that it is invertible. '
+                                  'Be cautious about the result.')
+                    blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), list(self._fields_layer_tensor_extent.values())))
+                    lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = block_matrix_inverse(eq.lhs_inner_products_addition, blocks_extent)
+                    if self._simplify_after_inversion:
+                        lhs_mat_inverted = lhs_mat_inverted.simplify()
+                    self._lhs_inverted = True
 
                 for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
@@ -487,11 +490,13 @@ class Layer(object):
                 lhs_order += ndim
 
             if self._lhs_inversion and not self._lhs_inverted:
-                try:
-                    lhs_mat_inverted[1:, 1:] = self._lhs_mat[1:, 1:].inv().simplify()
-                    self._lhs_inverted = True
-                except NonInvertibleMatrixError:
-                    raise NonInvertibleMatrixError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
+                warnings.warn(f'Inverting the LHS of layer {self} without checking that it is invertible. '
+                              'Be cautious about the result.')
+                blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), list(self._fields_layer_tensor_extent.values())))
+                lhs_mat_inverted[1:, 1:] = block_matrix_inverse(self._lhs_mat[1:, 1:], blocks_extent)
+                if self._simplify_after_inversion:
+                    lhs_mat_inverted = lhs_mat_inverted.simplify()
+                self._lhs_inverted = True
             if self._lhs_inverted:
                 self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, self.tensor, 1))
                                .subs(b_subs).subs(p_subs).subs(substitutions))
