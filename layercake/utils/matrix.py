@@ -38,7 +38,7 @@ def block_matrix_inverse(P, blocks_extent, simplify=True):
         warnings.warn(f'Inverting a symbolic matrix without checking that it is invertible. '
                       'Be cautious about the result.')
     be = blocks_extent.copy()
-    PP = P.copy()
+    PP = P
     B_list = list()
     C_list = list()
     Am1_list = list()
