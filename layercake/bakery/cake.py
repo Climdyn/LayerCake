@@ -24,6 +24,7 @@ from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
 from sympy import MutableSparseMatrix
 from sympy import zeros as sympy_zeros
 from sympy import simplify, N
+from sympy.matrices.exceptions import NonInvertibleMatrixError
 from sympy.tensor.array import permutedims
 
 from layercake.utils.tensor import sparse_mul, jsparse_mul
@@ -269,13 +270,12 @@ class Cake(object):
                 tensor = tensor.to_coo()
         else:
             if not self._lhs_inversion_in_layer:
-                warnings.warn('Inverting the cake LHS without checking that it is invertible. '
-                              'Be cautious about the result.')
                 lhs_mat_inverted = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
-                blocks_extent = list(map(lambda p: (p[0] - 1, p[1] - 1), self.fields_tensor_extent.values()))
-                lhs_mat_inverted[1:, 1:] = block_matrix_inverse(lhs_mat[1:, 1:], blocks_extent)
-                if self._simplify_after_LHS_inversion:
-                    lhs_mat_inverted = lhs_mat_inverted.simplify()
+                blocks_extent = [(be[0] - 1, be[1] - 1) for be in self.fields_tensor_extent.values()]
+                try:
+                    lhs_mat_inverted[1:, 1:] = block_matrix_inverse(lhs_mat[1:, 1:], blocks_extent, self._simplify_after_LHS_inversion)
+                except NonInvertibleMatrixError:
+                    raise NonInvertibleMatrixError(f'The left-hand side of the cake is not invertible with the provided basis.')
                 tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, tensor, 1))
             else:
                 tensor = ImmutableSparseNDimArray(tensor)

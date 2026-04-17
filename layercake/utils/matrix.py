@@ -7,10 +7,12 @@
     Defines useful functions to deal with symbolic matrices.
 
 """
+import warnings
 
 from sympy import MutableSparseMatrix
+from sympy.matrices.exceptions import NonInvertibleMatrixError
 
-def block_matrix_inverse(P, blocks_extent):
+def block_matrix_inverse(P, blocks_extent, simplify=True):
     """Function to invert a symbolic matrix :math:`P` devided by blocks.
 
     Parameters
@@ -19,12 +21,22 @@ def block_matrix_inverse(P, blocks_extent):
         The block matrix to invert.
     blocks_extent: list(tuple)
         The extent of each block, as a list of 2-tuple.
+    simplify: bool, optional
+        Try to simplify the inverse.
+        Default to `True`.
 
     Warnings
     --------
-    To be fast, this function doesn't check if the matrix :math:`P` is invertible !
+    If the `simplify` argument is set to `False`, this function will not check if the
+    matrix :math:`P` is invertible !
 
     """
+    if simplify:
+        if P.det().simplify() == 0:
+            raise NonInvertibleMatrixError('block_matrix_inverse: The provided matrix is not invertible.')
+    else:
+        warnings.warn(f'Inverting a symbolic matrix without checking that it is invertible. '
+                      'Be cautious about the result.')
     be = blocks_extent.copy()
     PP = P.copy()
     B_list = list()
@@ -54,7 +66,10 @@ def block_matrix_inverse(P, blocks_extent):
         Pp1[slice(Ashape, mat_shape), slice(Ashape, mat_shape)] = PP
         PP = Pp1
 
-    return PP
+    if simplify:
+        return PP.simplify()
+    else:
+        return PP
 
 def _block_matrix_inverse_2x2(P, blocks_extent):
     be = blocks_extent
