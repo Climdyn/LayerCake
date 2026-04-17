@@ -530,7 +530,7 @@ Once the tensor is computed, one can visualize it by calling the :class:`~layerc
     Tensor[2][7][16] =  4.37773E-01
     ...
 
-Where one can see entries of the rank-3 tensor of the model for :math:`u_1` and :math:`u_2`.
+where one can see entries of the rank-3 tensor of the model for :math:`u_1` and :math:`u_2`.
 
 The symbolic case
 """""""""""""""""
@@ -551,6 +551,39 @@ Alternatively, the tensor can be computed in `symbolic` mode:
     inner product definition. Some testing might be needed there to obtain the best solution.
 
 Again, once the tensor is computed, one can visualize it by calling the :class:`~layercake.bakery.cake.Cake.print_tensor` method:
+
+.. code:: ipython3
+
+    >>> cake.print_tensor()
+    Tensor[1][2][13] = 8*sqrt(2)*n*α'_1/(3*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][3][12] = -8*sqrt(2)*n*α'_1/(3*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][5][16] = 32*sqrt(2)*n*α'_1/(15*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][6][15] = -32*sqrt(2)*n*α'_1/(15*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][7][18] = 16*sqrt(2)*n*α'_1/(3*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][8][17] = -16*sqrt(2)*n*α'_1/(3*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][9][20] = 64*sqrt(2)*n*α'_1/(15*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][10][19] = -64*sqrt(2)*n*α'_1/(15*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][0][12] = 8*sqrt(2)*h_2*n*α'_1/(3*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][0][13] = -8*sqrt(2)*h_1*n*α'_1/(3*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][0][15] = 32*sqrt(2)*h_5*n*α'_1/(15*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][0][16] = -32*sqrt(2)*h_4*n*α'_1/(15*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][0][17] = 16*sqrt(2)*h_7*n*α'_1/(3*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][0][18] = -16*sqrt(2)*h_6*n*α'_1/(3*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][0][19] = 64*sqrt(2)*h_9*n*α'_1/(15*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[1][0][20] = -64*sqrt(2)*h_8*n*α'_1/(15*pi*(α'_1*α'_2 + (Δα_1 - 1)*(α'_2 + 1)))
+    Tensor[2][1][3] = 8*sqrt(2)*n**3*(n**2 + α'_2 + 1)/(3*pi*(α'_1*α'_2 - (n**2 - Δα_1 + 1)*(n**2 + α'_2 + 1)))
+    Tensor[2][1][13] = 8*sqrt(2)*n*α'_1*(-n**2 - 1)/(3*pi*(α'_1*α'_2 - (n**2 - Δα_1 + 1)*(n**2 + α'_2 + 1)))
+    Tensor[2][0][3] = -n*β*(n**2 + α'_2 + 1)/(α'_1*α'_2 - (n**2 - Δα_1 + 1)*(n**2 + α'_2 + 1))
+    Tensor[2][3][11] = 8*sqrt(2)*n*α'_1*(n**2 + 1)/(3*pi*(α'_1*α'_2 - (n**2 - Δα_1 + 1)*(n**2 + α'_2 + 1)))
+    Tensor[2][4][6] = 64*sqrt(2)*n**3*(n**2 + α'_2 + 1)/(15*pi*(α'_1*α'_2 - (n**2 - Δα_1 + 1)*(n**2 + α'_2 + 1)))
+    Tensor[2][4][16] = 64*sqrt(2)*n*α'_1*(-n**2 - 1)/(15*pi*(α'_1*α'_2 - (n**2 - Δα_1 + 1)*(n**2 + α'_2 + 1)))
+    Tensor[2][5][8] = 9*n*(n**2 - 1)*(n**2 + α'_2 + 1)/(2*(α'_1*α'_2 - (n**2 - Δα_1 + 1)*(n**2 + α'_2 + 1)))
+    Tensor[2][5][18] = 3*n*α'_1*(-n**2 - 1)/(2*(α'_1*α'_2 - (n**2 - Δα_1 + 1)*(n**2 + α'_2 + 1)))
+    ...
+
+
+where one can see the symbolic entries of the rank-3 tensor of the model for :math:`u_1` and :math:`u_2`.
+
 
 3.4 Getting the tendencies of the model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
