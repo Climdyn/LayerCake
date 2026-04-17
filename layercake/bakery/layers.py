@@ -29,6 +29,7 @@ from layercake.arithmetic.terms.operations import ProductOfTerms
 from layercake.variables.field import ParameterField, FunctionField
 from layercake.utils.symbolic_tensor import symbolic_tensordot
 from layercake.utils import isin
+from layercake.utils.matrix import block_matrix_inverse
 
 
 class Layer(object):
@@ -61,6 +62,7 @@ class Layer(object):
         self._lhs_inversion = True
         self._lhs_inverted = False
         self._lhs_mat = None
+        self._simplify_after_LHS_inversion = True
 
     @property
     def _cake_first_index(self):
@@ -406,11 +408,13 @@ class Layer(object):
                             raise ValueError(f'Field {ofield} not found in the cake.')
                         self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] += lhs_term.inner_products
                 else:
+                    blocks_extent = [(be[0] - 1, be[1] - 1) for be in self._fields_layer_tensor_extent.values()]
                     try:
-                        lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = eq.lhs_inner_products_addition.inv().simplify()
-                        self._lhs_inverted = True
+                        block_inverse = block_matrix_inverse(eq.lhs_inner_products_addition, blocks_extent, self._simplify_after_LHS_inversion)
                     except NonInvertibleMatrixError:
                         raise NonInvertibleMatrixError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
+                    lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = block_inverse
+                    self._lhs_inverted = True
 
                 for equation_term in eq.rhs_terms:
                     slices = [slice(lhs_order, lhs_order + ndim)]
@@ -487,11 +491,12 @@ class Layer(object):
                 lhs_order += ndim
 
             if self._lhs_inversion and not self._lhs_inverted:
+                blocks_extent = [(be[0] - 1, be[1] - 1) for be in self._fields_layer_tensor_extent.values()]
                 try:
-                    lhs_mat_inverted[1:, 1:] = self._lhs_mat[1:, 1:].inv().simplify()
-                    self._lhs_inverted = True
+                    lhs_mat_inverted[1:, 1:] = block_matrix_inverse(self._lhs_mat[1:, 1:], blocks_extent, self._simplify_after_LHS_inversion)
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')
+                self._lhs_inverted = True
             if self._lhs_inverted:
                 self.tensor = (ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, self.tensor, 1))
                                .subs(b_subs).subs(p_subs).subs(substitutions))

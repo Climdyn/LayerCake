@@ -12,20 +12,20 @@
 
 """
 
-
 from contextlib import redirect_stdout
 import numpy as np
 from numpy.linalg import LinAlgError
 import matplotlib.pyplot as plt
 import sparse as sp
 from numba import njit
+import warnings
 
 from sympy import ImmutableSparseNDimArray, MutableSparseNDimArray
 from sympy import MutableSparseMatrix
 from sympy import zeros as sympy_zeros
 from sympy import simplify, N
-from sympy.tensor.array import permutedims
 from sympy.matrices.exceptions import NonInvertibleMatrixError
+from sympy.tensor.array import permutedims
 
 from layercake.utils.tensor import sparse_mul, jsparse_mul
 from layercake.utils.symbolic_tensor import get_coords_and_values_from_tensor, compute_jacobian_permutations
@@ -34,6 +34,7 @@ from layercake.formatters.python import PythonJacobianEquationFormatter, PythonE
 from layercake.formatters.julia import JuliaJacobianEquationFormatter, JuliaEquationFormatter
 from layercake.utils import isin
 from layercake.utils.symbolic_tensor import symbolic_tensordot
+from layercake.utils.matrix import block_matrix_inverse
 
 real_eps = np.finfo(np.float64).eps
 small_number = 1.e-12
@@ -53,6 +54,7 @@ class Cake(object):
 
         self.layers = list()
         self._lhs_inversion_in_layer = True
+        self._simplify_after_LHS_inversion = True
 
     def add_layer(self, layer):
         """Add a layer object to the cake.
@@ -268,12 +270,13 @@ class Cake(object):
                 tensor = tensor.to_coo()
         else:
             if not self._lhs_inversion_in_layer:
+                lhs_mat_inverted = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
+                blocks_extent = [(be[0] - 1, be[1] - 1) for be in self.fields_tensor_extent.values()]
                 try:
-                    lhs_mat_inverted = MutableSparseMatrix(sympy_zeros(self.ndim + 1, self.ndim + 1))
-                    lhs_mat_inverted[1:, 1:] = lhs_mat[1:, 1:].inv().simplify()
-                    tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, tensor, 1))
+                    lhs_mat_inverted[1:, 1:] = block_matrix_inverse(lhs_mat[1:, 1:], blocks_extent, self._simplify_after_LHS_inversion)
                 except NonInvertibleMatrixError:
                     raise NonInvertibleMatrixError(f'The left-hand side of the cake is not invertible with the provided basis.')
+                tensor = ImmutableSparseNDimArray(symbolic_tensordot(lhs_mat_inverted, tensor, 1))
             else:
                 tensor = ImmutableSparseNDimArray(tensor)
 
