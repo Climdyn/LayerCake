@@ -5,7 +5,7 @@ This guide explains how the LayerCake framework can be used to transform a set o
 
 .. math::
 
-    \partial_t \mathcal{F}^{\mathrm LHS}_i (\psi_1, \ldots, \psi_N) = \mathcal{F}^{\mathrm{RHS}}_i (\psi_1, \ldots, \psi_N) \qquad , \quad i = 1,\ldots,N
+    \partial_t \mathcal{F}^{\mathrm LHS}_i \left[\psi_1, \ldots, \psi_N\right] = \mathcal{F}^{\mathrm{RHS}}_i \left[\psi_1, \ldots, \psi_N\right] \qquad , \quad i = 1,\ldots,N
 
 equations (PDEs) defined on a particular domain into a system of ordinary differential equations (ODEs)
 with an automated `Galerkin method`_. This method projects all the fields :math:`\psi_j` on given function basis :math:`\phi_{j,k}`:
@@ -808,6 +808,11 @@ and :math:`\alpha'_i` coefficients, and the Coriolis :math:`\beta` parameter.
 This functionality is thus particularly useful to get the tendencies and Jacobian matrix functions with actual analytical formula
 involving the model's parameters. For example, this enables the study of the models with bifurcation analysis
 tools such as AUTO-07p :cite:`user-doedel2007` and auto-AUTO :cite:`user-DH2025`.
+
+.. note::
+
+    As a final note, you can also take a look at the other examples in the `examples <../../../examples/>`_ folder.
+    You can also find specific LayerCake tricks on the :ref:`files/tricks:Various tricks` page.
 
 
 References
