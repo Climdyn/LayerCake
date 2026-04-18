@@ -16,3 +16,7 @@ into computing language expressions.
 .. automodule:: layercake.formatters.python
     :show-inheritance:
     :members:
+
+.. automodule:: layercake.formatters.julia
+    :show-inheritance:
+    :members:

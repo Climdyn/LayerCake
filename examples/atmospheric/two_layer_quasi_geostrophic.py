@@ -159,10 +159,10 @@ psi2_equation.add_rhs_terms(orographic_term)
 #
 # --------------------------------
 
-layer1 = Layer()
+layer1 = Layer("Top layer")
 layer1.add_equation(psi1_equation)
 
-layer2 = Layer()
+layer2 = Layer("Bottom layer")
 layer2.add_equation(psi2_equation)
 
 

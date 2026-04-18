@@ -56,3 +56,6 @@ differential equation.
     :show-inheritance:
     :members:
 
+.. automodule:: layercake.arithmetic.terms.gradient
+    :show-inheritance:
+    :members:

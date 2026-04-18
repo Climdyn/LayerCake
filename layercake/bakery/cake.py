@@ -676,9 +676,9 @@ class Cake(object):
         number_of_lines = self.number_of_equations + self.number_of_layers
         for i in latex_string_dict:
             if self.layers[i].name:
-                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i} ({self.layers[i].name}):')
+                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i+1} ({self.layers[i].name}):')
             else:
-                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i}:')
+                plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), f'Layer {i+1}:')
             k += 1
             for s in latex_string_dict[i]:
                 plt.text(-0.1, (number_of_lines - k) / (number_of_lines + 1), '$%s$' % s)
