@@ -126,5 +126,6 @@ rst_epilog = """
 .. |Sympy| replace:: :raw-html:`<a href="https://www.sympy.org/">Sympy</a>`
 .. |Numpy| replace:: :raw-html:`<a href="https://www.numpy.org/">Numpy</a>`
 .. |Matplotlib| replace:: :raw-html:`<a href="https://matplotlib.org/">Matplotlib</a>`
+.. |Numba| replace:: :raw-html:`<a href="https://numba.pydata.org/">Numba</a>`
 
 """
