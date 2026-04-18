@@ -1,0 +1,800 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Bakery &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Arithmetic module" href="arithmetic.html" />
+    <link rel="prev" title="Basis module" href="basis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../references.html">Code References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="variables.html">Variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">General utility module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inner_products.html">Inner products module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formatters.html">Formatters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basis.html">Basis module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">The Bakery</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#layer-definition-module">Layer definition module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.bakery.layers.Layer"><code class="docutils literal notranslate"><span class="pre">Layer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.equations"><code class="docutils literal notranslate"><span class="pre">Layer.equations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.tensor"><code class="docutils literal notranslate"><span class="pre">Layer.tensor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.name"><code class="docutils literal notranslate"><span class="pre">Layer.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.add_equation"><code class="docutils literal notranslate"><span class="pre">Layer.add_equation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.compute_inner_products"><code class="docutils literal notranslate"><span class="pre">Layer.compute_inner_products()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.compute_tensor"><code class="docutils literal notranslate"><span class="pre">Layer.compute_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.fields"><code class="docutils literal notranslate"><span class="pre">Layer.fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.maximum_rank"><code class="docutils literal notranslate"><span class="pre">Layer.maximum_rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.ndim"><code class="docutils literal notranslate"><span class="pre">Layer.ndim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.number_of_equations"><code class="docutils literal notranslate"><span class="pre">Layer.number_of_equations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.other_fields"><code class="docutils literal notranslate"><span class="pre">Layer.other_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.other_fields_in_lhs"><code class="docutils literal notranslate"><span class="pre">Layer.other_fields_in_lhs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.parameters"><code class="docutils literal notranslate"><span class="pre">Layer.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.parameters_symbols"><code class="docutils literal notranslate"><span class="pre">Layer.parameters_symbols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.show_latex"><code class="docutils literal notranslate"><span class="pre">Layer.show_latex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.layers.Layer.to_latex"><code class="docutils literal notranslate"><span class="pre">Layer.to_latex()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cake-definition-module">Cake definition module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.bakery.cake.Cake"><code class="docutils literal notranslate"><span class="pre">Cake</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.layers"><code class="docutils literal notranslate"><span class="pre">Cake.layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.add_layer"><code class="docutils literal notranslate"><span class="pre">Cake.add_layer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.compute_tendencies"><code class="docutils literal notranslate"><span class="pre">Cake.compute_tendencies()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.compute_tensor"><code class="docutils literal notranslate"><span class="pre">Cake.compute_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.fields"><code class="docutils literal notranslate"><span class="pre">Cake.fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.fields_tensor_extent"><code class="docutils literal notranslate"><span class="pre">Cake.fields_tensor_extent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.jacobian_tensor"><code class="docutils literal notranslate"><span class="pre">Cake.jacobian_tensor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.maximum_rank"><code class="docutils literal notranslate"><span class="pre">Cake.maximum_rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.ndim"><code class="docutils literal notranslate"><span class="pre">Cake.ndim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.number_of_equations"><code class="docutils literal notranslate"><span class="pre">Cake.number_of_equations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.number_of_layers"><code class="docutils literal notranslate"><span class="pre">Cake.number_of_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.parameters"><code class="docutils literal notranslate"><span class="pre">Cake.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.parameters_symbols"><code class="docutils literal notranslate"><span class="pre">Cake.parameters_symbols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.print_jacobian_tensor"><code class="docutils literal notranslate"><span class="pre">Cake.print_jacobian_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.print_jacobian_tensor_to_file"><code class="docutils literal notranslate"><span class="pre">Cake.print_jacobian_tensor_to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.print_tensor"><code class="docutils literal notranslate"><span class="pre">Cake.print_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.print_tensor_to_file"><code class="docutils literal notranslate"><span class="pre">Cake.print_tensor_to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.show_latex"><code class="docutils literal notranslate"><span class="pre">Cake.show_latex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.simplify_tensor"><code class="docutils literal notranslate"><span class="pre">Cake.simplify_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.tensor"><code class="docutils literal notranslate"><span class="pre">Cake.tensor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.bakery.cake.Cake.to_latex"><code class="docutils literal notranslate"><span class="pre">Cake.to_latex()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arithmetic.html">Arithmetic module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../references.html">Code References</a></li>
+      <li class="breadcrumb-item active">The Bakery</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/files/technical/bakery.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="the-bakery">
+<h1>The Bakery<a class="headerlink" href="#the-bakery" title="Link to this heading"></a></h1>
+<p>The bakery is where the cake’s layers and the cake itself get baked, to produce models from
+the partial differential equations.</p>
+<section id="layer-definition-module">
+<span id="module-layercake.bakery.layers"></span><h2>Layer definition module<a class="headerlink" href="#layer-definition-module" title="Link to this heading"></a></h2>
+<p>This module defines the layer object, i.e. the collection of partial differential equations
+(represented by <a class="reference internal" href="arithmetic.html#layercake.arithmetic.equation.Equation" title="layercake.arithmetic.equation.Equation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equation</span></code></a> objects) which governs the time evolution of
+a given fluid/media layer of the system at hand.
+It also computes and includes the ordinary differential equations representation of the
+partial differential equations, when projected on a given basis (Galerkin procedure).</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.bakery.layers.</span></span><span class="sig-name descname"><span class="pre">Layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/layers.html#Layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.layers.Layer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class to gather partial differential equations modelling
+a given fluid/media layer of the system at hand.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Name for the layer.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.equations">
+<span class="sig-name descname"><span class="pre">equations</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.equations" title="Link to this definition"></a></dt>
+<dd><p>A list of the equation objects included in the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="arithmetic.html#layercake.arithmetic.equation.Equation" title="layercake.arithmetic.equation.Equation"><em>Equation</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.tensor">
+<span class="sig-name descname"><span class="pre">tensor</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.tensor" title="Link to this definition"></a></dt>
+<dd><p>The tensor representing the ordinary differential equations tendencies.
+Can be either a numerical or a symbolic representation, depending on the user’s choice.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://sparse.pydata.org/en/stable/api/COO/#sparse.COO" title="(in sparse v0.0.0)">sparse.COO</a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.name" title="Link to this definition"></a></dt>
+<dd><p>Optional name for the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.add_equation">
+<span class="sig-name descname"><span class="pre">add_equation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/layers.html#Layer.add_equation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.layers.Layer.add_equation" title="Link to this definition"></a></dt>
+<dd><p>Add an equation object to the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>equation</strong> (<a class="reference internal" href="arithmetic.html#layercake.arithmetic.equation.Equation" title="layercake.arithmetic.equation.Equation"><em>Equation</em></a>) – Equation object to add to the layer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.compute_inner_products">
+<span class="sig-name descname"><span class="pre">compute_inner_products</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numerical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/layers.html#Layer.compute_inner_products"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.layers.Layer.compute_inner_products" title="Link to this definition"></a></dt>
+<dd><p>Compute the inner products tensors, either symbolic or numerical ones, of all the terms
+of the layer equations, including the left-hand side terms.
+Computations are parallelized on multiple CPUs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numerical</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to compute numerical or symbolic inner products.
+Default to <cite>True</cite> (numerical inner products as output).</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – <p>Control the switch from symbolic to numerical integration. By default, <cite>parallel_integration</cite> workers will try to integrate
+<span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expressions symbolically, but a fallback to numerical integration can be enforced.
+The options are:</p>
+<ul>
+<li><p><cite>None</cite>: This is the “full-symbolic” mode. No timeout will be applied, and the switch to numerical integration will never happen.
+Can result in very long and improbable computation time.</p></li>
+<li><p><cite>True</cite>: This is the “full-numerical” mode. Symbolic computations do not occur, and the workers try directly to integrate
+numerically.</p></li>
+<li><p><cite>False</cite>: Same as <cite>None</cite>.</p></li>
+<li><p>An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+numerical integration.</p></li>
+</ul>
+</p></li>
+<li><p><strong>num_threads</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPUs to use in parallel for the computations. If <cite>None</cite>, use all the CPUs available.
+Default to <cite>None</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.compute_tensor">
+<span class="sig-name descname"><span class="pre">compute_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numerical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_inner_products</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_inner_products_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitutions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_subs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters_subs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs_inversion_in_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/layers.html#Layer.compute_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.layers.Layer.compute_tensor" title="Link to this definition"></a></dt>
+<dd><p>Compute the tensor of the symbolic or numerical representation of the ordinary differential
+equations tendencies of the layer.
+Results are stored in the <a class="reference internal" href="#layercake.bakery.layers.Layer.tensor" title="layercake.bakery.layers.Layer.tensor"><code class="xref py py-attr docutils literal notranslate"><span class="pre">tensor</span></code></a> attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numerical</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to compute the numerical or the symbolic tensor.
+Default to <cite>True</cite> (numerical tensor as output).</p></li>
+<li><p><strong>compute_inner_products</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the inner products tensors of the layer equations’ terms must be computed first.
+Default to <cite>False</cite>. Please note that if the inner products are not computed firsthand, the tensor computation
+will fail.</p></li>
+<li><p><strong>compute_inner_products_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Arguments to pass to the computation of the inner products.</p></li>
+<li><p><strong>substitutions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em><em>, </em><em>optional</em>) – List of 2-tuples containing extra symbolic substitutions to be made at the end of the tensor computation.
+Only applies for the symbolic tendencies.
+The 2-tuples contain first a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p></li>
+<li><p><strong>basis_subs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to substitute the parameters appearing in the definition of the basis of functions by
+their numerical value.
+Only applies for the symbolic tendencies.
+Default to <cite>False</cite>.</p></li>
+<li><p><strong>parameters_subs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em><em>, </em><em>optional</em>) – List of model’s parameters to substitute in the symbolic tendencies’ tensor.
+Only applies for the symbolic tendencies.</p></li>
+<li><p><strong>lhs_inversion_in_layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Try to inverse the LHS matrix and take the matricial product with the RHS. Default to <cite>True</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.fields">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fields</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.fields" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of dynamical fields of the layer, i.e. the fields whose time
+evolution is provided by the partial differential equations of the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.field.Field" title="layercake.variables.field.Field"><em>Field</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.maximum_rank">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maximum_rank</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.maximum_rank" title="Link to this definition"></a></dt>
+<dd><p>Maximum over the ranks of the equations in the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.ndim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.ndim" title="Link to this definition"></a></dt>
+<dd><p>Dimension of the full ordinary differential equations system of the layer, resulting from
+the Galerkin expansion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.number_of_equations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_equations</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.number_of_equations" title="Link to this definition"></a></dt>
+<dd><p>Number of partial differential equations in the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.other_fields">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">other_fields</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.other_fields" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of dynamical fields of other layers, i.e. the fields whose time
+evolution is provided by the partial differential equations of other layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.field.Field" title="layercake.variables.field.Field"><em>Field</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.other_fields_in_lhs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">other_fields_in_lhs</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.other_fields_in_lhs" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of dynamical fields of other layers present in the LHS of the layer’s equations,
+i.e. the fields whose time evolution is provided by the partial differential equations of other layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.field.Field" title="layercake.variables.field.Field"><em>Field</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.parameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.parameters" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of parameters of the layer, i.e. the explicit parameters
+appearing in the partial differential equations of the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.parameters_symbols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters_symbols</span></span><a class="headerlink" href="#layercake.bakery.layers.Layer.parameters_symbols" title="Link to this definition"></a></dt>
+<dd><p>List of parameter’s symbols present in the layer
+partial differential equations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.show_latex">
+<span class="sig-name descname"><span class="pre">show_latex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enclose_lhs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first_lhs_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first_rhs_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/layers.html#Layer.show_latex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.layers.Layer.show_latex" title="Link to this definition"></a></dt>
+<dd><p>Show the LaTeX string representing the layer’s equations mathematically rendered in a window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enclose_lhs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to enclose the left-hand side term of the equations inside parenthesis.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>drop_first_lhs_char</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop the first two character of the left-hand side latex string of the equations.
+Useful to drop the sign in front of it.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>drop_first_rhs_char</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop the first two character of the right-hand side latex string of the equations.
+Useful to drop the sign in front of it.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.layers.Layer.to_latex">
+<span class="sig-name descname"><span class="pre">to_latex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enclose_lhs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first_lhs_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first_rhs_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/layers.html#Layer.to_latex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.layers.Layer.to_latex" title="Link to this definition"></a></dt>
+<dd><p>Generate the LaTeX strings representing the layer’s equations mathematically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enclose_lhs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to enclose the left-hand side term of the equations inside parenthesis.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>drop_first_lhs_char</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop the first two character of the left-hand side latex string of the equations.
+Useful to drop the sign in front of it.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>drop_first_rhs_char</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop the first two character of the right-hand side latex string of the equations.
+Useful to drop the sign in front of it.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The LaTeX strings representing the layer’s equations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="cake-definition-module">
+<span id="module-layercake.bakery.cake"></span><h2>Cake definition module<a class="headerlink" href="#cake-definition-module" title="Link to this heading"></a></h2>
+<p>This module defines the cake object, i.e. the collection of stacked layers
+(represented by <a class="reference internal" href="#layercake.bakery.layers.Layer" title="layercake.bakery.layers.Layer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Layer</span></code></a> objects) of a given fluid/media of the system at hand.
+A cake is thus a representation of a layered system defined by the user.
+It also computes and includes the ordinary differential equations representation of the
+partial differential equations contained in the layers, when projected on a given basis (Galerkin procedure).</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.bakery.cake.</span></span><span class="sig-name descname"><span class="pre">Cake</span></span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class to gather layers of a given fluid/media of the system at hand.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.layers">
+<span class="sig-name descname"><span class="pre">layers</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.layers" title="Link to this definition"></a></dt>
+<dd><p>A list of the layer objects included in the cake.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="#layercake.bakery.layers.Layer" title="layercake.bakery.layers.Layer"><em>Layer</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.add_layer">
+<span class="sig-name descname"><span class="pre">add_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.add_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.add_layer" title="Link to this definition"></a></dt>
+<dd><p>Add a layer object to the cake.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layer</strong> (<a class="reference internal" href="#layercake.bakery.layers.Layer" title="layercake.bakery.layers.Layer"><em>Layer</em></a>) – Layer object to add to the cake.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.compute_tendencies">
+<span class="sig-name descname"><span class="pre">compute_tendencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'python'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_symbolic_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.compute_tendencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.compute_tendencies" title="Link to this definition"></a></dt>
+<dd><p>Function handling the tendencies tensor to create a tendencies function for the whole cake.
+Returns the tendencies function <span class="math notranslate nohighlight">\(\boldsymbol{f}\)</span> determining the model’s ordinary differential
+equations:</p>
+<div class="math notranslate nohighlight">
+\[\dot{\boldsymbol{x}} = \boldsymbol{f}(\boldsymbol{x})\]</div>
+<p>It returns also the linearized tendencies
+<span class="math notranslate nohighlight">\(\boldsymbol{\mathrm{J}} \equiv \boldsymbol{\mathrm{D}f} = \frac{\partial \boldsymbol{f}}{\partial \boldsymbol{x}}\)</span>
+(Jacobian matrix).</p>
+<p>Depending on whether the tendencies tensor is symbolic or numerical, it will return either
+<a class="reference external" href="https://numba.pydata.org/">Numbafied</a> callable for the functions <span class="math notranslate nohighlight">\(\boldsymbol{f}\)</span> and <span class="math notranslate nohighlight">\(J\)</span>,
+or list of strings defining each tendency in a computing language selected by the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – String defining in which computing language the tendencies lists must be returned.
+Currently, it can be <cite>‘python’</cite>, <cite>‘fortran’</cite> or <cite>‘julia</cite>’.
+Default to <cite>‘python’</cite>.</p></li>
+<li><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Additional language translation mapping provided by the user, mapping replacements for converting
+Sympy symbolic output strings to the target language.</p></li>
+<li><p><strong>force_symbolic_output</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Force the return of symbolic tendencies, even if the tensor is numerical.
+Useful to use the results with another language, or to save it in plain text.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>f</strong> (<em>callable or list(str), list(Symbol)</em>) – If the tendencies tensor is numerical, the numba-jitted tendencies function.
+If the tendencies tensor is symbolic, or if <cite>force_symbolic</cite> is <cite>True</cite>, the list of tendencies string in the selected target language,
+along with the list of parameters appearing in them.</p></li>
+<li><p><strong>Df</strong> (<em>callable or list(str), list(Symbol)</em>) – If the tendencies tensor is numerical, the numba-jitted linearized tendencies function.
+If the tendencies tensor is symbolic, or if <cite>force_symbolic</cite> is <cite>True</cite>, the list of linearized tendencies string in the selected target language,
+along with the list of parameters appearing in them.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.compute_tensor">
+<span class="sig-name descname"><span class="pre">compute_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numerical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_inner_products</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_inner_products_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitutions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_subs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters_subs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs_inversion_in_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.compute_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.compute_tensor" title="Link to this definition"></a></dt>
+<dd><p>Compute the tensor of the symbolic or numerical representation of the ordinary differential
+equations tendencies of all the layers.
+Arguments are passed to the layer <code class="xref py py-meth docutils literal notranslate"><span class="pre">compute_tensor()</span></code> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numerical</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to compute the numerical or the symbolic tensor.
+Default to <cite>True</cite> (numerical tensor as output).</p></li>
+<li><p><strong>compute_inner_products</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the inner products tensors of the layer equations’ terms must be computed first.
+Default to <cite>False</cite>. Please note that if the inner products are not computed firsthand, the tensor computation
+will fail.</p></li>
+<li><p><strong>compute_inner_products_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Arguments to pass to the computation of the inner products.</p></li>
+<li><p><strong>substitutions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em><em>, </em><em>optional</em>) – List of 2-tuples containing extra symbolic substitutions to be made at the end of the tensor computation.
+Only applies for the symbolic tendencies.
+The 2-tuples contain first a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p></li>
+<li><p><strong>basis_subs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to substitute the parameters appearing in the definition of the basis of functions by
+their numerical value.
+Only applies for the symbolic tendencies.
+Default to <cite>False</cite>.</p></li>
+<li><p><strong>parameters_subs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em><em>, </em><em>optional</em>) – List of model’s parameters to substitute in the symbolic tendencies’ tensor.
+Only applies for the symbolic tendencies.</p></li>
+<li><p><strong>lhs_inversion_in_layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Try to inverse the LHS matrix and take the matricial product with the RHS in each layer if possible. Default to <cite>True</cite>.
+If <cite>False</cite>, it forces the inversion of the LHS at the cake level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.fields">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fields</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.fields" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of dynamical fields of the cake, i.e. the fields whose time
+evolution is provided by the partial differential equations of all the layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.field.Field" title="layercake.variables.field.Field"><em>Field</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.fields_tensor_extent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fields_tensor_extent</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.fields_tensor_extent" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of 2-tuples giving for each dynamical field of the model its entries range in the
+tensor of tendencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.jacobian_tensor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">jacobian_tensor</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.jacobian_tensor" title="Link to this definition"></a></dt>
+<dd><p>Return the tensor
+representing the Jacobian matrix of the ordinary differential equations tendencies of the whole cake.
+Can be either a numerical or a symbolic representation, depending on the user’s choice for the inner products.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://sparse.pydata.org/en/stable/api/COO/#sparse.COO" title="(in sparse v0.0.0)">sparse.COO</a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.maximum_rank">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maximum_rank</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.maximum_rank" title="Link to this definition"></a></dt>
+<dd><p>Maximum over the ranks of the equations over all the layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.ndim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.ndim" title="Link to this definition"></a></dt>
+<dd><p>Dimension of the full ordinary differential equations system of the cake, resulting from
+the Galerkin expansions of the layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.number_of_equations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_equations</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.number_of_equations" title="Link to this definition"></a></dt>
+<dd><p>Total number of equations composing the cake.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.number_of_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_layers</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.number_of_layers" title="Link to this definition"></a></dt>
+<dd><p>Number of layers in the cake.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.parameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.parameters" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of parameters of the cake, i.e. the explicit parameters
+appearing in the partial differential equations of all the layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.parameters_symbols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters_symbols</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.parameters_symbols" title="Link to this definition"></a></dt>
+<dd><p>List of parameter’s symbols present in all the layers’
+partial differential equations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.print_jacobian_tensor">
+<span class="sig-name descname"><span class="pre">print_jacobian_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numerics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.print_jacobian_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.print_jacobian_tensor" title="Link to this definition"></a></dt>
+<dd><p>Routine to print the Jacobian tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the name to print beside the values of the tensor. Default to <cite>TensorJacobian</cite>.</p></li>
+<li><p><strong>to_numerics</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Try to output a numerical value for the tensor entries, even if the tensor is a
+symbolic one.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.print_jacobian_tensor_to_file">
+<span class="sig-name descname"><span class="pre">print_jacobian_tensor_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numerics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.print_jacobian_tensor_to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.print_jacobian_tensor_to_file" title="Link to this definition"></a></dt>
+<dd><p>Routine to print the Jacobian tensor to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The filename where to print the tensor.</p></li>
+<li><p><strong>tensor_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the name to print beside the values of the tensor. Default to <cite>TensorJacobian</cite>.</p></li>
+<li><p><strong>to_numerics</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Try to output a numerical value for the tensor entries, even if the tensor is a
+symbolic one.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.print_tensor">
+<span class="sig-name descname"><span class="pre">print_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numerics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.print_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.print_tensor" title="Link to this definition"></a></dt>
+<dd><p>Routine to print the tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the name to print beside the values of the tensor. Default to <cite>Tensor</cite>.</p></li>
+<li><p><strong>to_numerics</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Try to output a numerical value for the tensor entries, even if the tensor is a
+symbolic one.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.print_tensor_to_file">
+<span class="sig-name descname"><span class="pre">print_tensor_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_numerics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.print_tensor_to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.print_tensor_to_file" title="Link to this definition"></a></dt>
+<dd><p>Routine to print the tensor to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The filename where to print the tensor.</p></li>
+<li><p><strong>tensor_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the name to print beside the values of the tensor. Default to <cite>Tensor</cite>.</p></li>
+<li><p><strong>to_numerics</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Try to output a numerical value for the tensor entries, even if the tensor is a
+symbolic one.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.show_latex">
+<span class="sig-name descname"><span class="pre">show_latex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enclose_lhs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first_lhs_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first_rhs_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.show_latex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.show_latex" title="Link to this definition"></a></dt>
+<dd><p>Show the LaTeX string representing the cake’s equations mathematically rendered in a window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enclose_lhs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to enclose the left-hand side term of the equations inside parenthesis.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>drop_first_lhs_char</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop the first two character of the left-hand side latex string of the equations.
+Useful to drop the sign in front of it.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>drop_first_rhs_char</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop the first two character of the right-hand side latex string of the equations.
+Useful to drop the sign in front of it.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.simplify_tensor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">simplify_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.simplify_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.simplify_tensor" title="Link to this definition"></a></dt>
+<dd><p>Routine that simplifies the component of a tensor <span class="math notranslate nohighlight">\(\mathcal{T}\)</span>.
+For each index <span class="math notranslate nohighlight">\(i\)</span>, it upper-triangularizes the
+tensor <span class="math notranslate nohighlight">\(\mathcal{T}_{i,\ldots}\)</span> for all the subsequent indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor</strong> (<a class="reference external" href="https://sparse.pydata.org/en/stable/api/COO/#sparse.COO" title="(in sparse v0.0.0)"><em>sparse.COO</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a>) – The tensor to simplify.</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – If the absolute value of  a tensor entry is lower than this threshold value,
+then this value is removed from the tensor. No threshold is applied if not set.
+Only applies to numerical tensors.
+Useful to filter small spurious results of numerical integrations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The upper-triangularized tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://sparse.pydata.org/en/stable/api/COO/#sparse.COO" title="(in sparse v0.0.0)">sparse.COO</a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.tensor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tensor</span></span><a class="headerlink" href="#layercake.bakery.cake.Cake.tensor" title="Link to this definition"></a></dt>
+<dd><p>Return the tensor
+representing the ordinary differential equations tendencies of the whole cake.
+Can be either a numerical or a symbolic representation, depending on the user’s choice for the inner products.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://sparse.pydata.org/en/stable/api/COO/#sparse.COO" title="(in sparse v0.0.0)">sparse.COO</a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.bakery.cake.Cake.to_latex">
+<span class="sig-name descname"><span class="pre">to_latex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enclose_lhs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first_lhs_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first_rhs_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/bakery/cake.html#Cake.to_latex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.bakery.cake.Cake.to_latex" title="Link to this definition"></a></dt>
+<dd><p>Generate the LaTeX strings representing the cake’s equations mathematically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enclose_lhs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to enclose the left-hand side term of the equations inside parenthesis.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>drop_first_lhs_char</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop the first two character of the left-hand side latex string of the equations.
+Useful to drop the sign in front of it.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>drop_first_rhs_char</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop the first two character of the right-hand side latex string of the equations.
+Useful to drop the sign in front of it.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The LaTeX strings representing the cake’s equations.
+It is a dictionary with one entry per cake’s layer.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>))</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basis.html" class="btn btn-neutral float-left" title="Basis module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="arithmetic.html" class="btn btn-neutral float-right" title="Arithmetic module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

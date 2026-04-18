@@ -1,0 +1,721 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formatters module &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Basis module" href="basis.html" />
+    <link rel="prev" title="Inner products module" href="inner_products.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../references.html">Code References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="variables.html">Variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">General utility module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inner_products.html">Inner products module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Formatters module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#base-classes-for-formatting-symbolic-equations-output">Base classes for formatting symbolic equations output</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description-of-the-classes">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.formatters.base.EquationFormatter"><code class="docutils literal notranslate"><span class="pre">EquationFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.base.EquationFormatter.lang_translation"><code class="docutils literal notranslate"><span class="pre">EquationFormatter.lang_translation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.base.EquationFormatter.index_offset"><code class="docutils literal notranslate"><span class="pre">EquationFormatter.index_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.base.EquationFormatter.__call__"><code class="docutils literal notranslate"><span class="pre">EquationFormatter.__call__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.base.EquationFormatter.closing_character"><code class="docutils literal notranslate"><span class="pre">EquationFormatter.closing_character</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.base.EquationFormatter.opening_character"><code class="docutils literal notranslate"><span class="pre">EquationFormatter.opening_character</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.formatters.base.JacobianEquationFormatter"><code class="docutils literal notranslate"><span class="pre">JacobianEquationFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.base.JacobianEquationFormatter.lang_translation"><code class="docutils literal notranslate"><span class="pre">JacobianEquationFormatter.lang_translation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.base.JacobianEquationFormatter.index_offset"><code class="docutils literal notranslate"><span class="pre">JacobianEquationFormatter.index_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.base.JacobianEquationFormatter.__call__"><code class="docutils literal notranslate"><span class="pre">JacobianEquationFormatter.__call__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#classes-for-formatting-symbolic-equations-output-in-fortran">Classes for formatting symbolic equations output in Fortran</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.formatters.fortran.FortranEquationFormatter"><code class="docutils literal notranslate"><span class="pre">FortranEquationFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.fortran.FortranEquationFormatter.lang_translation"><code class="docutils literal notranslate"><span class="pre">FortranEquationFormatter.lang_translation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.fortran.FortranEquationFormatter.index_offset"><code class="docutils literal notranslate"><span class="pre">FortranEquationFormatter.index_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.fortran.FortranEquationFormatter.closing_character"><code class="docutils literal notranslate"><span class="pre">FortranEquationFormatter.closing_character</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.fortran.FortranEquationFormatter.opening_character"><code class="docutils literal notranslate"><span class="pre">FortranEquationFormatter.opening_character</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter"><code class="docutils literal notranslate"><span class="pre">FortranJacobianEquationFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter.lang_translation"><code class="docutils literal notranslate"><span class="pre">FortranJacobianEquationFormatter.lang_translation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter.index_offset"><code class="docutils literal notranslate"><span class="pre">FortranJacobianEquationFormatter.index_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter.closing_character"><code class="docutils literal notranslate"><span class="pre">FortranJacobianEquationFormatter.closing_character</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter.opening_character"><code class="docutils literal notranslate"><span class="pre">FortranJacobianEquationFormatter.opening_character</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#classes-for-formatting-symbolic-equations-output-in-python">Classes for formatting symbolic equations output in Python</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.formatters.python.PythonEquationFormatter"><code class="docutils literal notranslate"><span class="pre">PythonEquationFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.python.PythonEquationFormatter.lang_translation"><code class="docutils literal notranslate"><span class="pre">PythonEquationFormatter.lang_translation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.python.PythonEquationFormatter.index_offset"><code class="docutils literal notranslate"><span class="pre">PythonEquationFormatter.index_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.python.PythonEquationFormatter.closing_character"><code class="docutils literal notranslate"><span class="pre">PythonEquationFormatter.closing_character</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.python.PythonEquationFormatter.opening_character"><code class="docutils literal notranslate"><span class="pre">PythonEquationFormatter.opening_character</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.formatters.python.PythonJacobianEquationFormatter"><code class="docutils literal notranslate"><span class="pre">PythonJacobianEquationFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.python.PythonJacobianEquationFormatter.lang_translation"><code class="docutils literal notranslate"><span class="pre">PythonJacobianEquationFormatter.lang_translation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.python.PythonJacobianEquationFormatter.index_offset"><code class="docutils literal notranslate"><span class="pre">PythonJacobianEquationFormatter.index_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.python.PythonJacobianEquationFormatter.closing_character"><code class="docutils literal notranslate"><span class="pre">PythonJacobianEquationFormatter.closing_character</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.python.PythonJacobianEquationFormatter.opening_character"><code class="docutils literal notranslate"><span class="pre">PythonJacobianEquationFormatter.opening_character</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#classes-for-formatting-symbolic-equations-output-in-julia">Classes for formatting symbolic equations output in Julia</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.formatters.julia.JuliaEquationFormatter"><code class="docutils literal notranslate"><span class="pre">JuliaEquationFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.julia.JuliaEquationFormatter.lang_translation"><code class="docutils literal notranslate"><span class="pre">JuliaEquationFormatter.lang_translation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.julia.JuliaEquationFormatter.index_offset"><code class="docutils literal notranslate"><span class="pre">JuliaEquationFormatter.index_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.julia.JuliaEquationFormatter.closing_character"><code class="docutils literal notranslate"><span class="pre">JuliaEquationFormatter.closing_character</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.julia.JuliaEquationFormatter.opening_character"><code class="docutils literal notranslate"><span class="pre">JuliaEquationFormatter.opening_character</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter"><code class="docutils literal notranslate"><span class="pre">JuliaJacobianEquationFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter.lang_translation"><code class="docutils literal notranslate"><span class="pre">JuliaJacobianEquationFormatter.lang_translation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter.index_offset"><code class="docutils literal notranslate"><span class="pre">JuliaJacobianEquationFormatter.index_offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter.closing_character"><code class="docutils literal notranslate"><span class="pre">JuliaJacobianEquationFormatter.closing_character</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter.opening_character"><code class="docutils literal notranslate"><span class="pre">JuliaJacobianEquationFormatter.opening_character</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="basis.html">Basis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bakery.html">The Bakery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arithmetic.html">Arithmetic module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../references.html">Code References</a></li>
+      <li class="breadcrumb-item active">Formatters module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/files/technical/formatters.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="formatters-module">
+<h1>Formatters module<a class="headerlink" href="#formatters-module" title="Link to this heading"></a></h1>
+<p>This module contains all the languages formatters used to convert symbolic expressions
+into computing language expressions.</p>
+<section id="base-classes-for-formatting-symbolic-equations-output">
+<span id="module-layercake.formatters.base"></span><h2>Base classes for formatting symbolic equations output<a class="headerlink" href="#base-classes-for-formatting-symbolic-equations-output" title="Link to this heading"></a></h2>
+<p>Defines base classes to format tendencies and Jacobian symbolic equations output.</p>
+<section id="description-of-the-classes">
+<h3>Description of the classes<a class="headerlink" href="#description-of-the-classes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.formatters.base.EquationFormatter" title="layercake.formatters.base.EquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationFormatter</span></code></a>: Base class for symbolic equations formatting.</p></li>
+<li><p><a class="reference internal" href="#layercake.formatters.base.JacobianEquationFormatter" title="layercake.formatters.base.JacobianEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">JacobianEquationFormatter</span></code></a>: Base class for symbolic Jacobian equations formatting.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.formatters.base.EquationFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.formatters.base.</span></span><span class="sig-name descname"><span class="pre">EquationFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/base.html#EquationFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.base.EquationFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Base class for symbolic equations formatting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the target language.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.base.EquationFormatter.lang_translation">
+<span class="sig-name descname"><span class="pre">lang_translation</span></span><a class="headerlink" href="#layercake.formatters.base.EquationFormatter.lang_translation" title="Link to this definition"></a></dt>
+<dd><p>Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the target language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.base.EquationFormatter.index_offset">
+<span class="sig-name descname"><span class="pre">index_offset</span></span><a class="headerlink" href="#layercake.formatters.base.EquationFormatter.index_offset" title="Link to this definition"></a></dt>
+<dd><p>Number that accesses the first element in an array. Defaults to 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.formatters.base.EquationFormatter.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'U'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tendencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'F'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/base.html#EquationFormatter.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.base.EquationFormatter.__call__" title="Link to this definition"></a></dt>
+<dd><p>Convert a model symbolic tendencies terms tensor to a list of symbolic equations in
+string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a>) – Symbolic tendencies terms tensor to convert.</p></li>
+<li><p><strong>variable</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the state variable to use for the output equations strings.
+Default to <cite>‘U’</cite>.</p></li>
+<li><p><strong>tendencies</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the tendencies variable to use for the output equations strings.
+Default to <cite>‘F</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.base.EquationFormatter.closing_character">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closing_character</span></span><a class="headerlink" href="#layercake.formatters.base.EquationFormatter.closing_character" title="Link to this definition"></a></dt>
+<dd><p>Character closing the arrays specification index in the target language.
+Must be defined in the subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.base.EquationFormatter.opening_character">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">opening_character</span></span><a class="headerlink" href="#layercake.formatters.base.EquationFormatter.opening_character" title="Link to this definition"></a></dt>
+<dd><p>Character opening the arrays specification index in the target language.
+Must be defined in the subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.formatters.base.JacobianEquationFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.formatters.base.</span></span><span class="sig-name descname"><span class="pre">JacobianEquationFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/base.html#JacobianEquationFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.base.JacobianEquationFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.formatters.base.EquationFormatter" title="layercake.formatters.base.EquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationFormatter</span></code></a></p>
+<p>Base class for symbolic Jacobian equations formatting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the target language.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.base.JacobianEquationFormatter.lang_translation">
+<span class="sig-name descname"><span class="pre">lang_translation</span></span><a class="headerlink" href="#layercake.formatters.base.JacobianEquationFormatter.lang_translation" title="Link to this definition"></a></dt>
+<dd><p>Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the target language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.base.JacobianEquationFormatter.index_offset">
+<span class="sig-name descname"><span class="pre">index_offset</span></span><a class="headerlink" href="#layercake.formatters.base.JacobianEquationFormatter.index_offset" title="Link to this definition"></a></dt>
+<dd><p>Number that accesses the first element in an array. Defaults to 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.formatters.base.JacobianEquationFormatter.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'U'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tendencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'J'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/base.html#JacobianEquationFormatter.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.base.JacobianEquationFormatter.__call__" title="Link to this definition"></a></dt>
+<dd><p>Convert a model Jacobian symbolic tendencies terms tensor to a list of symbolic equations in
+string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a>) – Jacobian symbolic tendencies terms tensor to convert.</p></li>
+<li><p><strong>variable</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the state variable to use for the output equations strings.
+Default to <cite>‘U’</cite>.</p></li>
+<li><p><strong>tendencies</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the tendencies variable to use for the output equations strings.
+Default to <cite>‘F</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="classes-for-formatting-symbolic-equations-output-in-fortran">
+<span id="module-layercake.formatters.fortran"></span><h2>Classes for formatting symbolic equations output in Fortran<a class="headerlink" href="#classes-for-formatting-symbolic-equations-output-in-fortran" title="Link to this heading"></a></h2>
+<p>Defines classes to format tendencies and Jacobian symbolic equations output in Fortran.</p>
+<section id="id1">
+<h3>Description of the classes<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.formatters.fortran.FortranEquationFormatter" title="layercake.formatters.fortran.FortranEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FortranEquationFormatter</span></code></a>: Class for symbolic equations formatting in Fortran.</p></li>
+<li><p><a class="reference internal" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter" title="layercake.formatters.fortran.FortranJacobianEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FortranJacobianEquationFormatter</span></code></a>: Class for symbolic Jacobian equations formatting in Fortran.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranEquationFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.formatters.fortran.</span></span><span class="sig-name descname"><span class="pre">FortranEquationFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/fortran.html#FortranEquationFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.fortran.FortranEquationFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.formatters.base.EquationFormatter" title="layercake.formatters.base.EquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationFormatter</span></code></a></p>
+<p>Class for symbolic equations formatting in Fortran.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Fortran language.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranEquationFormatter.lang_translation">
+<span class="sig-name descname"><span class="pre">lang_translation</span></span><a class="headerlink" href="#layercake.formatters.fortran.FortranEquationFormatter.lang_translation" title="Link to this definition"></a></dt>
+<dd><p>Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Fortran language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranEquationFormatter.index_offset">
+<span class="sig-name descname"><span class="pre">index_offset</span></span><a class="headerlink" href="#layercake.formatters.fortran.FortranEquationFormatter.index_offset" title="Link to this definition"></a></dt>
+<dd><p>Number that accesses the first element in an array. In Fortran the base index is 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranEquationFormatter.closing_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closing_character</span></span><a class="headerlink" href="#layercake.formatters.fortran.FortranEquationFormatter.closing_character" title="Link to this definition"></a></dt>
+<dd><p>Character closing the arrays specification index in the Fortran language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranEquationFormatter.opening_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">opening_character</span></span><a class="headerlink" href="#layercake.formatters.fortran.FortranEquationFormatter.opening_character" title="Link to this definition"></a></dt>
+<dd><p>Character opening the arrays specification index in the Fortran language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranJacobianEquationFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.formatters.fortran.</span></span><span class="sig-name descname"><span class="pre">FortranJacobianEquationFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/fortran.html#FortranJacobianEquationFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.formatters.base.JacobianEquationFormatter" title="layercake.formatters.base.JacobianEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">JacobianEquationFormatter</span></code></a></p>
+<p>Class for symbolic Jacobian equations formatting in Fortran.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Fortran language.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranJacobianEquationFormatter.lang_translation">
+<span class="sig-name descname"><span class="pre">lang_translation</span></span><a class="headerlink" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter.lang_translation" title="Link to this definition"></a></dt>
+<dd><p>Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Fortran language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranJacobianEquationFormatter.index_offset">
+<span class="sig-name descname"><span class="pre">index_offset</span></span><a class="headerlink" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter.index_offset" title="Link to this definition"></a></dt>
+<dd><p>Number that accesses the first element in an array. In Fortran the base index is 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranJacobianEquationFormatter.closing_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closing_character</span></span><a class="headerlink" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter.closing_character" title="Link to this definition"></a></dt>
+<dd><p>Character closing the arrays specification index in the Fortran language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.fortran.FortranJacobianEquationFormatter.opening_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">opening_character</span></span><a class="headerlink" href="#layercake.formatters.fortran.FortranJacobianEquationFormatter.opening_character" title="Link to this definition"></a></dt>
+<dd><p>Character opening the arrays specification index in the Fortran language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="classes-for-formatting-symbolic-equations-output-in-python">
+<span id="module-layercake.formatters.python"></span><h2>Classes for formatting symbolic equations output in Python<a class="headerlink" href="#classes-for-formatting-symbolic-equations-output-in-python" title="Link to this heading"></a></h2>
+<p>Defines classes to format tendencies and Jacobian symbolic equations output in Python.</p>
+<section id="id2">
+<h3>Description of the classes<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.formatters.python.PythonEquationFormatter" title="layercake.formatters.python.PythonEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">PythonEquationFormatter</span></code></a>: Class for symbolic equations formatting in Python.</p></li>
+<li><p><a class="reference internal" href="#layercake.formatters.python.PythonJacobianEquationFormatter" title="layercake.formatters.python.PythonJacobianEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">PythonJacobianEquationFormatter</span></code></a>: Class for symbolic Jacobian equations formatting in Python.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonEquationFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.formatters.python.</span></span><span class="sig-name descname"><span class="pre">PythonEquationFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/python.html#PythonEquationFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.python.PythonEquationFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.formatters.base.EquationFormatter" title="layercake.formatters.base.EquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationFormatter</span></code></a></p>
+<p>Class for symbolic equations formatting in Python.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Python language.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonEquationFormatter.lang_translation">
+<span class="sig-name descname"><span class="pre">lang_translation</span></span><a class="headerlink" href="#layercake.formatters.python.PythonEquationFormatter.lang_translation" title="Link to this definition"></a></dt>
+<dd><p>Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Python language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonEquationFormatter.index_offset">
+<span class="sig-name descname"><span class="pre">index_offset</span></span><a class="headerlink" href="#layercake.formatters.python.PythonEquationFormatter.index_offset" title="Link to this definition"></a></dt>
+<dd><p>Number that accesses the first element in an array. In Python the index base is 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonEquationFormatter.closing_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closing_character</span></span><a class="headerlink" href="#layercake.formatters.python.PythonEquationFormatter.closing_character" title="Link to this definition"></a></dt>
+<dd><p>Character closing the arrays specification index in the Python language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonEquationFormatter.opening_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">opening_character</span></span><a class="headerlink" href="#layercake.formatters.python.PythonEquationFormatter.opening_character" title="Link to this definition"></a></dt>
+<dd><p>Character opening the arrays specification index in the Python language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonJacobianEquationFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.formatters.python.</span></span><span class="sig-name descname"><span class="pre">PythonJacobianEquationFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/python.html#PythonJacobianEquationFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.python.PythonJacobianEquationFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.formatters.base.JacobianEquationFormatter" title="layercake.formatters.base.JacobianEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">JacobianEquationFormatter</span></code></a></p>
+<p>Class for symbolic Jacobian equations formatting in Python.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Python language.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonJacobianEquationFormatter.lang_translation">
+<span class="sig-name descname"><span class="pre">lang_translation</span></span><a class="headerlink" href="#layercake.formatters.python.PythonJacobianEquationFormatter.lang_translation" title="Link to this definition"></a></dt>
+<dd><p>Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Python language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonJacobianEquationFormatter.index_offset">
+<span class="sig-name descname"><span class="pre">index_offset</span></span><a class="headerlink" href="#layercake.formatters.python.PythonJacobianEquationFormatter.index_offset" title="Link to this definition"></a></dt>
+<dd><p>Number that accesses the first element in an array. In Python the index base is 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonJacobianEquationFormatter.closing_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closing_character</span></span><a class="headerlink" href="#layercake.formatters.python.PythonJacobianEquationFormatter.closing_character" title="Link to this definition"></a></dt>
+<dd><p>Character closing the arrays specification index in the Python language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.python.PythonJacobianEquationFormatter.opening_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">opening_character</span></span><a class="headerlink" href="#layercake.formatters.python.PythonJacobianEquationFormatter.opening_character" title="Link to this definition"></a></dt>
+<dd><p>Character opening the arrays specification index in the Python language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="classes-for-formatting-symbolic-equations-output-in-julia">
+<span id="module-layercake.formatters.julia"></span><h2>Classes for formatting symbolic equations output in Julia<a class="headerlink" href="#classes-for-formatting-symbolic-equations-output-in-julia" title="Link to this heading"></a></h2>
+<p>Defines classes to format tendencies and Jacobian symbolic equations output in Julia.</p>
+<section id="id3">
+<h3>Description of the classes<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.formatters.julia.JuliaEquationFormatter" title="layercake.formatters.julia.JuliaEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">JuliaEquationFormatter</span></code></a>: Class for symbolic equations formatting in Julia.</p></li>
+<li><p><a class="reference internal" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter" title="layercake.formatters.julia.JuliaJacobianEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">JuliaJacobianEquationFormatter</span></code></a>: Class for symbolic Jacobian equations formatting in Julia.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaEquationFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.formatters.julia.</span></span><span class="sig-name descname"><span class="pre">JuliaEquationFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/julia.html#JuliaEquationFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.julia.JuliaEquationFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.formatters.base.EquationFormatter" title="layercake.formatters.base.EquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationFormatter</span></code></a></p>
+<p>Class for symbolic equations formatting in Julia.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Julia language.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaEquationFormatter.lang_translation">
+<span class="sig-name descname"><span class="pre">lang_translation</span></span><a class="headerlink" href="#layercake.formatters.julia.JuliaEquationFormatter.lang_translation" title="Link to this definition"></a></dt>
+<dd><p>Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Julia language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaEquationFormatter.index_offset">
+<span class="sig-name descname"><span class="pre">index_offset</span></span><a class="headerlink" href="#layercake.formatters.julia.JuliaEquationFormatter.index_offset" title="Link to this definition"></a></dt>
+<dd><p>Number that accesses the first element in an array. In Julia the index base is 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaEquationFormatter.closing_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closing_character</span></span><a class="headerlink" href="#layercake.formatters.julia.JuliaEquationFormatter.closing_character" title="Link to this definition"></a></dt>
+<dd><p>Character closing the arrays specification index in the Julia language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaEquationFormatter.opening_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">opening_character</span></span><a class="headerlink" href="#layercake.formatters.julia.JuliaEquationFormatter.opening_character" title="Link to this definition"></a></dt>
+<dd><p>Character opening the arrays specification index in the Julia language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaJacobianEquationFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.formatters.julia.</span></span><span class="sig-name descname"><span class="pre">JuliaJacobianEquationFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/formatters/julia.html#JuliaJacobianEquationFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.formatters.base.JacobianEquationFormatter" title="layercake.formatters.base.JacobianEquationFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">JacobianEquationFormatter</span></code></a></p>
+<p>Class for symbolic Jacobian equations formatting in Julia.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lang_translation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Julia language.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaJacobianEquationFormatter.lang_translation">
+<span class="sig-name descname"><span class="pre">lang_translation</span></span><a class="headerlink" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter.lang_translation" title="Link to this definition"></a></dt>
+<dd><p>Language translation mapping dictionary, mapping replacements for converting
+Sympy symbolic output strings to the Julia language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaJacobianEquationFormatter.index_offset">
+<span class="sig-name descname"><span class="pre">index_offset</span></span><a class="headerlink" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter.index_offset" title="Link to this definition"></a></dt>
+<dd><p>Number that accesses the first element in an array. In Julia the index base is 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaJacobianEquationFormatter.closing_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closing_character</span></span><a class="headerlink" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter.closing_character" title="Link to this definition"></a></dt>
+<dd><p>Character closing the arrays specification index in the Julia language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.formatters.julia.JuliaJacobianEquationFormatter.opening_character">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">opening_character</span></span><a class="headerlink" href="#layercake.formatters.julia.JuliaJacobianEquationFormatter.opening_character" title="Link to this definition"></a></dt>
+<dd><p>Character opening the arrays specification index in the Julia language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="inner_products.html" class="btn btn-neutral float-left" title="Inner products module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="basis.html" class="btn btn-neutral float-right" title="Basis module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

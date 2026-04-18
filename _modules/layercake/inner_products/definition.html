@@ -1,0 +1,339 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.inner_products.definition &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.inner_products.definition</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.inner_products.definition</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inner products definition module</span>
+<span class="sd">    ================================</span>
+
+<span class="sd">    Module containing classes to define the `inner products`_ used by the model.</span>
+
+<span class="sd">    .. _inner products: https://en.wikipedia.org/wiki/Inner_product_space</span>
+
+<span class="sd">    Main classes</span>
+<span class="sd">    ------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="c1"># from sympy.simplify.fu import TR8, TR10  # old qgs optimizer functions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">trigsimp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">Integral</span><span class="p">,</span> <span class="n">conjugate</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">exit_after</span>
+
+
+<div class="viewcode-block" id="InnerProductDefinition">
+<a class="viewcode-back" href="../../../files/technical/inner_products.html#layercake.inner_products.definition.InnerProductDefinition">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InnerProductDefinition</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class to define the model&#39;s basis inner products.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="InnerProductDefinition.inner_product">
+<a class="viewcode-back" href="../../../files/technical/inner_products.html#layercake.inner_products.definition.InnerProductDefinition.inner_product">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inner_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">G</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Definition of the inner product :math:`(S, G)`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        S:</span>
+<span class="sd">            Left-hand side function of the product.</span>
+<span class="sd">        G:</span>
+<span class="sd">            Right-hand side function of the product.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        res</span>
+<span class="sd">            The result of the inner product.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="StandardSymbolicInnerProductDefinition">
+<a class="viewcode-back" href="../../../files/technical/inner_products.html#layercake.inner_products.definition.StandardSymbolicInnerProductDefinition">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StandardSymbolicInnerProductDefinition</span><span class="p">(</span><span class="n">InnerProductDefinition</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Standard class to define symbolic inner products using |Sympy|.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coordinate_system: ~systems.CoordinateSystem</span>
+<span class="sd">        Coordinate system on which the basis is defined.</span>
+<span class="sd">    optimizer: None or callable or str, optional</span>
+<span class="sd">        A function to optimize the computation of the integrals or the integrand.</span>
+<span class="sd">        If a string, specifies pre-defined optimizers:</span>
+<span class="sd">        * `&#39;trig&#39;`: Optimizer specifically designed for trigonometric functions.</span>
+<span class="sd">        If `None`, does not optimize.</span>
+<span class="sd">    complex: bool, optional</span>
+<span class="sd">        Whether to compute the inner products with complex conjugate expression</span>
+<span class="sd">        for the second term.</span>
+<span class="sd">        Default to `False`, i.e. real inner products.</span>
+<span class="sd">    kwargs: dict</span>
+<span class="sd">        Specific keywords arguments to pass to the |Sympy| integrals,</span>
+<span class="sd">        see :func:`~sympy.integrals.integrals.integrate` and</span>
+<span class="sd">        :class:`~sympy.integrals.integrals.Integral`.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coordinate_system: ~systems.CoordinateSystem</span>
+<span class="sd">        Coordinate system on which the basis is defined.</span>
+<span class="sd">    complex: bool, optional</span>
+<span class="sd">        Whether to compute the inner products with complex conjugate expression</span>
+<span class="sd">        for the second term.</span>
+<span class="sd">    optimizer: None or callable</span>
+<span class="sd">        A function to optimize the computation of the integrals or the integrand.</span>
+<span class="sd">        If `None`, does not optimize the computation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">symbolic_computation_timeout</span> <span class="o">=</span> <span class="mi">200</span>  <span class="c1"># default value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate_system</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">InnerProductDefinition</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span> <span class="o">=</span> <span class="n">coordinate_system</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">complex</span> <span class="o">=</span> <span class="nb">complex</span>
+
+        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_optimizer</span>
+        <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s1">&#39;trig&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trig_optimizer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+<div class="viewcode-block" id="StandardSymbolicInnerProductDefinition.set_optimizer">
+<a class="viewcode-back" href="../../../files/technical/inner_products.html#layercake.inner_products.definition.StandardSymbolicInnerProductDefinition.set_optimizer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to set the optimizer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        optimizer: callable</span>
+<span class="sd">            A function to optimize the computation of the integrals or the integrand.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_no_optimizer</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">expr</span>
+
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def _trig_optimizer(expr):  # old qgs optimizer</span>
+    <span class="c1">#     return TR10(TR8(expr))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@exit_after</span><span class="p">(</span><span class="n">symbolic_computation_timeout</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fu</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">trigsimp</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fu&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@exit_after</span><span class="p">(</span><span class="n">symbolic_computation_timeout</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_matching</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">trigsimp</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;matching&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@exit_after</span><span class="p">(</span><span class="n">symbolic_computation_timeout</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_old</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">trigsimp</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;old&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_trig_optimizer</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_matching</span><span class="p">(</span><span class="n">expr</span><span class="p">))</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_old</span><span class="p">(</span><span class="n">expr</span><span class="p">))</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_fu</span><span class="p">(</span><span class="n">expr</span><span class="p">))</span>
+
+        <span class="n">measure</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">measure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">measure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1000000000</span><span class="o">+</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">sel_res</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">measure</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">measure</span><span class="p">))]</span>
+        <span class="k">if</span> <span class="n">sel_res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simplification of symbolic expression in integrals: No simplifications &quot;</span>
+                               <span class="sa">f</span><span class="s2">&quot;were achieved in less that </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">symbolic_computation_timeout</span><span class="si">}</span><span class="s2"> seconds !&quot;</span>
+                               <span class="sa">f</span><span class="s2">&quot; Change the &#39;symbolic_computation_timeout&#39; attribute of the inner product&quot;</span>
+                               <span class="sa">f</span><span class="s2">&quot; definition class if you want to try longer computation time.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sel_res</span>
+
+<div class="viewcode-block" id="StandardSymbolicInnerProductDefinition.integrate_over_domain">
+<a class="viewcode-back" href="../../../files/technical/inner_products.html#layercake.inner_products.definition.StandardSymbolicInnerProductDefinition.integrate_over_domain">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">integrate_over_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">symbolic_expr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Definition of the integrals over the spatial domain used by the inner products:</span>
+<span class="sd">        :math:`\\int_a^b\\int_c^d \\, \\mathrm{expr}(x, y) \\, \\mathrm{d} x \\, \\mathrm{d} y`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        expr: ~sympy.core.expr.Expr</span>
+<span class="sd">            The expression to integrate.</span>
+<span class="sd">        symbolic_expr: bool, optional</span>
+<span class="sd">            If `True`, return the integral as a symbolic expression object. Else, return the integral performed symbolically.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ~sympy.core.expr.Expr</span>
+<span class="sd">            The result of the symbolic integration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_symbol</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_symbol</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">extent_u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">extent_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">symbolic_expr</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Integral</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">extent_u</span><span class="p">),</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="o">*</span><span class="n">extent_v</span><span class="p">),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">integrate</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">extent_u</span><span class="p">),</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="o">*</span><span class="n">extent_v</span><span class="p">),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StandardSymbolicInnerProductDefinition.inner_product">
+<a class="viewcode-back" href="../../../files/technical/inner_products.html#layercake.inner_products.definition.StandardSymbolicInnerProductDefinition.inner_product">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inner_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">symbolic_expr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">integrand</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function defining the inner product to be computed symbolically:</span>
+<span class="sd">        :math:`(S, G) = \\left(1 / \\mathcal{N}\\right) \\int_a^b\\int_c^d S(x,y)\\, G(x,y)\\, \\mathrm{d} x \\, \\mathrm{d} y` where</span>
+<span class="sd">        :math:`\\mathcal{N} = (b-a) \\, (d-c)` is the norm of the integrals.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        S: ~sympy.core.expr.Expr</span>
+<span class="sd">            Left-hand side function of the product.</span>
+<span class="sd">        G: ~sympy.core.expr.Expr</span>
+<span class="sd">            Right-hand side function of the product.</span>
+<span class="sd">        symbolic_expr: bool, optional</span>
+<span class="sd">            If `True`, return the integral as a symbolic expression object. Else, return the integral performed symbolically.</span>
+<span class="sd">        integrand: bool, optional</span>
+<span class="sd">            If `True`, return the integrand of the integral and its integration limits as a list of symbolic expression object. Else, return the integral performed symbolically.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ~sympy.core.expr.Expr</span>
+<span class="sd">            The result of the symbolic integration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_symbol</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_symbol</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">u_elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">infinitesimal_length</span>
+        <span class="n">v_elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">infinitesimal_length</span>
+        <span class="n">extent_u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">extent_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="p">((</span><span class="n">extent_u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent_u</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">extent_v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent_v</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">mod_G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span><span class="p">:</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">S</span> <span class="o">*</span> <span class="n">conjugate</span><span class="p">(</span><span class="n">mod_G</span><span class="p">))</span> <span class="o">/</span> <span class="n">norm</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">S</span> <span class="o">*</span> <span class="n">mod_G</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span>
+        <span class="k">if</span> <span class="n">integrand</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">expr</span> <span class="o">*</span> <span class="n">u_elem</span> <span class="o">*</span> <span class="n">v_elem</span><span class="p">,</span>  <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">extent_u</span><span class="p">),</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="o">*</span><span class="n">extent_v</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrate_over_domain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">expr</span> <span class="o">*</span> <span class="n">u_elem</span> <span class="o">*</span> <span class="n">v_elem</span><span class="p">),</span> <span class="n">symbolic_expr</span><span class="o">=</span><span class="n">symbolic_expr</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

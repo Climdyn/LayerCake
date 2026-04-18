@@ -1,0 +1,841 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.bakery.cake &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.bakery.cake</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.bakery.cake</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Cake definition module</span>
+<span class="sd">    ======================</span>
+
+<span class="sd">    This module defines the cake object, i.e. the collection of stacked layers</span>
+<span class="sd">    (represented by :class:`~layercake.bakery.layers.Layer` objects) of a given fluid/media of the system at hand.</span>
+<span class="sd">    A cake is thus a representation of a layered system defined by the user.</span>
+<span class="sd">    It also computes and includes the ordinary differential equations representation of the</span>
+<span class="sd">    partial differential equations contained in the layers, when projected on a given basis (Galerkin procedure).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">redirect_stdout</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinAlgError</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sparse</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">njit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">,</span> <span class="n">MutableSparseNDimArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutableSparseMatrix</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">zeros</span> <span class="k">as</span> <span class="n">sympy_zeros</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">simplify</span><span class="p">,</span> <span class="n">N</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.matrices.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NonInvertibleMatrixError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.tensor.array</span><span class="w"> </span><span class="kn">import</span> <span class="n">permutedims</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">sparse_mul</span><span class="p">,</span> <span class="n">jsparse_mul</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.symbolic_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_coords_and_values_from_tensor</span><span class="p">,</span> <span class="n">compute_jacobian_permutations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.formatters.fortran</span><span class="w"> </span><span class="kn">import</span> <span class="n">FortranJacobianEquationFormatter</span><span class="p">,</span> <span class="n">FortranEquationFormatter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.formatters.python</span><span class="w"> </span><span class="kn">import</span> <span class="n">PythonJacobianEquationFormatter</span><span class="p">,</span> <span class="n">PythonEquationFormatter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.formatters.julia</span><span class="w"> </span><span class="kn">import</span> <span class="n">JuliaJacobianEquationFormatter</span><span class="p">,</span> <span class="n">JuliaEquationFormatter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">isin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.symbolic_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">symbolic_tensordot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.matrix</span><span class="w"> </span><span class="kn">import</span> <span class="n">block_matrix_inverse</span>
+
+<span class="n">real_eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+<span class="n">small_number</span> <span class="o">=</span> <span class="mf">1.e-12</span>
+
+
+<div class="viewcode-block" id="Cake">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Cake</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to gather layers of a given fluid/media of the system at hand.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    layers: list(~layers.Layer)</span>
+<span class="sd">        A list of the layer objects included in the cake.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_simplify_after_LHS_inversion</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="Cake.add_layer">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.add_layer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a layer object to the cake.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        layer: ~layers.Layer</span>
+<span class="sd">            Layer object to add to the cake.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">layer</span><span class="o">.</span><span class="n">_cake_order</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+        <span class="n">layer</span><span class="o">.</span><span class="n">_cake</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">equation</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">equations</span><span class="p">:</span>
+            <span class="n">equation</span><span class="o">.</span><span class="n">_cake</span> <span class="o">=</span> <span class="bp">self</span>
+            <span class="n">equation</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">_cake</span> <span class="o">=</span> <span class="bp">self</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Dimension of the full ordinary differential equations system of the cake, resulting from</span>
+<span class="sd">        the Galerkin expansions of the layers.&quot;&quot;&quot;</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">dim</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">ndim</span>
+        <span class="k">return</span> <span class="n">dim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~field.Field): Returns the list of dynamical fields of the cake, i.e. the fields whose time</span>
+<span class="sd">        evolution is provided by the partial differential equations of all the layers.&quot;&quot;&quot;</span>
+        <span class="n">fields_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">fields_list</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">fields</span>
+        <span class="k">return</span> <span class="n">fields_list</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_of_equations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Total number of equations composing the cake.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~parameter.Parameter): Returns the list of parameters of the cake, i.e. the explicit parameters</span>
+<span class="sd">        appearing in the partial differential equations of all the layers.&quot;&quot;&quot;</span>
+        <span class="n">parameters_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">isin</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">parameters_list</span><span class="p">):</span>
+                    <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parameters_list</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameters_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~sympy.core.symbol.Symbol): List of parameter&#39;s symbols present in all the layers&#39;</span>
+<span class="sd">        partial differential equations.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fields_tensor_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;dict(tuple(int)): A dictionary of 2-tuples giving for each dynamical field of the model its entries range in the</span>
+<span class="sd">        tensor of tendencies.&quot;&quot;&quot;</span>
+        <span class="n">extent</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                <span class="n">ni</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                <span class="n">extent</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ni</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">ni</span>
+        <span class="k">return</span> <span class="n">extent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_of_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Number of layers in the cake.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Cake.compute_tensor">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.compute_tensor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compute_inner_products</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">compute_inner_products_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">substitutions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basis_subs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">parameters_subs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lhs_inversion_in_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the tensor of the symbolic or numerical representation of the ordinary differential</span>
+<span class="sd">        equations tendencies of all the layers.</span>
+<span class="sd">        Arguments are passed to the layer :meth:`~Layer.compute_tensor` method.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        numerical: bool, optional</span>
+<span class="sd">            Whether to compute the numerical or the symbolic tensor.</span>
+<span class="sd">            Default to `True` (numerical tensor as output).</span>
+<span class="sd">        compute_inner_products: bool, optional</span>
+<span class="sd">            Whether the inner products tensors of the layer equations&#39; terms must be computed first.</span>
+<span class="sd">            Default to `False`. Please note that if the inner products are not computed firsthand, the tensor computation</span>
+<span class="sd">            will fail.</span>
+<span class="sd">        compute_inner_products_kwargs: dict, optional</span>
+<span class="sd">            Arguments to pass to the computation of the inner products.</span>
+<span class="sd">        substitutions: list(tuple), optional</span>
+<span class="sd">            List of 2-tuples containing extra symbolic substitutions to be made at the end of the tensor computation.</span>
+<span class="sd">            Only applies for the symbolic tendencies.</span>
+<span class="sd">            The 2-tuples contain first a |Sympy|  expression and then the value to substitute.</span>
+<span class="sd">        basis_subs: bool, optional</span>
+<span class="sd">            Whether to substitute the parameters appearing in the definition of the basis of functions by</span>
+<span class="sd">            their numerical value.</span>
+<span class="sd">            Only applies for the symbolic tendencies.</span>
+<span class="sd">            Default to `False`.</span>
+<span class="sd">        parameters_subs: list(~parameter.Parameter), optional</span>
+<span class="sd">            List of model&#39;s parameters to substitute in the symbolic tendencies&#39; tensor.</span>
+<span class="sd">            Only applies for the symbolic tendencies.</span>
+<span class="sd">        lhs_inversion_in_layer: bool, optional</span>
+<span class="sd">            Try to inverse the LHS matrix and take the matricial product with the RHS in each layer if possible. Default to `True`.</span>
+<span class="sd">            If `False`, it forces the inversion of the LHS at the cake level.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">lhs_inversion_in_layer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">other_fields_in_lhs</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">layer</span><span class="o">.</span><span class="n">compute_tensor</span><span class="p">(</span><span class="n">numerical</span><span class="o">=</span><span class="n">numerical</span><span class="p">,</span>
+                                 <span class="n">compute_inner_products</span><span class="o">=</span><span class="n">compute_inner_products</span><span class="p">,</span>
+                                 <span class="n">compute_inner_products_kwargs</span><span class="o">=</span><span class="n">compute_inner_products_kwargs</span><span class="p">,</span>
+                                 <span class="n">substitutions</span><span class="o">=</span><span class="n">substitutions</span><span class="p">,</span>
+                                 <span class="n">basis_subs</span><span class="o">=</span><span class="n">basis_subs</span><span class="p">,</span>
+                                 <span class="n">parameters_subs</span><span class="o">=</span><span class="n">parameters_subs</span><span class="p">,</span>
+                                 <span class="n">lhs_inversion_in_layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span>
+                                 <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maximum_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Maximum over the ranks of the equations over all the layers.&quot;&quot;&quot;</span>
+        <span class="n">max_rank</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">max_rank</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_rank</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="n">maximum_rank</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">max_rank</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_layers_first_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(int): A list giving for each dynamical field of the model the first index of its entries range in the</span>
+<span class="sd">        tensor of tendencies.&quot;&quot;&quot;</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">layer</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">idx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_layers_last_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(int): A list giving for each dynamical field of the model the last index of its entries range in the</span>
+<span class="sd">        tensor of tendencies.&quot;&quot;&quot;</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">layer</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">idx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray: Return the tensor</span>
+<span class="sd">        representing the ordinary differential equations tendencies of the whole cake.</span>
+<span class="sd">        Can be either a numerical or a symbolic representation, depending on the user&#39;s choice for the inner products.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_rank</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">):</span>
+            <span class="n">numerical</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">):</span>
+            <span class="n">numerical</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unable to determine the tensor status of layer 1.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">numerical</span><span class="p">:</span>
+            <span class="n">tensor</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dok&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span><span class="p">:</span>
+                <span class="n">lhs_mat</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dok&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tensor</span> <span class="o">=</span> <span class="n">MutableSparseNDimArray</span><span class="p">(</span><span class="n">iterable</span><span class="o">=</span><span class="p">{},</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span><span class="p">:</span>
+                <span class="n">lhs_mat</span> <span class="o">=</span> <span class="n">MutableSparseMatrix</span><span class="p">(</span><span class="n">sympy_zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">numerical</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="ow">not</span> <span class="n">numerical</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">))):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Your cake is composed of both symbolic and numerical layers. &quot;</span>
+                                 <span class="s2">&quot;Can&#39;t compute the full tensor.&quot;</span><span class="p">)</span>
+            <span class="n">lmax</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">maximum_rank</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">slices</span> <span class="o">=</span> <span class="p">([</span><span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers_first_index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers_first_index</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])]</span>
+                          <span class="o">+</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lmax</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)])</span>
+                <span class="n">zeros</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lmax</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">slices</span> <span class="o">=</span> <span class="p">([</span><span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers_first_index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="kc">None</span><span class="p">)]</span>
+                          <span class="o">+</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lmax</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)])</span>
+                <span class="n">zeros</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lmax</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span> <span class="o">+</span> <span class="n">zeros</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">numerical</span><span class="p">:</span>
+                <span class="n">tensor</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">+</span> <span class="n">layer</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">todense</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span><span class="p">:</span>
+                    <span class="n">lhs_mat</span><span class="p">[</span><span class="n">args</span><span class="p">[:</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">lhs_mat</span><span class="p">[</span><span class="n">args</span><span class="p">[:</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+</span> <span class="n">layer</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="o">.</span><span class="n">todense</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tensor</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">+</span> <span class="n">layer</span><span class="o">.</span><span class="n">tensor</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span><span class="p">:</span>
+                    <span class="n">lhs_mat</span><span class="p">[</span><span class="n">args</span><span class="p">[:</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">lhs_mat</span><span class="p">[</span><span class="n">args</span><span class="p">[:</span><span class="mi">2</span><span class="p">]]</span> <span class="o">+</span> <span class="n">layer</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">numerical</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">lhs_mat_inverted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="n">lhs_mat_inverted</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">lhs_mat</span><span class="o">.</span><span class="n">todense</span><span class="p">()[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:])</span>
+                    <span class="n">tensor</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">lhs_mat_inverted</span><span class="p">,</span> <span class="n">tensor</span><span class="o">.</span><span class="n">to_coo</span><span class="p">(),</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">LinAlgError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The left-hand side of the cake is not invertible with the provided basis.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">to_coo</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion_in_layer</span><span class="p">:</span>
+                <span class="n">lhs_mat_inverted</span> <span class="o">=</span> <span class="n">MutableSparseMatrix</span><span class="p">(</span><span class="n">sympy_zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">blocks_extent</span> <span class="o">=</span> <span class="p">[(</span><span class="n">be</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">be</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">be</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields_tensor_extent</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">lhs_mat_inverted</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">block_matrix_inverse</span><span class="p">(</span><span class="n">lhs_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">blocks_extent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simplify_after_LHS_inversion</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">NonInvertibleMatrixError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">NonInvertibleMatrixError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The left-hand side of the cake is not invertible with the provided basis.&#39;</span><span class="p">)</span>
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">(</span><span class="n">symbolic_tensordot</span><span class="p">(</span><span class="n">lhs_mat_inverted</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+
+        <span class="n">tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simplify_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">small_number</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tensor</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">jacobian_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray: Return the tensor</span>
+<span class="sd">        representing the Jacobian matrix of the ordinary differential equations tendencies of the whole cake.</span>
+<span class="sd">        Can be either a numerical or a symbolic representation, depending on the user&#39;s choice for the inner products.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jacobian_from_numerical_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jacobian_from_symbolic_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unable to determine the kind of tensor to simplify.&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_jacobian_from_numerical_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to compute the Jacobian tensor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tensor: sparse.COO</span>
+<span class="sd">            The system tensor.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sparse.COO</span>
+<span class="sd">            The Jacobian tensor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n_perm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
+
+        <span class="n">jacobian_tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_perm</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">jacobian_tensor</span> <span class="o">+=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">jacobian_tensor</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_jacobian_from_symbolic_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to compute the Jacobian tensor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tensor: ~sympy.tensor.array.ImmutableSparseNDimArray</span>
+<span class="sd">            The system tensor.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ~sympy.tensor.array.ImmutableSparseNDimArray</span>
+<span class="sd">            The Jacobian tensor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">perms</span> <span class="o">=</span> <span class="n">compute_jacobian_permutations</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">jacobian_tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perms</span><span class="p">:</span>
+            <span class="n">jacobian_tensor</span> <span class="o">+=</span> <span class="n">permutedims</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">perm</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">jacobian_tensor</span>
+
+<div class="viewcode-block" id="Cake.compute_tendencies">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.compute_tendencies">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_tendencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">lang_translation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_symbolic_output</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function handling the tendencies tensor to create a tendencies function for the whole cake.</span>
+<span class="sd">        Returns the tendencies function :math:`\\boldsymbol{f}` determining the model&#39;s ordinary differential</span>
+<span class="sd">        equations:</span>
+
+<span class="sd">        .. math:: \\dot{\\boldsymbol{x}} = \\boldsymbol{f}(\\boldsymbol{x})</span>
+
+<span class="sd">        It returns also the linearized tendencies</span>
+<span class="sd">        :math:`\\boldsymbol{\\mathrm{J}} \\equiv \\boldsymbol{\\mathrm{D}f} = \\frac{\\partial \\boldsymbol{f}}{\\partial \\boldsymbol{x}}`</span>
+<span class="sd">        (Jacobian matrix).</span>
+
+<span class="sd">        Depending on whether the tendencies tensor is symbolic or numerical, it will return either</span>
+<span class="sd">        `Numbafied &lt;https://numba.pydata.org/&gt;`_ callable for the functions :math:`\\boldsymbol{f}` and :math:`J`,</span>
+<span class="sd">        or list of strings defining each tendency in a computing language selected by the user.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        language: str, optional</span>
+<span class="sd">            String defining in which computing language the tendencies lists must be returned.</span>
+<span class="sd">            Currently, it can be `&#39;python&#39;`, `&#39;fortran&#39;` or `&#39;julia`&#39;.</span>
+<span class="sd">            Default to `&#39;python&#39;`.</span>
+<span class="sd">        lang_translation: dict(str), optional</span>
+<span class="sd">            Additional language translation mapping provided by the user, mapping replacements for converting</span>
+<span class="sd">            Sympy symbolic output strings to the target language.</span>
+<span class="sd">        force_symbolic_output: bool, optional</span>
+<span class="sd">            Force the return of symbolic tendencies, even if the tensor is numerical.</span>
+<span class="sd">            Useful to use the results with another language, or to save it in plain text.</span>
+<span class="sd">            Default to `False`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        f: callable or list(str), list(Symbol)</span>
+<span class="sd">            If the tendencies tensor is numerical, the numba-jitted tendencies function.</span>
+<span class="sd">            If the tendencies tensor is symbolic, or if `force_symbolic` is `True`, the list of tendencies string in the selected target language,</span>
+<span class="sd">            along with the list of parameters appearing in them.</span>
+<span class="sd">        Df: callable or list(str), list(Symbol)</span>
+<span class="sd">            If the tendencies tensor is numerical, the numba-jitted linearized tendencies function.</span>
+<span class="sd">            If the tendencies tensor is symbolic, or if `force_symbolic` is `True`, the list of linearized tendencies string in the selected target language,</span>
+<span class="sd">            along with the list of parameters appearing in them.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">force_symbolic_output</span><span class="p">:</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">todense</span><span class="p">())</span>
+                    <span class="k">if</span> <span class="n">language</span> <span class="o">==</span> <span class="s1">&#39;python&#39;</span><span class="p">:</span>
+                        <span class="n">formatter</span> <span class="o">=</span> <span class="n">PythonEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                        <span class="n">jacobian_formatter</span> <span class="o">=</span> <span class="n">PythonJacobianEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">language</span> <span class="o">==</span> <span class="s1">&#39;fortran&#39;</span><span class="p">:</span>
+                        <span class="n">formatter</span> <span class="o">=</span> <span class="n">FortranEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                        <span class="n">jacobian_formatter</span> <span class="o">=</span> <span class="n">FortranJacobianEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">language</span> <span class="o">==</span> <span class="s1">&#39;julia&#39;</span><span class="p">:</span>
+                        <span class="n">formatter</span> <span class="o">=</span> <span class="n">JuliaEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                        <span class="n">jacobian_formatter</span> <span class="o">=</span> <span class="n">JuliaJacobianEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                        <span class="n">formatter</span> <span class="o">=</span> <span class="n">language</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">jacobian_formatter</span> <span class="o">=</span> <span class="n">language</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unable to determine the formatter.&#39;</span><span class="p">)</span>
+
+                    <span class="n">equations_list</span> <span class="o">=</span> <span class="n">formatter</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                    <span class="n">jt</span> <span class="o">=</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span><span class="o">.</span><span class="n">todense</span><span class="p">())</span>
+                    <span class="n">jacobian_equations_list</span> <span class="o">=</span> <span class="n">jacobian_formatter</span><span class="p">(</span><span class="n">jt</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="p">(</span><span class="n">equations_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)),</span> <span class="p">(</span><span class="n">jacobian_equations_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">jt</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">))</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">coo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">T</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">data</span>
+
+                    <span class="nd">@njit</span>
+                    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+                        <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="mf">1.</span><span class="p">),</span> <span class="n">x</span><span class="p">))</span>
+                        <span class="n">xr</span> <span class="o">=</span> <span class="n">sparse_mul</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">coo</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">xr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+                    <span class="n">jcoo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">T</span>
+                    <span class="n">jval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span><span class="o">.</span><span class="n">data</span>
+
+                    <span class="nd">@njit</span>
+                    <span class="k">def</span><span class="w"> </span><span class="nf">Df</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+                        <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="mf">1.</span><span class="p">),</span> <span class="n">x</span><span class="p">))</span>
+                        <span class="n">mul_jac</span> <span class="o">=</span> <span class="n">jsparse_mul</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">jcoo</span><span class="p">,</span> <span class="n">jval</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">mul_jac</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span>
+
+                    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">Df</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">language</span> <span class="o">==</span> <span class="s1">&#39;python&#39;</span><span class="p">:</span>
+                    <span class="n">formatter</span> <span class="o">=</span> <span class="n">PythonEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                    <span class="n">jacobian_formatter</span> <span class="o">=</span> <span class="n">PythonJacobianEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">language</span> <span class="o">==</span> <span class="s1">&#39;fortran&#39;</span><span class="p">:</span>
+                    <span class="n">formatter</span> <span class="o">=</span> <span class="n">FortranEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                    <span class="n">jacobian_formatter</span> <span class="o">=</span> <span class="n">FortranJacobianEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">language</span> <span class="o">==</span> <span class="s1">&#39;julia&#39;</span><span class="p">:</span>
+                    <span class="n">formatter</span> <span class="o">=</span> <span class="n">JuliaEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                    <span class="n">jacobian_formatter</span> <span class="o">=</span> <span class="n">JuliaJacobianEquationFormatter</span><span class="p">(</span><span class="n">lang_translation</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                    <span class="n">formatter</span> <span class="o">=</span> <span class="n">language</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">jacobian_formatter</span> <span class="o">=</span> <span class="n">language</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unable to determine the formatter.&#39;</span><span class="p">)</span>
+
+                <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span>
+                <span class="n">equations_list</span> <span class="o">=</span> <span class="n">formatter</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="n">jt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span>
+                <span class="n">jacobian_equations_list</span> <span class="o">=</span> <span class="n">jacobian_formatter</span><span class="p">(</span><span class="n">jt</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="p">(</span><span class="n">equations_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)),</span> <span class="p">(</span><span class="n">jacobian_equations_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">jt</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">))</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Something went very wrong. Unable to determine the kind of the tensor.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You must first compute the tensor of your cake before computing the tendencies.&quot;</span>
+                             <span class="s2">&quot;Run the &#39;compute_tensor&#39; method first.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Cake.simplify_tensor">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.simplify_tensor">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">simplify_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Routine that simplifies the component of a tensor :math:`\\mathcal{T}`.</span>
+<span class="sd">        For each index :math:`i`, it upper-triangularizes the</span>
+<span class="sd">        tensor :math:`\\mathcal{T}_{i,\\ldots}` for all the subsequent indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tensor: sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray</span>
+<span class="sd">            The tensor to simplify.</span>
+<span class="sd">        threshold: float, optional</span>
+<span class="sd">            If the absolute value of  a tensor entry is lower than this threshold value,</span>
+<span class="sd">            then this value is removed from the tensor. No threshold is applied if not set.</span>
+<span class="sd">            Only applies to numerical tensors.</span>
+<span class="sd">            Useful to filter small spurious results of numerical integrations.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sparse.COO or ~sympy.tensor.array.sparse_ndim_array.ImmutableSparseNDimArray</span>
+<span class="sd">            The upper-triangularized tensor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">):</span>
+            <span class="n">coords_val</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">sorted_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">coords_val</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">coords_val</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">sorted_indices</span>
+
+            <span class="n">tmp_tensor</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">(</span><span class="n">coords_val</span><span class="p">,</span> <span class="n">tensor</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">coords_val</span> <span class="o">=</span> <span class="n">tmp_tensor</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">tmp_tensor</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+                <span class="n">data</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+            <span class="n">upp_tensor</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">(</span><span class="n">coords_val</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">upp_tensor</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">):</span>
+            <span class="n">coords_val</span> <span class="o">=</span> <span class="n">get_coords_and_values_from_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+            <span class="n">sorted_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">coords_val</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">coords_val</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sorted_indices</span>
+            <span class="n">tensor_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">cv</span> <span class="ow">in</span> <span class="n">coords_val</span><span class="p">:</span>
+                <span class="n">coords</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">cv</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">cv</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">coords</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tensor_dict</span><span class="p">:</span>
+                    <span class="n">tensor_dict</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">old_val</span> <span class="o">=</span> <span class="n">tensor_dict</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span>
+                    <span class="n">new_val</span> <span class="o">=</span> <span class="n">simplify</span><span class="p">(</span><span class="n">old_val</span> <span class="o">+</span> <span class="n">val</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">new_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">tensor_dict</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_val</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">tensor_dict</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">(</span><span class="n">iterable</span><span class="o">=</span><span class="n">tensor_dict</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unable to determine the kind of tensor to simplify.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Cake.print_tensor">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.print_tensor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">to_numerics</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Routine to print the tensor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tensor_name: str, optional</span>
+<span class="sd">            Specify the name to print beside the values of the tensor. Default to `Tensor`.</span>
+<span class="sd">        to_numerics: bool</span>
+<span class="sd">            Try to output a numerical value for the tensor entries, even if the tensor is a</span>
+<span class="sd">            symbolic one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tensor_name</span><span class="p">:</span>
+            <span class="n">tensor_name</span> <span class="o">=</span> <span class="s1">&#39;Tensor&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">coo</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_string_format</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="n">tensor_name</span><span class="p">,</span> <span class="n">coo</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">):</span>
+            <span class="n">coords_val</span> <span class="o">=</span> <span class="n">get_coords_and_values_from_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="s1">&#39;tuple&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">coo_val</span> <span class="ow">in</span> <span class="n">coords_val</span><span class="p">:</span>
+                <span class="n">coo</span> <span class="o">=</span> <span class="n">coo_val</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">coo_val</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">to_numerics</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_string_format</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="n">tensor_name</span><span class="p">,</span> <span class="n">coo</span><span class="p">,</span> <span class="n">N</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_string_format_symbolic</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="n">tensor_name</span><span class="p">,</span> <span class="n">coo</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognized tensor format.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Cake.print_tensor_to_file">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.print_tensor_to_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_tensor_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">tensor_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">to_numerics</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Routine to print the tensor to a file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            The filename where to print the tensor.</span>
+<span class="sd">        tensor_name: str, optional</span>
+<span class="sd">            Specify the name to print beside the values of the tensor. Default to `Tensor`.</span>
+<span class="sd">        to_numerics: bool</span>
+<span class="sd">            Try to output a numerical value for the tensor entries, even if the tensor is a</span>
+<span class="sd">            symbolic one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">redirect_stdout</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_tensor</span><span class="p">(</span><span class="n">tensor_name</span><span class="p">,</span> <span class="n">to_numerics</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Cake.print_jacobian_tensor">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.print_jacobian_tensor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_jacobian_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">to_numerics</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Routine to print the Jacobian tensor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tensor_name: str, optional</span>
+<span class="sd">            Specify the name to print beside the values of the tensor. Default to `TensorJacobian`.</span>
+<span class="sd">        to_numerics: bool</span>
+<span class="sd">            Try to output a numerical value for the tensor entries, even if the tensor is a</span>
+<span class="sd">            symbolic one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tensor_name</span><span class="p">:</span>
+            <span class="n">tensor_name</span> <span class="o">=</span> <span class="s1">&#39;TensorJacobian&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">coo</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_string_format</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="n">tensor_name</span><span class="p">,</span> <span class="n">coo</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span><span class="p">,</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">):</span>
+            <span class="n">coords_val</span> <span class="o">=</span> <span class="n">get_coords_and_values_from_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jacobian_tensor</span><span class="p">,</span> <span class="s1">&#39;tuple&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">coo_val</span> <span class="ow">in</span> <span class="n">coords_val</span><span class="p">:</span>
+                <span class="n">coo</span> <span class="o">=</span> <span class="n">coo_val</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">coo_val</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">to_numerics</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_string_format</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="n">tensor_name</span><span class="p">,</span> <span class="n">coo</span><span class="p">,</span> <span class="n">N</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_string_format_symbolic</span><span class="p">(</span><span class="nb">print</span><span class="p">,</span> <span class="n">tensor_name</span><span class="p">,</span> <span class="n">coo</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognized Jacobian tensor format.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Cake.print_jacobian_tensor_to_file">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.print_jacobian_tensor_to_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_jacobian_tensor_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">tensor_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">to_numerics</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Routine to print the Jacobian tensor to a file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            The filename where to print the tensor.</span>
+<span class="sd">        tensor_name: str, optional</span>
+<span class="sd">            Specify the name to print beside the values of the tensor. Default to `TensorJacobian`.</span>
+<span class="sd">        to_numerics: bool</span>
+<span class="sd">            Try to output a numerical value for the tensor entries, even if the tensor is a</span>
+<span class="sd">            symbolic one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">redirect_stdout</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_jacobian_tensor</span><span class="p">(</span><span class="n">tensor_name</span><span class="p">,</span> <span class="n">to_numerics</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Cake.to_latex">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.to_latex">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enclose_lhs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate the LaTeX strings representing the cake&#39;s equations mathematically.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        enclose_lhs: bool, optional</span>
+<span class="sd">            Whether to enclose the left-hand side term of the equations inside parenthesis.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_lhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the left-hand side latex string of the equations.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_rhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the right-hand side latex string of the equations.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `False`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict(list(str))</span>
+<span class="sd">            The LaTeX strings representing the cake&#39;s equations.</span>
+<span class="sd">            It is a dictionary with one entry per cake&#39;s layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">latex_string_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
+            <span class="n">latex_string_list</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">enclose_lhs</span><span class="o">=</span><span class="n">enclose_lhs</span><span class="p">,</span>
+                                               <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="n">drop_first_lhs_char</span><span class="p">,</span>
+                                               <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="n">drop_first_rhs_char</span>
+                                               <span class="p">)</span>
+
+            <span class="n">latex_string_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">latex_string_list</span>
+
+        <span class="k">return</span> <span class="n">latex_string_dict</span></div>
+
+
+<div class="viewcode-block" id="Cake.show_latex">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.cake.Cake.show_latex">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enclose_lhs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Show the LaTeX string representing the cake&#39;s equations mathematically rendered in a window.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        enclose_lhs: bool, optional</span>
+<span class="sd">            Whether to enclose the left-hand side term of the equations inside parenthesis.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_lhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the left-hand side latex string of the equations.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_rhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the right-hand side latex string of the equations.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">latex_string_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">enclose_lhs</span><span class="o">=</span><span class="n">enclose_lhs</span><span class="p">,</span>
+                                          <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="n">drop_first_lhs_char</span><span class="p">,</span>
+                                          <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="n">drop_first_rhs_char</span>
+                                          <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_equations</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">number_of_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_equations</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">latex_string_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_lines</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">number_of_lines</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;Layer </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">):&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_lines</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">number_of_lines</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;Layer </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">latex_string_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_lines</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">number_of_lines</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;$</span><span class="si">%s</span><span class="s1">$&#39;</span> <span class="o">%</span> <span class="n">s</span><span class="p">)</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_string_format</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;String formatting for the numerical tensor printing.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">real_eps</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">symbol</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;[&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;]&quot;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; = </span><span class="si">% .5E</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span>
+            <span class="n">func</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_string_format_symbolic</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;String formatting for the symbolic tensor printing.&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">symbol</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;[&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;]&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">func</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

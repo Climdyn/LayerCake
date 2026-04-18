@@ -1,0 +1,544 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>General utility module &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Inner products module" href="inner_products.html" />
+    <link rel="prev" title="Variables module" href="variables.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../references.html">Code References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="variables.html">Variables module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">General utility module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sparse-tensor-utility-module">Sparse tensor utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.tensor.jsparse_mul"><code class="docutils literal notranslate"><span class="pre">jsparse_mul()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.tensor.sparse_mul"><code class="docutils literal notranslate"><span class="pre">sparse_mul()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#symbolic-tensor-utility-module">Symbolic tensor utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.symbolic_tensor.compute_jacobian_permutations"><code class="docutils literal notranslate"><span class="pre">compute_jacobian_permutations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.symbolic_tensor.get_coords_and_values_from_tensor"><code class="docutils literal notranslate"><span class="pre">get_coords_and_values_from_tensor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.symbolic_tensor.get_coords_from_index"><code class="docutils literal notranslate"><span class="pre">get_coords_from_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.symbolic_tensor.remove_dic_zeros"><code class="docutils literal notranslate"><span class="pre">remove_dic_zeros()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.symbolic_tensor.symbolic_tensordot"><code class="docutils literal notranslate"><span class="pre">symbolic_tensordot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#commutativity-utility-module">Commutativity utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.commutativity.disable_commutativity"><code class="docutils literal notranslate"><span class="pre">disable_commutativity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.commutativity.enable_commutativity"><code class="docutils literal notranslate"><span class="pre">enable_commutativity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-computations-utility-module">Parallel computations utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.parallel.exit_after"><code class="docutils literal notranslate"><span class="pre">exit_after()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.parallel.parallel_integration"><code class="docutils literal notranslate"><span class="pre">parallel_integration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.parallel.parallel_symbolic_evaluation"><code class="docutils literal notranslate"><span class="pre">parallel_symbolic_evaluation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-module">Integration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.integration.integration"><code class="docutils literal notranslate"><span class="pre">integration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.integration.numerical_integration"><code class="docutils literal notranslate"><span class="pre">numerical_integration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.utils.integration.symbolic_integration"><code class="docutils literal notranslate"><span class="pre">symbolic_integration()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="inner_products.html">Inner products module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formatters.html">Formatters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basis.html">Basis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bakery.html">The Bakery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arithmetic.html">Arithmetic module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../references.html">Code References</a></li>
+      <li class="breadcrumb-item active">General utility module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/files/technical/utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="general-utility-module">
+<h1>General utility module<a class="headerlink" href="#general-utility-module" title="Link to this heading"></a></h1>
+<p>Module with various submodules with useful functions used throughout the code.</p>
+<section id="sparse-tensor-utility-module">
+<span id="module-layercake.utils.tensor"></span><h2>Sparse tensor utility module<a class="headerlink" href="#sparse-tensor-utility-module" title="Link to this heading"></a></h2>
+<p>Defines useful functions to deal with sparse tensors, defined by a coordinates-values list provided as a <span class="raw-html"><a href="https://www.numpy.org/">Numpy</a></span> array.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.tensor.jsparse_mul">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.tensor.</span></span><span class="sig-name descname"><span class="pre">jsparse_mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/tensor.html#jsparse_mul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.tensor.jsparse_mul" title="Link to this definition"></a></dt>
+<dd><p>Sparse multiplication of a tensor with a vector, resulting in a matrix.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is a Numba-jitted function, so it cannot take a <a class="reference external" href="https://sparse.pydata.org/en/stable/api/COO/#sparse.COO" title="(in sparse v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sparse.COO</span></code></a> sparse tensor directly.
+The tensor coordinates list and values must be provided separately by the user.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vec</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – The vector to contract the tensor with. Must be of shape (<cite>ndim</cite>,) where <cite>ndim</cite> is the second dimension of the tensor.</p></li>
+<li><p><strong>coo</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – A 2D array of shape (n_elems, rank), a list of n_elems tensor coordinates corresponding to each value provided, and rank the rank of the tensor.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – A 1D array of shape (n_elems,), a list of value in the tensor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.tensor.sparse_mul">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.tensor.</span></span><span class="sig-name descname"><span class="pre">sparse_mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/tensor.html#sparse_mul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.tensor.sparse_mul" title="Link to this definition"></a></dt>
+<dd><p>Sparse multiplication of a tensor with a vector, resulting into a vector.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is a Numba-jitted function, so it cannot take a <a class="reference external" href="https://sparse.pydata.org/en/stable/api/COO/#sparse.COO" title="(in sparse v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sparse.COO</span></code></a> sparse tensor directly.
+The tensor coordinates list and values must be provided separately by the user.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vec</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – The vector to contract the tensor with. Must be of shape (<cite>ndim</cite>,) where <cite>ndim</cite> is the second dimension of the tensor.</p></li>
+<li><p><strong>coo</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – A 2D array of shape (n_elems, rank), a list of n_elems tensor coordinates corresponding to each value provided, and rank the rank of the tensor.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – A 1D array of shape (n_elems,), a list of value in the tensor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The result vector of shape (<cite>ndim</cite>,).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="symbolic-tensor-utility-module">
+<span id="module-layercake.utils.symbolic_tensor"></span><h2>Symbolic tensor utility module<a class="headerlink" href="#symbolic-tensor-utility-module" title="Link to this heading"></a></h2>
+<p>Defines useful functions to deal with <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbolic tensors.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.symbolic_tensor.compute_jacobian_permutations">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.symbolic_tensor.</span></span><span class="sig-name descname"><span class="pre">compute_jacobian_permutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/symbolic_tensor.html#compute_jacobian_permutations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.symbolic_tensor.compute_jacobian_permutations" title="Link to this definition"></a></dt>
+<dd><p>Return the axes permutations needed to compute the Jacobian tensor associated to the symbolic models tendencies’ tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – The shape of the tendencies’ tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of permutations of the axes needed to compute the models Jacobian matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.symbolic_tensor.get_coords_and_values_from_tensor">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.symbolic_tensor.</span></span><span class="sig-name descname"><span class="pre">get_coords_and_values_from_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tuple'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/symbolic_tensor.html#get_coords_and_values_from_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.symbolic_tensor.get_coords_and_values_from_tensor" title="Link to this definition"></a></dt>
+<dd><p>Get the coordinates and values of a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> sparse tensor, as a coordinates-values list.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This a function implemented to compensate for the lack of such feature in <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>, and which might need to be
+reimplemented or replaced in the future.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.MutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>MutableSparseNDimArray</em></a>) – The tensor from which to return the coordinates and values list.</p></li>
+<li><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – <p>The kind of output. Can be:</p>
+<ul>
+<li><p><cite>numpy</cite>: return the list as a <span class="raw-html"><a href="https://www.numpy.org/">Numpy</a></span> array.</p></li>
+<li><p><cite>list</cite>: return the list as nested Python lists.</p></li>
+<li><p><cite>tuple</cite>: return the list as a list of tuples.</p></li>
+</ul>
+<p>Default to <cite>tuple</cite>.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The coordinates-values list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>) or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>) or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.symbolic_tensor.get_coords_from_index">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.symbolic_tensor.</span></span><span class="sig-name descname"><span class="pre">get_coords_from_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/symbolic_tensor.html#get_coords_from_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.symbolic_tensor.get_coords_from_index" title="Link to this definition"></a></dt>
+<dd><p>Get the coordinates of a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> sparse tensor entry along each axis, given its private dictionary index.</p>
+<p class="rubric">Notes</p>
+<p>Assumes that every axis has the same length <cite>ndim</cite>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Assumes that the private dictionary has a certain indexing rationale, which may change over time in <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dic_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Index of the sought entry in the sparse tensor private dictionary.</p></li>
+<li><p><strong>ndim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The length of the axes.</p></li>
+<li><p><strong>shape_len</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Rank of the tensor.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.symbolic_tensor.remove_dic_zeros">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.symbolic_tensor.</span></span><span class="sig-name descname"><span class="pre">remove_dic_zeros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/symbolic_tensor.html#remove_dic_zeros"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.symbolic_tensor.remove_dic_zeros" title="Link to this definition"></a></dt>
+<dd><p>Removes zero values from dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Dictionary which could include zeroes in values to remove.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary with same keys and values as input, but keys with zero value are removed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.symbolic_tensor.symbolic_tensordot">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.symbolic_tensor.</span></span><span class="sig-name descname"><span class="pre">symbolic_tensordot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/symbolic_tensor.html#symbolic_tensordot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.symbolic_tensor.symbolic_tensordot" title="Link to this definition"></a></dt>
+<dd><p>Compute tensor dot product along specified axes of two sympy symbolic arrays</p>
+<p>This is based on <span class="raw-html"><a href="https://www.numpy.org/">Numpy</a></span> <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.tensordot.html#numpy.tensordot" title="(in NumPy v2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">tensordot()</span></code></a> .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableDenseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableDenseNDimArray</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.MutableDenseNDimArray" title="(in SymPy v1.14.0)"><em>MutableDenseNDimArray</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.MutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>MutableSparseNDimArray</em></a>) – Arrays to take the dot product of.</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableDenseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableDenseNDimArray</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.MutableDenseNDimArray" title="(in SymPy v1.14.0)"><em>MutableDenseNDimArray</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.MutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>MutableSparseNDimArray</em></a>) – Arrays to take the dot product of.</p></li>
+<li><p><strong>axes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>2-tuple</em>) – If an integer is provided, sum over the last <cite>axes</cite> axes of <cite>a</cite> and the first <cite>axes</cite> axes
+of <cite>b</cite> in order.
+Else, specify the axes to be summed by a 2-tuple of tuples containing the axes.
+The sizes of the corresponding axes must match.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The tensor dot product of the input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableDenseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableDenseNDimArray</em></a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.MutableDenseNDimArray" title="(in SymPy v1.14.0)"><em>MutableDenseNDimArray</em></a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.ImmutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>ImmutableSparseNDimArray</em></a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/tensor/array.html#sympy.tensor.array.MutableSparseNDimArray" title="(in SymPy v1.14.0)"><em>MutableSparseNDimArray</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="commutativity-utility-module">
+<span id="module-layercake.utils.commutativity"></span><h2>Commutativity utility module<a class="headerlink" href="#commutativity-utility-module" title="Link to this heading"></a></h2>
+<p>Defines useful functions to deal with enabling or disabling commutativity in <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expressions.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.commutativity.disable_commutativity">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.commutativity.</span></span><span class="sig-name descname"><span class="pre">disable_commutativity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/commutativity.html#disable_commutativity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.commutativity.disable_commutativity" title="Link to this definition"></a></dt>
+<dd><p>Disable commutativity of a given Sympy expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>expr</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a>) – The expression on which to disable commutativity.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The expression with the commutativity disabled.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.commutativity.enable_commutativity">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.commutativity.</span></span><span class="sig-name descname"><span class="pre">enable_commutativity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/commutativity.html#enable_commutativity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.commutativity.enable_commutativity" title="Link to this definition"></a></dt>
+<dd><p>Enable commutativity of a given Sympy expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>expr</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a>) – The expression on which to enable commutativity.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The expression with the commutativity enabled.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="parallel-computations-utility-module">
+<span id="module-layercake.utils.parallel"></span><h2>Parallel computations utility module<a class="headerlink" href="#parallel-computations-utility-module" title="Link to this heading"></a></h2>
+<p>Defines low-level functions to deal with parallel computation tasks.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Those are low-level computation routines which are not user-friendly.
+Usage must be thoroughly tested.</p>
+</div>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.parallel.exit_after">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.parallel.</span></span><span class="sig-name descname"><span class="pre">exit_after</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/parallel.html#exit_after"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.parallel.exit_after" title="Link to this definition"></a></dt>
+<dd><p>use as decorator to exit process if
+function takes longer than s seconds</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.parallel.parallel_integration">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.parallel.</span></span><span class="sig-name descname"><span class="pre">parallel_integration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitutions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_int</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/parallel.html#parallel_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.parallel.parallel_integration" title="Link to this definition"></a></dt>
+<dd><p>Functions to integrate <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expressions, either symbolically or numerically, in parallel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pool</strong> (<em>pebble.ProcessPool</em>) – A Pebble pool of workers.</p></li>
+<li><p><strong>args_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em>) – <p>A list of tuples with the following arguments for the integration subfunctions:</p>
+<ul>
+<li><p><cite>indices</cite>: Tuple of integers labelling the integrations in the integration queue.
+Will be returned by the worker.</p></li>
+<li><p><cite>integrals_definition</cite>: A callable returning the integral(s) as a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expression.</p></li>
+<li><p><cite>integrals_arguments</cite>: A tuple with the arguments to be provided to the <cite>integrals_definition</cite> callable.</p></li>
+</ul>
+</p></li>
+<li><p><strong>substitutions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em>) – List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.
+The 2-tuples contain first a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p></li>
+<li><p><strong>destination</strong> (<em>None</em><em> or </em><a class="reference external" href="https://sparse.pydata.org/en/stable/api/DOK/#sparse.DOK" title="(in sparse v0.0.0)"><em>sparse.DOK</em></a><em> or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>) – Place where to store the output. If an array is provided, it will append the output of the integrations to it.
+If <cite>None</cite>, it will create a new dictionary and return it.
+If <cite>symbolic_int</cite> is <cite>True</cite>, then <cite>destination</cite> should be <cite>None</cite>.</p></li>
+<li><p><strong>timeout</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – <p>Control the switch from symbolic to numerical integration. By default, <cite>parallel_integration</cite> workers will try to integrate
+<span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expressions symbolically, but a fallback to numerical integration can be enforced.
+The options are:</p>
+<ul>
+<li><p><cite>None</cite>: This is the “full-symbolic” mode. No timeout will be applied, and the switch to numerical integration will never happen.
+Can result in very long and improbable computation time.</p></li>
+<li><p><cite>True</cite>: This is the “full-numerical” mode. Symbolic computations do not occur, and the workers try directly to integrate
+numerically.</p></li>
+<li><p><cite>False</cite>: Same as <cite>None</cite>.</p></li>
+<li><p>An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the
+numerical integration.</p></li>
+</ul>
+</p></li>
+<li><p><strong>permute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Permute the indices provided, except the first one, and return the result for all these indices.
+Default to <cite>False</cite>.</p></li>
+<li><p><strong>symbolic_int</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Force symbolic integration and do not substitute the substitutions at the end, making the output a list of <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expressions.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list with the results, as 2-tuple with the labelling indices and the output of the integration, either as a float or as
+a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> integration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>(2-tuple)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.parallel.parallel_symbolic_evaluation">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.parallel.</span></span><span class="sig-name descname"><span class="pre">parallel_symbolic_evaluation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_product</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numerical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/parallel.html#parallel_symbolic_evaluation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.parallel.parallel_symbolic_evaluation" title="Link to this definition"></a></dt>
+<dd><p>Functions to evaluate <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> inner products expressions inside tensors in parallel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pool</strong> (<a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor" title="(in Python v3.14)"><em>concurrent.futures.ThreadPoolExecutor</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor" title="(in Python v3.14)"><em>concurrent.futures.ProcessPoolExecutor</em></a>) – A pool of workers.</p></li>
+<li><p><strong>indices_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em>) – A list of tuples with the indices of the tensor entries.</p></li>
+<li><p><strong>inner_product</strong> (<em>callable</em>) – A callable defining the inner products.</p></li>
+<li><p><strong>basis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="basis.html#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis"><em>SymbolicBasis</em></a><em>)</em>) – List of symbolic function basis on which each element of the term(s) inner products must be decomposed.</p></li>
+<li><p><strong>numerical</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether to compute numerical or symbolic inner products.</p></li>
+<li><p><strong>term</strong> (<a class="reference internal" href="arithmetic.html#layercake.arithmetic.terms.base.ArithmeticTerms" title="layercake.arithmetic.terms.base.ArithmeticTerms"><em>ArithmeticTerms</em></a>) – Arithmetic term(s) from which the inner products will be computed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list with the results, as 2-tuple with the labelling indices and the output of the evaluation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>(2-tuple)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="integration-module">
+<span id="module-layercake.utils.integration"></span><h2>Integration module<a class="headerlink" href="#integration-module" title="Link to this heading"></a></h2>
+<p>Defines low-level functions to deal with integrations.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Those are low-level computation routines which are not user-friendly.
+Usage must be thoroughly tested.</p>
+</div>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.integration.integration">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.integration.</span></span><span class="sig-name descname"><span class="pre">integration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitutions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_int</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/integration.html#integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.integration.integration" title="Link to this definition"></a></dt>
+<dd><p>Functions to integrate <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expressions, either symbolically or numerically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em>) – <p>A list of tuples with the following arguments for the integration subfunctions:</p>
+<ul>
+<li><p><cite>indices</cite>: Tuple of integers labelling the integrations in the integration queue.
+Will be returned by the worker.</p></li>
+<li><p><cite>integrals_definition</cite>: A callable returning the integral(s) as a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expression.</p></li>
+<li><p><cite>integrals_arguments</cite>: A tuple with the arguments to be provided to the <cite>integrals_definition</cite> callable.</p></li>
+</ul>
+</p></li>
+<li><p><strong>substitutions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em>) – List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.
+The 2-tuples contain first a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p></li>
+<li><p><strong>destination</strong> (<em>None</em><em> or </em><a class="reference external" href="https://sparse.pydata.org/en/stable/api/DOK/#sparse.DOK" title="(in sparse v0.0.0)"><em>sparse.DOK</em></a><em> or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>) – Place where to store the output. If an array is provided, it will append the output of the integrations to it.
+If <cite>None</cite>, it will create a new dictionary and return it.
+If <cite>symbolic_int</cite> is <cite>True</cite>, then <cite>destination</cite> should be <cite>None</cite>.</p></li>
+<li><p><strong>permute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Permute the indices provided, except the first one, and return the result for all these indices.
+Default to <cite>False</cite>.</p></li>
+<li><p><strong>symbolic_int</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Force symbolic integration and do not substitute the substitutions at the end, making the output a list of <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expressions.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list with the results, as 2-tuple with the labelling indices and the output of the integration, either as a float or as
+a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> integration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>(2-tuple)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.integration.numerical_integration">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.integration.</span></span><span class="sig-name descname"><span class="pre">numerical_integration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/integration.html#numerical_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.integration.numerical_integration" title="Link to this definition"></a></dt>
+<dd><p>Return the result of a numerical integration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ls</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – <p>A list or a tuple with the following arguments for the integration:</p>
+<ul class="simple">
+<li><p><cite>indices</cite>: Tuple of integers labelling the integration.
+Will be returned by the worker.</p></li>
+<li><p><cite>integrals_definition</cite>: A callable returning the integral(s) as a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expression.</p></li>
+<li><p><cite>integrals_arguments</cite>: A tuple with the arguments to be provided to the <cite>integrals_definition</cite> callable.</p></li>
+<li><p><cite>substitutions</cite>: List of 2-tuples containing symbolic substitutions to be made before numerically integrating.
+The 2-tuples contain first a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>tuple(int)</em> – The integers labelling the integration.</p></li>
+<li><p><em>float</em> – The outcome of the numerical integration.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.utils.integration.symbolic_integration">
+<span class="sig-prename descclassname"><span class="pre">layercake.utils.integration.</span></span><span class="sig-name descname"><span class="pre">symbolic_integration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/utils/integration.html#symbolic_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.utils.integration.symbolic_integration" title="Link to this definition"></a></dt>
+<dd><p>Return the result of a symbolic integration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ls</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – <p>A list or a tuple with the following arguments for the integration:</p>
+<ul class="simple">
+<li><p><cite>indices</cite>: Tuple of integers labelling the integration.
+Will be returned by the worker.</p></li>
+<li><p><cite>integrals_definition</cite>: A callable returning the integral(s) as a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expression.</p></li>
+<li><p><cite>integrals_arguments</cite>: A tuple with the arguments to be provided to the <cite>integrals_definition</cite> callable.</p></li>
+<li><p><cite>substitutions</cite>: List of 2-tuples containing symbolic substitutions to be made before numerically integrating.
+The 2-tuples contain first a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.
+This is used to check and bypass integrations that are giving zero values.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>tuple(int)</em> – The integers labelling the integration.</p></li>
+<li><p><em>~sympy.core.expr.Expr</em> – The outcome of the symbolic integration.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="variables.html" class="btn btn-neutral float-left" title="Variables module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="inner_products.html" class="btn btn-neutral float-right" title="Inner products module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,377 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.arithmetic.terms.operations &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.arithmetic.terms.operations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.arithmetic.terms.operations</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Arithmetic operations module</span>
+<span class="sd">    ============================</span>
+
+<span class="sd">    This module defines terms resulting from arithmetic operation being applied to arithmetic terms.</span>
+<span class="sd">    The corresponding objects hold the symbolic representation of the terms and their decomposition</span>
+<span class="sd">    on given function basis.</span>
+
+<span class="sd">    Description of the classes</span>
+<span class="sd">    --------------------------</span>
+
+<span class="sd">    * :class:`ProductOfTerms`: Product of a list of terms in a partial differential equation.</span>
+<span class="sd">    * :class:`AdditionOfTerms`: Addition of a list of terms in a partial differential equation.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.terms.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">OperationOnTerms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">sproduct</span><span class="p">,</span> <span class="n">sadd</span>
+
+
+<div class="viewcode-block" id="ProductOfTerms">
+<a class="viewcode-back" href="../../../../files/technical/arithmetic.html#layercake.arithmetic.terms.operations.ProductOfTerms">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProductOfTerms</span><span class="p">(</span><span class="n">OperationOnTerms</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Term representing the product of multiple arithmetic terms.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    *terms: ArithmeticTerms</span>
+<span class="sd">        Arithmetic terms to take the product of.</span>
+<span class="sd">    name: str, optional</span>
+<span class="sd">        Name of the term.</span>
+<span class="sd">    rank: int, optional</span>
+<span class="sd">        Can be used to force the rank of the term, i.e. force the rank of the tensor storing the term(s) decomposition on the provided function basis.</span>
+<span class="sd">        Compute the rank automatically if not provided.</span>
+<span class="sd">    sign: int, optional</span>
+<span class="sd">        Sign in front of the term. Either +1 or -1.</span>
+<span class="sd">        Default to +1.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the term.</span>
+<span class="sd">    sign: int</span>
+<span class="sd">        Sign in front of the term. Either +1 or -1.</span>
+<span class="sd">    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)</span>
+<span class="sd">        The inner products tensor of the term.</span>
+<span class="sd">        Set initially to `None` (not computed).</span>
+<span class="sd">    inner_product_definition: InnerProductDefinition</span>
+<span class="sd">        Object defining the integral representation of the inner product that is used to compute the term representation</span>
+<span class="sd">        on a given function basis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="n">OperationOnTerms</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="n">sign</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Routine to compute the rank of the inner products tensor, if not enforced by the user.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The rank of the inner products tensor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terms</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span> <span class="o">+=</span> <span class="n">term</span><span class="o">.</span><span class="n">rank</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_inner_products_basis_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basis</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function defining the list of symbolic function basis specified in order to compute the inner products</span>
+<span class="sd">        for the operation on terms. Must be defined in subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        basis: SymbolicBasis</span>
+<span class="sd">            Basis to put on the left-hand side of the inner products.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple(SymbolicBasis)</span>
+<span class="sd">            List of symbolic function basis used to compute the inner products.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">basis_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">basis</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terms</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">rank</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">basis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">basis_list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProductOfTerms.operation">
+<a class="viewcode-back" href="../../../../files/technical/arithmetic.html#layercake.arithmetic.terms.operations.ProductOfTerms.operation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Operation (here the product) acting on the terms.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        *terms: ArithmeticTerms</span>
+<span class="sd">            Terms on which the operation must be applied.</span>
+<span class="sd">        evaluate: bool</span>
+<span class="sd">            Whether to let |Sympy| evaluate the operation or not.</span>
+<span class="sd">            Default to `False`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ~sympy.core.expr.Expr</span>
+<span class="sd">            The result of the operation on the terms, as a |Sympy| symbolic expression.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sproduct</span><span class="p">(</span><span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="n">evaluate</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str: Return a LaTeX representation of the terms.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sign</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;+ &#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;- &#39;</span>
+
+        <span class="n">latexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">latex</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">terms</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">lat</span> <span class="ow">in</span> <span class="n">latexes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">lat</span><span class="si">}</span><span class="s1">) &#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lat</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s1"> &#39;</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+
+
+<div class="viewcode-block" id="AdditionOfTerms">
+<a class="viewcode-back" href="../../../../files/technical/arithmetic.html#layercake.arithmetic.terms.operations.AdditionOfTerms">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AdditionOfTerms</span><span class="p">(</span><span class="n">OperationOnTerms</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Term representing the addition of multiple arithmetic terms.</span>
+
+<span class="sd">    Warnings</span>
+<span class="sd">    --------</span>
+<span class="sd">    Provided terms must have the same rank, and involve the same field.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    *terms: ArithmeticTerms</span>
+<span class="sd">        Arithmetic terms to take the addition of.</span>
+<span class="sd">    name: str, optional</span>
+<span class="sd">        Name of the term.</span>
+<span class="sd">    rank: int, optional</span>
+<span class="sd">        Can be used to force the rank of the term, i.e. force the rank of the tensor storing the term(s) decomposition on the provided function basis.</span>
+<span class="sd">        Compute the rank automatically if not provided.</span>
+<span class="sd">    sign: int, optional</span>
+<span class="sd">        Sign in front of the term. Either +1 or -1.</span>
+<span class="sd">        Default to +1.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the term.</span>
+<span class="sd">    sign: int</span>
+<span class="sd">        Sign in front of the term. Either +1 or -1.</span>
+<span class="sd">    inner_products: None or ~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float)</span>
+<span class="sd">        The inner products tensor of the term.</span>
+<span class="sd">        Set initially to `None` (not computed).</span>
+<span class="sd">    inner_product_definition: InnerProductDefinition</span>
+<span class="sd">        Object defining the integral representation of the inner product that is used to compute the term representation</span>
+<span class="sd">        on a given function basis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="n">OperationOnTerms</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="n">sign</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">term1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">terms</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">term2</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">[</span><span class="n">i</span><span class="p">:]:</span>
+                <span class="k">if</span> <span class="n">term2</span><span class="o">.</span><span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">term1</span><span class="o">.</span><span class="n">field</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;AdditionOfTerms must always involve the same field, &#39;</span>
+                                     <span class="sa">f</span><span class="s1">&#39;but two different fields </span><span class="si">{</span><span class="n">term1</span><span class="o">.</span><span class="n">field</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="n">term2</span><span class="o">.</span><span class="n">field</span><span class="si">}</span><span class="s1"> have been provided.&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbolic_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: The symbolic expression of the result of the operation on the terms, but as a symbolic functional.</span>
+<span class="sd">        Only contains symbols.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sproduct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sign</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">symbolic_expression</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terms</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">numerical_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: The numerical expression of the result of the operation on the terms, as a symbolic functional,</span>
+<span class="sd">        and with parameters replaced by their numerical value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sproduct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sign</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">numerical_expression</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terms</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_symbolic_expressions_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_expression</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_numerical_expressions_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_expression</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_symbolic_functions_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_function</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_numerical_functions_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_function</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Routine to compute the rank of the inner products tensor, if not enforced by the user.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The rank of the inner products tensor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">prank</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_terms</span><span class="p">):</span>
+            <span class="n">trank</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">rank</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trank</span> <span class="o">!=</span> <span class="n">prank</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;All the terms provided to AdditionOfTerms term must be of the same rank.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span> <span class="o">=</span> <span class="n">trank</span>
+
+            <span class="n">prank</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">rank</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_inner_products_basis_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basis</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function defining the list of symbolic function basis specified in order to compute the inner products</span>
+<span class="sd">        for the operation on terms. Must be defined in subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        basis: SymbolicBasis</span>
+<span class="sd">            Basis to put on the left-hand side of the inner products.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple(SymbolicBasis)</span>
+<span class="sd">            List of symbolic function basis used to compute the inner products.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">basis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">basis</span>
+
+<div class="viewcode-block" id="AdditionOfTerms.operation">
+<a class="viewcode-back" href="../../../../files/technical/arithmetic.html#layercake.arithmetic.terms.operations.AdditionOfTerms.operation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Operation (here the addition) acting on the terms.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        *terms: ArithmeticTerms</span>
+<span class="sd">            Terms on which the operation must be applied.</span>
+<span class="sd">        evaluate: bool</span>
+<span class="sd">            Whether to let |Sympy| evaluate the operation or not.</span>
+<span class="sd">            Default to `False`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ~sympy.core.expr.Expr</span>
+<span class="sd">            The result of the operation on the terms, as a |Sympy| symbolic expression.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sadd</span><span class="p">(</span><span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="n">evaluate</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str: Return a LaTeX representation of the terms.&quot;&quot;&quot;</span>
+        <span class="n">latexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">latex</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">terms</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">lat</span> <span class="ow">in</span> <span class="n">latexes</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lat</span><span class="si">}</span><span class="s1"> &#39;</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

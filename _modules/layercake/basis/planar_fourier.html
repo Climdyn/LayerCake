@@ -1,0 +1,551 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.basis.planar_fourier &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.basis.planar_fourier</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.basis.planar_fourier</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fourier Basis definition module</span>
+<span class="sd">    ===============================</span>
+
+<span class="sd">    Classes and functions defining Fourier basis of functions (`Fourier modes`_) on a plane.</span>
+
+<span class="sd">    Description of the classes</span>
+<span class="sd">    --------------------------</span>
+
+<span class="sd">    * :class:`PlanarChannelFourierBasis`: Fourier basis defined on a zonally periodic channel, with no-flux boundary conditions in the meridional direction :math:`y`.</span>
+<span class="sd">    * :class:`PlanarBasinFourierBasis`: Fourier basis defined on a closed basin, with no-flux boundary conditions in both the zonal and meridional direction :math:`x` and :math:`y`.</span>
+
+<span class="sd">    .. _Fourier modes: https://en.wikipedia.org/wiki/Fourier_series</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.basis.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SymbolicBasis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.variables.systems</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlanarCartesianCoordinateSystem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.variables.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">pi</span>
+
+
+<div class="viewcode-block" id="PlanarChannelFourierBasis">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.PlanarChannelFourierBasis">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PlanarChannelFourierBasis</span><span class="p">(</span><span class="n">SymbolicBasis</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fourier basis defined on a zonally periodic channel on a 2D plane, with no-flux boundary conditions in the meridional</span>
+<span class="sd">    direction :math:`y`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters: list(~parameter.Parameter)</span>
+<span class="sd">        List holding the parameters appearing in the equations defining the basis.</span>
+<span class="sd">    spectral_blocks: ~numpy.ndarray(int)</span>
+<span class="sd">        Spectral blocks detailing the modes :math:`x`- and :math:`y`-wavenumber.</span>
+<span class="sd">        Array of shape (`nblocks`, 2), where `nblocks` is the number of spectral blocks.</span>
+<span class="sd">    length: float or ~parameter.Parameter, optional</span>
+<span class="sd">        Length of the domain along the :math:`x` coordinate: :math:`L_x` .</span>
+<span class="sd">        Default to `None` for the default length of :math:`2 \\pi / n`.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    substitutions: list(tuple)</span>
+<span class="sd">        List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first</span>
+<span class="sd">        a |Sympy|  expression and then the value to substitute.</span>
+<span class="sd">    coordinate_system: ~systems.CoordinateSystem</span>
+<span class="sd">        Coordinate system on which the basis is defined.</span>
+<span class="sd">    parameters: list(~parameter.Parameter)</span>
+<span class="sd">        Dictionary holding the parameters appearing in the equations defining the basis.</span>
+<span class="sd">    length: float or ~parameter.Parameter or None</span>
+<span class="sd">        Length of the domain along the :math:`x` coordinate: :math:`L_x` .</span>
+<span class="sd">        `None` for the default length of :math:`2 \\pi / n`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;n&#39; (model aspect ratio) should be present in the provided parameters&quot;</span><span class="p">)</span>
+
+        <span class="c1"># aspect_ratio = float(param)</span>
+
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span>
+            <span class="c1"># length = 2 * np.pi / aspect_ratio</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="n">SymbolicBasis</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+
+        <span class="n">awavenum</span> <span class="o">=</span> <span class="n">channel_wavenumbers</span><span class="p">(</span><span class="n">spectral_blocks</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">wv</span> <span class="ow">in</span> <span class="n">awavenum</span><span class="p">:</span>
+
+            <span class="n">mode_eq</span> <span class="o">=</span> <span class="n">fourier_functions</span><span class="p">(</span><span class="n">wv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">mode_eq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mode_eq</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PlanarChannelFourierBasis.set_parameters">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.PlanarChannelFourierBasis.set_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setter for the parameters&#39; dictionary.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parameters: list(~parameter.Parameter)</span>
+<span class="sd">            List holding the parameters appearing in the equations defining the basis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;n&#39; (model aspect ratio) should be present in the provided parameters&quot;</span><span class="p">)</span>
+
+        <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+
+        <span class="n">coordinate_system</span> <span class="o">=</span> <span class="n">PlanarCartesianCoordinateSystem</span><span class="p">(</span><span class="n">extent</span><span class="o">=</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">pi</span><span class="p">)))</span>
+        <span class="c1"># coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span> <span class="o">=</span> <span class="n">coordinate_system</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">substitutions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">substitutions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PlanarBasinFourierBasis">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.PlanarBasinFourierBasis">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PlanarBasinFourierBasis</span><span class="p">(</span><span class="n">SymbolicBasis</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fourier basis defined on a closed basin, with no-flux boundary conditions in both the zonal and meridional</span>
+<span class="sd">    direction :math:`x` and :math:`y`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters: list(~parameter.Parameter)</span>
+<span class="sd">        List holding the parameters appearing in the equations defining the basis.</span>
+<span class="sd">    spectral_blocks: ~numpy.ndarray(int)</span>
+<span class="sd">        Spectral blocks detailing the modes :math:`x`- and :math:`y`-wavenumber.</span>
+<span class="sd">        Array of shape (`nblocks`, 2), where `nblocks` is the number of spectral blocks.</span>
+<span class="sd">    length: float or ~parameter.Parameter, optional</span>
+<span class="sd">        Length of the domain along the :math:`x` coordinate: :math:`L_x` .</span>
+<span class="sd">        Default to `None` for the default length of :math:`2 \\pi / n`.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    substitutions: list(tuple)</span>
+<span class="sd">        List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first</span>
+<span class="sd">        a |Sympy|  expression and then the value to substitute.</span>
+<span class="sd">    coordinate_system: ~systems.CoordinateSystem</span>
+<span class="sd">        Coordinate system on which the basis is defined.</span>
+<span class="sd">    parameters: list(~parameter.Parameter)</span>
+<span class="sd">        Dictionary holding the parameters appearing in the equations defining the basis.</span>
+<span class="sd">    length: float or None</span>
+<span class="sd">        Length of the domain along the :math:`x` coordinate: :math:`L_x` .</span>
+<span class="sd">        `None` for the default length of :math:`2 \\pi / n`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;n&#39; (model aspect ratio) should be present in the provided parameters&quot;</span><span class="p">)</span>
+
+        <span class="c1"># aspect_ratio = float(param)</span>
+
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span>
+            <span class="c1"># length = 2 * np.pi / aspect_ratio</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="n">SymbolicBasis</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+
+        <span class="n">owavenum</span> <span class="o">=</span> <span class="n">basin_wavenumbers</span><span class="p">(</span><span class="n">spectral_blocks</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">wv</span> <span class="ow">in</span> <span class="n">owavenum</span><span class="p">:</span>
+
+            <span class="n">mode_eq</span> <span class="o">=</span> <span class="n">fourier_functions</span><span class="p">(</span><span class="n">wv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">mode_eq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mode_eq</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PlanarBasinFourierBasis.set_parameters">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.PlanarBasinFourierBasis.set_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setter for the parameters&#39; dictionary.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parameters: list(~parameter.Parameter)</span>
+<span class="sd">            List holding the parameters appearing in the equations defining the basis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;n&#39; (model aspect ratio) should be present in the provided parameters&quot;</span><span class="p">)</span>
+
+        <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+
+        <span class="n">coordinate_system</span> <span class="o">=</span> <span class="n">PlanarCartesianCoordinateSystem</span><span class="p">(</span><span class="n">extent</span><span class="o">=</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">pi</span><span class="p">)))</span>
+        <span class="c1"># coordinate_system = PlanarCartesianCoordinateSystem(extent=((0., length), (0., aspect_ratio * length / 2)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span> <span class="o">=</span> <span class="n">coordinate_system</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">substitutions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">substitutions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="contiguous_basin_basis">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.contiguous_basin_basis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">contiguous_basin_basis</span><span class="p">(</span><span class="n">nxmax</span><span class="p">,</span> <span class="n">nymax</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that returns the basis for contiguous spectral blocks of modes on a closed basin.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nxmax: int</span>
+<span class="sd">        Maximum x-wavenumber to fill the spectral block up to.</span>
+<span class="sd">    nymax: int</span>
+<span class="sd">        Maximum :math:`y`-wavenumber to fill the spectral block up to.</span>
+<span class="sd">    parameters: list(~parameter.Parameter)</span>
+<span class="sd">        List holding the parameters appearing in the equations defining the basis.</span>
+<span class="sd">    length: float or ~parameter.Parameter, optional</span>
+<span class="sd">        Length of the domain along the :math:`x` coordinate: :math:`L_x` .</span>
+<span class="sd">        Default to `None` for the default length of :math:`2 \\pi / n`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    PlanarBasinFourierBasis</span>
+<span class="sd">        The closed basin contiguous basis up to the specified spectral truncation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">spectral_blocks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nxmax</span> <span class="o">*</span> <span class="n">nymax</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">nx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nxmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ny</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nymax</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span>
+            <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ny</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">PlanarBasinFourierBasis</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="contiguous_channel_basis">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.contiguous_channel_basis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">contiguous_channel_basis</span><span class="p">(</span><span class="n">nxmax</span><span class="p">,</span> <span class="n">nymax</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that returns the basis for contiguous spectral blocks of modes on a channel.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nxmax: int</span>
+<span class="sd">        Maximum x-wavenumber to fill the spectral block up to.</span>
+<span class="sd">    nymax: int</span>
+<span class="sd">        Maximum :math:`y`-wavenumber to fill the spectral block up to.</span>
+<span class="sd">    parameters: list(~parameter.Parameter)</span>
+<span class="sd">        List holding the parameters appearing in the equations defining the basis.</span>
+<span class="sd">    length: float or ~parameter.Parameter, optional</span>
+<span class="sd">        Length of the domain along the :math:`x` coordinate: :math:`L_x` .</span>
+<span class="sd">        Default to `None` for the default length of :math:`2 \\pi / n`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ChannelFourierBasis</span>
+<span class="sd">        The channel contiguous basis up to the specified spectral truncation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">spectral_blocks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nxmax</span> <span class="o">*</span> <span class="n">nymax</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">nx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nxmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ny</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nymax</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span>
+            <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ny</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">PlanarChannelFourierBasis</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fourier_functions">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.fourier_functions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fourier_functions</span><span class="p">(</span><span class="n">wave_number</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">coordinate_system</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that return Fourier modes expressions:</span>
+
+<span class="sd">    * `&#39;A&#39;` for a function of the form :math:`F^A_{P} (x, y) =  \\sqrt{2}\\, \\cos(P y) = \\sqrt{2}\\, \\cos(n_y\\, y)`</span>
+<span class="sd">    * `&#39;K&#39;` for a function of the form :math:`F^K_{M,P} (x, y) =  2\\cos(M nx)\\, \\sin(P y) = 2\\cos(n_x\\,  n\\, x)\\, \\sin(n_y\\, y)`</span>
+<span class="sd">    * `&#39;L&#39;` for a function of the form :math:`F^L_{H,P} (x, y) = 2\\sin(H nx)\\, \\sin(P y) = 2\\sin(n_x\\, n \\,x)\\, \\sin(n_y\\, y)`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    wave_number: WaveNumber</span>
+<span class="sd">        The wavenumber and type information of the mode to be returned.</span>
+<span class="sd">    n: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        The aspect ratio symbol.</span>
+<span class="sd">    coordinate_system: ~systems.CoordinateSystem</span>
+<span class="sd">        Coordinate system on which the basis is defined.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ~sympy.core.expr.Expr</span>
+<span class="sd">        Symbolic expression of the mode.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mode_eq</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_symbol</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_symbol</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">wave_number</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;A&#39;</span><span class="p">:</span>
+        <span class="n">mode_eq</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">wave_number</span><span class="o">.</span><span class="n">ny</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">wave_number</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;K&#39;</span><span class="p">:</span>
+        <span class="n">mode_eq</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">wave_number</span><span class="o">.</span><span class="n">nx</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">wave_number</span><span class="o">.</span><span class="n">ny</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">wave_number</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;L&#39;</span><span class="p">:</span>
+        <span class="n">mode_eq</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">wave_number</span><span class="o">.</span><span class="n">nx</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">wave_number</span><span class="o">.</span><span class="n">ny</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mode_eq</span></div>
+
+
+
+<div class="viewcode-block" id="WaveNumber">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.WaveNumber">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WaveNumber</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to define model base functions wavenumber. The basis function available are:</span>
+
+<span class="sd">    * `&#39;A&#39;` for a function of the form :math:`F^A_{P} (x, y) =  \\sqrt{2}\\, \\cos(P y) = \\sqrt{2}\\, \\cos(n_y\\, y)`</span>
+<span class="sd">    * `&#39;K&#39;` for a function of the form :math:`F^K_{M,P} (x, y) =  2\\cos(M nx)\\, \\sin(P y) = 2\\cos(n_x\\,  n\\, x)\\, \\sin(n_y\\, y)`</span>
+<span class="sd">    * `&#39;L&#39;` for a function of the form :math:`F^L_{H,P} (x, y) = 2\\sin(H nx)\\, \\sin(P y) = 2\\sin(n_x\\, n \\,x)\\, \\sin(n_y\\, y)`</span>
+
+<span class="sd">    where :math:`x` and :math:`y` are the nondimensional model&#39;s domain coordinates.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    function_type: str</span>
+<span class="sd">        One character string to define the type of basis function. It can be `&#39;A&#39;`, `&#39;K&#39;` or `&#39;L&#39;`.</span>
+<span class="sd">    P: int</span>
+<span class="sd">        The :math:`y` wavenumber integer.</span>
+<span class="sd">    M: int</span>
+<span class="sd">        The :math:`x` wavenumber integer.</span>
+<span class="sd">    H: int</span>
+<span class="sd">        The :math:`x` wavenumber integer.</span>
+<span class="sd">    nx: float</span>
+<span class="sd">        The :math:`x` wavenumber.</span>
+<span class="sd">    ny: float</span>
+<span class="sd">        The :math:`y` wavenumber.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    type: str</span>
+<span class="sd">        One character string to define the type of basis function. It can be `&#39;A&#39;`, `&#39;K&#39;` or `&#39;L&#39;`.</span>
+<span class="sd">    P: int</span>
+<span class="sd">        The :math:`y` wavenumber integer.</span>
+<span class="sd">    M: int</span>
+<span class="sd">        The :math:`x` wavenumber integer.</span>
+<span class="sd">    H: int</span>
+<span class="sd">        The :math:`x` wavenumber integer.</span>
+<span class="sd">    nx: float</span>
+<span class="sd">        The :math:`x` wavenumber.</span>
+<span class="sd">    ny: float</span>
+<span class="sd">        The :math:`y` wavenumber.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_type</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">function_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">P</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">M</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">H</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nx</span> <span class="o">=</span> <span class="n">nx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ny</span> <span class="o">=</span> <span class="n">ny</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;type = </span><span class="si">{}</span><span class="s2">, P = </span><span class="si">{}</span><span class="s2">, M= </span><span class="si">{}</span><span class="s2">,H=</span><span class="si">{}</span><span class="s2">, nx= </span><span class="si">{}</span><span class="s2">, ny=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ny</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="channel_wavenumbers">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.channel_wavenumbers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">channel_wavenumbers</span><span class="p">(</span><span class="n">spectral_blocks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Functions that returns the :class:`WaveNumber` objects corresponding to a given list of spectral blocks for a</span>
+<span class="sd">    channel-like spatial domain.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectral_blocks: ~numpy.ndarray(int)</span>
+<span class="sd">        Spectral blocks detailing the modes :math:`x`- and :math:`y`-wavenumber.</span>
+<span class="sd">        Array of shape (nblocks, 2), where `nblocks` is the number of spectral blocks.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ~numpy.ndarray(WaveNumber)</span>
+<span class="sd">        The array of wavenumber objects corresponding to the given spectral blocks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># initialization of the variables</span>
+    <span class="n">wave_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="c1"># Atmospheric wavenumbers definition</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spectral_blocks</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>  <span class="c1"># function type is limited to AKL for the moment: atmosphere is a channel</span>
+
+        <span class="k">if</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">wave_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WaveNumber</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="n">wave_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WaveNumber</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="n">wave_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WaveNumber</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wave_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WaveNumber</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="n">wave_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WaveNumber</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wave_numbers</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="basin_wavenumbers">
+<a class="viewcode-back" href="../../../files/technical/basis.html#layercake.basis.planar_fourier.basin_wavenumbers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">basin_wavenumbers</span><span class="p">(</span><span class="n">spectral_blocks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Functions that returns the :class:`WaveNumber` objects corresponding to a given list of spectral blocks for a</span>
+<span class="sd">    closed basin spatial domain.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectral_blocks: ~numpy.ndarray(int)</span>
+<span class="sd">        Spectral blocks detailing the modes :math:`x`- and :math:`y`-wavenumber.</span>
+<span class="sd">        Array of shape (`nblocks`, 2), where `nblocks` is the number of spectral blocks.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ~numpy.ndarray(WaveNumber)</span>
+<span class="sd">        The array of wavenumber objects corresponding to the given spectral blocks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># initialization of the variables</span>
+    <span class="n">wave_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="c1"># Oceanic wavenumbers definition</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spectral_blocks</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>  <span class="c1"># function type is limited to L for the moment: ocean is a closed basin</span>
+        <span class="n">wave_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WaveNumber</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">spectral_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wave_numbers</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,647 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.variables.field &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.variables.field</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.variables.field</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Field definition module</span>
+<span class="sd">    =======================</span>
+
+<span class="sd">    This module defines spatial fields in the models.</span>
+
+<span class="sd">    Description of the classes</span>
+<span class="sd">    --------------------------</span>
+
+<span class="sd">    * :class:`Field`: Class defining the spatial fields.</span>
+<span class="sd">    * :class:`ParameterField`: Class defining static spatial field that can be viewed as models&#39; parameters.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pebble</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcessPool</span> <span class="k">as</span> <span class="n">Pool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">cpu_count</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">Function</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImmutableSparseMatrix</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.variables.variable</span><span class="w"> </span><span class="kn">import</span> <span class="n">Variable</span><span class="p">,</span> <span class="n">VariablesArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.variables.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParametersArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">parallel_integration</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">integration</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.symbolic_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_dic_zeros</span>
+
+
+<div class="viewcode-block" id="Field">
+<a class="viewcode-back" href="../../../files/technical/variables.html#layercake.variables.field.Field">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Field</span><span class="p">(</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class defining the spatial fields in the models.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the field.</span>
+<span class="sd">    symbol: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        A |Sympy| symbol to represent the field in symbolic expressions.</span>
+<span class="sd">    basis: SymbolicBasis</span>
+<span class="sd">        A symbolic basis of functions on which the Galerkin expansion of the field is performed.</span>
+<span class="sd">    inner_product_definition: InnerProductDefinition</span>
+<span class="sd">        Inner product definition object used to compute the inner products between the elements of the basis.</span>
+<span class="sd">    units: str, optional</span>
+<span class="sd">        The units of the variable.</span>
+<span class="sd">        Should be specified by joining atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    latex: str, optional</span>
+<span class="sd">        Latex string representing the variable.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    state: VariablesArray</span>
+<span class="sd">        Field state array: array containing the coefficient of the field&#39;s Galerkin expansion.</span>
+<span class="sd">    state_kwargs: dict</span>
+<span class="sd">        Used to create the field state array if `state` is not a :class:`VariableArray`.</span>
+<span class="sd">        Passed to the :class:`VariableArray` constructor.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the field.</span>
+<span class="sd">    symbol: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        The |Sympy| symbol representing the field in symbolic expressions.</span>
+<span class="sd">    basis: SymbolicBasis</span>
+<span class="sd">        The symbolic basis of functions on which the Galerkin expansion of the field is performed.</span>
+<span class="sd">    inner_product_definition: InnerProductDefinition</span>
+<span class="sd">        The inner product definition object used to compute the inner products between the elements of the basis.</span>
+<span class="sd">    units: str, optional</span>
+<span class="sd">        The units of the variable.</span>
+<span class="sd">        Should be specified by joining atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">    latex: str, optional</span>
+<span class="sd">        Latex string representing the variable.</span>
+<span class="sd">    state: VariablesArray</span>
+<span class="sd">        Field state array: array containing the coefficient of the field&#39;s Galerkin expansion.</span>
+<span class="sd">    coordinate_system: CoordinateSystem</span>
+<span class="sd">        Coordinate system on which the basis of functions and the inner product are defined.</span>
+<span class="sd">    function: ~sympy.core.expr.Expr</span>
+<span class="sd">        A Sympy symbolic representation of the field as a function of space and time.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">inner_product_definition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">state_kwargs</span><span class="p">):</span>
+
+        <span class="n">_t</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+
+        <span class="n">Variable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">latex</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">basis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span> <span class="o">=</span> <span class="n">basis</span><span class="o">.</span><span class="n">coordinate_system</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inner_product_definition</span> <span class="o">=</span> <span class="n">inner_product_definition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">symbol</span><span class="p">)(</span><span class="n">_t</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates_symbol_as_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;dynamical&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">state_kwargs</span><span class="p">:</span>
+            <span class="n">state_kwargs</span><span class="p">[</span><span class="s1">&#39;dynamical&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">VariablesArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">)),</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="n">latex</span><span class="p">,</span> <span class="o">**</span><span class="n">state_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">VariablesArray</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">VariablesArray</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="n">latex</span><span class="p">,</span> <span class="o">**</span><span class="n">state_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_equation</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; (symbol: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,  units: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">+</span> <span class="s1">&#39;, state: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="ParameterField">
+<a class="viewcode-back" href="../../../files/technical/variables.html#layercake.variables.field.ParameterField">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParameterField</span><span class="p">(</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class defining a static spatial fields in the models.</span>
+<span class="sd">    Can be viewed as a model parameter.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the field.</span>
+<span class="sd">    symbol: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        A |Sympy| symbol to represent the field in symbolic expressions.</span>
+<span class="sd">    parameters_array: ParametersArray or ~numpy.ndarray</span>
+<span class="sd">        Array containing the coefficients of the field Galerkin expansion.</span>
+<span class="sd">    basis: SymbolicBasis</span>
+<span class="sd">        A symbolic basis of functions on which the Galerkin expansion of the field is performed.</span>
+<span class="sd">    inner_product_definition: InnerProductDefinition</span>
+<span class="sd">        Inner product definition object used to compute the inner products between the elements of the basis.</span>
+<span class="sd">    units: str, optional</span>
+<span class="sd">        The units of the variable.</span>
+<span class="sd">        Should be specified by joining atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    latex: str, optional</span>
+<span class="sd">        Latex string representing the variable.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    parameters_array_kwargs: dict, optional</span>
+<span class="sd">        Used to create the field state if `parameters_array` is not a :class:`ParametersArray` object.</span>
+<span class="sd">        Passed to the :class:`ParametersArray` class constructor.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the field.</span>
+<span class="sd">    symbol: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        The |Sympy| symbol representing the field in symbolic expressions.</span>
+<span class="sd">    basis: SymbolicBasis</span>
+<span class="sd">        The symbolic basis of functions on which the Galerkin expansion of the field is performed.</span>
+<span class="sd">    inner_product_definition: InnerProductDefinition</span>
+<span class="sd">        The inner product definition object used to compute the inner products between the elements of the basis.</span>
+<span class="sd">    units: str</span>
+<span class="sd">        The units of the variable.</span>
+<span class="sd">        Should be specified by joining atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">    latex: str, optional</span>
+<span class="sd">        Latex string representing the variable.</span>
+<span class="sd">    parameters: ParametersArray</span>
+<span class="sd">        Array containing the coefficients of the field Galerkin expansion.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">parameters_array</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span>
+                 <span class="n">inner_product_definition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters_array_kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">basis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inner_product_definition</span> <span class="o">=</span> <span class="n">inner_product_definition</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters_array</span><span class="p">,</span> <span class="n">ParametersArray</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters_array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">parameters_array</span><span class="o">.</span><span class="n">units</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">):</span>
+                <span class="n">symbol_name</span> <span class="o">=</span> <span class="n">symbol</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">symbol_name</span> <span class="o">=</span> <span class="n">symbol</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">symbol_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parameters_array</span><span class="p">))]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">symbols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">ParametersArray</span><span class="p">(</span><span class="n">parameters_array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">symbols</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters_array_kwargs</span><span class="p">)</span>
+
+        <span class="n">Variable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">latex</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of parameters provided does not match the number of modes in the provided basis.&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dimensional_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Returns the dimensional value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">dimensional_values</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nondimensional_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Returns the nondimensional value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">nondimensional_values</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~numpy.ndarray(~sympy.core.symbol.Symbol): Returns the symbol of the parameters in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbolic_expressions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~numpy.ndarray(~sympy.core.expr.Expr): Returns the symbolic expressions of the parameters in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbolic_expressions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_dimensional</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool: Indicate if the provided value is dimensional or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">input_dimensional</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">return_dimensional</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool: Indicate if the returned value is dimensional or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">return_dimensional</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">descriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~numpy.ndarray(str): Description of the parameters in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptions</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; (symbol: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,  units: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">+</span> <span class="s1">&#39;, parameters: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="FunctionField">
+<a class="viewcode-back" href="../../../files/technical/variables.html#layercake.variables.field.FunctionField">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FunctionField</span><span class="p">(</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class defining a static spatial fields in the models, specified as a function of the model&#39;s coordinates.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the field.</span>
+<span class="sd">    symbol: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        Symbol representing the field.</span>
+<span class="sd">    symbolic_expression: ~sympy.core.expr.Expr</span>
+<span class="sd">        A |Sympy| expression to represent the field mathematical expression in symbolic expressions.</span>
+<span class="sd">    basis: SymbolicBasis</span>
+<span class="sd">        A symbolic basis of functions on which the Galerkin expansion of the field is performed.</span>
+<span class="sd">    expression_parameters: None or list(~parameter.Parameter), optional</span>
+<span class="sd">        List of parameters appearing in the symbolic expression.</span>
+<span class="sd">        If `None`, assumes that no parameters are appearing there.</span>
+<span class="sd">    inner_product_definition: InnerProductDefinition or None, optional</span>
+<span class="sd">        Inner product definition object used to compute the inner products between the elements of the basis.</span>
+<span class="sd">        If `None`, the Galerkin expansion will not be computed, and then this field can only be used in symbolic expressions.</span>
+<span class="sd">    units: str, optional</span>
+<span class="sd">        The units of the variable.</span>
+<span class="sd">        Should be specified by joining atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    latex: str, optional</span>
+<span class="sd">        Latex string representing the variable.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    extra_substitutions: list(tuple), optional</span>
+<span class="sd">        List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.</span>
+<span class="sd">        The 2-tuples contain first a |Sympy|  expression and then the value to substitute.</span>
+<span class="sd">    force_substitution: bool, optional</span>
+<span class="sd">        Force the substitution by the numerical values of the parameters arrays, even in the symbolic case.</span>
+<span class="sd">        Default to `False`.</span>
+<span class="sd">    force_symbolic_substitution: bool, optional</span>
+<span class="sd">        Force the substitution by the symbolic expressions resulting from the projection of the function field onto</span>
+<span class="sd">        the provided `basis`. Only relevant when working in the symbolic case.</span>
+<span class="sd">        Is superseded by the `force_substitution` argument, i.e. the latter should be set to `False` for this parameter to work.</span>
+<span class="sd">        Default to `False`.</span>
+<span class="sd">    **parameters_array_kwargs: dict, optional</span>
+<span class="sd">        Used to create the field state :class:`ParametersArray` object.</span>
+<span class="sd">        Passed to the :class:`ParametersArray` class constructor.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the field.</span>
+<span class="sd">    symbol: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        Symbol representing the field.</span>
+<span class="sd">    symbolic_expression: ~sympy.core.expr.Expr</span>
+<span class="sd">        A |Sympy| expression to represent the field mathematical expression in symbolic expressions.</span>
+<span class="sd">    basis: SymbolicBasis</span>
+<span class="sd">        The symbolic basis of functions on which the Galerkin expansion of the field is performed.</span>
+<span class="sd">    inner_product_definition: InnerProductDefinition</span>
+<span class="sd">        The inner product definition object used to compute the inner products between the elements of the basis.</span>
+<span class="sd">    units: str</span>
+<span class="sd">        The units of the variable.</span>
+<span class="sd">        Should be specified by joining atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">    latex: str, optional</span>
+<span class="sd">        Latex string representing the variable.</span>
+<span class="sd">    parameters: ParametersArray</span>
+<span class="sd">        Array containing the coefficients of the field Galerkin expansion, computed from the specified basis.</span>
+<span class="sd">    expression_parameters: None or list(~parameter.Parameter), optional</span>
+<span class="sd">        List of parameters appearing in the symbolic expression.</span>
+<span class="sd">        If `None`, assumes that no parameters are appearing there.</span>
+<span class="sd">    force_substitution: bool, optional</span>
+<span class="sd">        Force the substitution by the numerical values of the parameters arrays, even in the symbolic case.</span>
+<span class="sd">    force_symbolic_substitution: bool, optional</span>
+<span class="sd">        Force the substitution by the symbolic expressions resulting from the projection of the function field onto</span>
+<span class="sd">        the provided `basis`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">symbolic_expression</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">expression_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">inner_product_definition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_substitutions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">force_substitution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_symbolic_substitution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters_array_kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">basis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inner_product_definition</span> <span class="o">=</span> <span class="n">inner_product_definition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_expression</span> <span class="o">=</span> <span class="n">symbolic_expression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expression_parameters</span> <span class="o">=</span> <span class="n">expression_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_substitution</span> <span class="o">=</span> <span class="n">force_substitution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_symbolic_substitution</span> <span class="o">=</span> <span class="n">force_symbolic_substitution</span>
+
+        <span class="n">Variable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">latex</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner_product_definition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_expansion</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_substitutions</span><span class="o">=</span><span class="n">extra_substitutions</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters_array_kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of parameters provided does not match the number of modes in the provided basis.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_parameters</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner_product_definition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_symbolic_expansion</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_substitutions</span><span class="o">=</span><span class="n">extra_substitutions</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_parameters</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of parameters provided does not match the number of modes in the provided basis.&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dimensional_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Returns the dimensional value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">dimensional_values</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nondimensional_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Returns the nondimensional value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">nondimensional_values</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~numpy.ndarray(~sympy.core.symbol.Symbol): Returns the symbol of the parameters in the array.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbolic_expressions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~numpy.ndarray(~sympy.core.expr.Expr): Returns the symbolic expressions of the parameters in the array.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbolic_expressions</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">numerical_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: The numeric expression of the function, i.e. with parameters replaced by their numerical value.&quot;&quot;&quot;</span>
+        <span class="n">substitutions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">expr_parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expr_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression_parameters</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">expr_parameters</span><span class="p">:</span>
+            <span class="n">substitutions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">param</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_expression</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_dimensional</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool: Indicate if the provided value is dimensional or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">input_dimensional</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">return_dimensional</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool: Indicate if the returned value is dimensional or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">return_dimensional</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">descriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~numpy.ndarray(str): Description of the parameters in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptions</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; (symbol: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,  units: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">+</span> <span class="s1">&#39;, parameters: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_substitutions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters_array_kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the Galerkin expansion and store the result.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        timeout: None or bool or int</span>
+<span class="sd">            Control the switch from symbolic to numerical integration.</span>
+<span class="sd">            In the end, all results are converted to numerical expressions, but</span>
+<span class="sd">            by default, `parallel_integration` workers will try first to integrate</span>
+<span class="sd">            |Sympy| expressions symbolically. However, a fallback to numerical integration can be enforced.</span>
+<span class="sd">            The options are:</span>
+
+<span class="sd">            * `None`: This is the &quot;full-symbolic&quot; mode. No timeout will be applied, and the switch to numerical integration will never happen.</span>
+<span class="sd">              Can result in very long and improbable computation time.</span>
+<span class="sd">            * `True`: This is the &quot;full-numerical&quot; mode. Symbolic computations do not occur, and the workers try directly to integrate</span>
+<span class="sd">              numerically.</span>
+<span class="sd">            * `False`: Same as `None`.</span>
+<span class="sd">            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the</span>
+<span class="sd">              numerical integration.</span>
+<span class="sd">        num_threads: None or int, optional</span>
+<span class="sd">            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.</span>
+<span class="sd">            Default to `None`.</span>
+<span class="sd">        extra_substitutions: list(tuple)</span>
+<span class="sd">            List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.</span>
+<span class="sd">            The 2-tuples contain first a |Sympy|  expression and then the value to substitute.</span>
+<span class="sd">        **parameters_array_kwargs: dict, optional</span>
+<span class="sd">            Used to create the field state :class:`ParametersArray` object.</span>
+<span class="sd">            Passed to the :class:`ParametersArray` class constructor.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_threads</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span>
+
+        <span class="n">substitutions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">substitutions</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">expr_parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expr_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression_parameters</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">expr_parameters</span><span class="p">:</span>
+            <span class="n">substitutions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">param</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">extra_substitutions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">substitutions</span> <span class="o">+=</span> <span class="n">extra_substitutions</span>
+
+        <span class="n">args_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner_product_definition</span><span class="o">.</span><span class="n">inner_product</span><span class="p">,</span>
+                      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_expression</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)))</span>
+                     <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">))]</span>
+
+        <span class="k">if</span> <span class="s1">&#39;LAYERCAKE_PARALLEL_INTEGRATION&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="n">parallel_integrations</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAYERCAKE_PARALLEL_INTEGRATION&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+                <span class="n">parallel_integrations</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parallel_integrations</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">parallel_integrations</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="n">parallel_integration</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">args_list</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span>
+                                              <span class="n">symbolic_int</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">integration</span><span class="p">(</span><span class="n">args_list</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">symbolic_int</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)</span>
+
+        <span class="n">symbol_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">symbols_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">symbol_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">))]</span>
+        <span class="n">symbols_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">symbols_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">ParametersArray</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">symbols</span><span class="o">=</span><span class="n">symbols_list</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters_array_kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_symbolic_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basis_subs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">extra_substitutions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the Galerkin expansion and store the result.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        timeout: None or bool or int</span>
+<span class="sd">            Control the switch from symbolic to numerical integration.</span>
+<span class="sd">            In the end, all results are converted to numerical expressions, but</span>
+<span class="sd">            by default, `parallel_integration` workers will try first to integrate</span>
+<span class="sd">            |Sympy| expressions symbolically. However, a fallback to numerical integration can be enforced.</span>
+<span class="sd">            The options are:</span>
+
+<span class="sd">            * `None`: This is the &quot;full-symbolic&quot; mode. No timeout will be applied, and the switch to numerical integration will never happen.</span>
+<span class="sd">              Can result in very long and improbable computation time.</span>
+<span class="sd">            * `True`: This is the &quot;full-numerical&quot; mode. Symbolic computations do not occur, and the workers try directly to integrate</span>
+<span class="sd">              numerically.</span>
+<span class="sd">            * `False`: Same as `None`.</span>
+<span class="sd">            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the</span>
+<span class="sd">              numerical integration.</span>
+<span class="sd">        num_threads: None or int, optional</span>
+<span class="sd">            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.</span>
+<span class="sd">            Default to `None`.</span>
+<span class="sd">        basis_subs: bool, optional</span>
+<span class="sd">            Whether to substitute the parameters appearing in the definition of the basis of functions by</span>
+<span class="sd">            their numerical value.</span>
+<span class="sd">            Default to `False`.</span>
+<span class="sd">        extra_substitutions: list(tuple)</span>
+<span class="sd">            List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.</span>
+<span class="sd">            The 2-tuples contain first a |Sympy|  expression and then the value to substitute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_threads</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">basis_subs</span><span class="p">:</span>
+            <span class="n">substitutions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">substitutions</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">substitutions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">extra_substitutions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">substitutions</span> <span class="o">+=</span> <span class="n">extra_substitutions</span>
+
+        <span class="n">args_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner_product_definition</span><span class="o">.</span><span class="n">inner_product</span><span class="p">,</span>
+                      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_expression</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)))</span>
+                     <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">))]</span>
+
+        <span class="k">if</span> <span class="s1">&#39;LAYERCAKE_PARALLEL_INTEGRATION&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="n">parallel_integrations</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAYERCAKE_PARALLEL_INTEGRATION&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+                <span class="n">parallel_integrations</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parallel_integrations</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">parallel_integrations</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="n">parallel_integration</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">args_list</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span>
+                                              <span class="n">symbolic_int</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">integration</span><span class="p">(</span><span class="n">args_list</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">symbolic_int</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">remove_dic_zeros</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">mat_output</span> <span class="o">=</span> <span class="p">{(</span><span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_parameters</span> <span class="o">=</span> <span class="n">ImmutableSparseMatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">),</span> <span class="n">mat_output</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_parameters</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">layercake</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">layercake.basis.spherical_harmonics</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphericalHarmonicsBasis</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">layercake.inner_products.definition</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardSymbolicInnerProductDefinition</span>
+
+    <span class="n">_R</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;R&#39;</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">_R</span><span class="p">)</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">R</span><span class="p">]</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">SphericalHarmonicsBasis</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">})</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">StandardSymbolicInnerProductDefinition</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">coordinate_system</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">coordinates_symbol_as_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;ψ&#39;</span>
+    <span class="n">psi</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="s2">&quot;psi&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;[m^2][s^-2]&quot;</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\psi&#39;</span><span class="p">)</span>
+    <span class="n">ff</span> <span class="o">=</span> <span class="n">FunctionField</span><span class="p">(</span><span class="s1">&#39;ff&#39;</span><span class="p">,</span> <span class="s1">&#39;s_phi&#39;</span><span class="p">,</span> <span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">basis</span><span class="p">,</span> <span class="n">inner_product_definition</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\sin \phi&#39;</span><span class="p">)</span>
+    <span class="n">ffc</span> <span class="o">=</span> <span class="n">FunctionField</span><span class="p">(</span><span class="s1">&#39;ffc&#39;</span><span class="p">,</span> <span class="s1">&#39;c_phi&#39;</span><span class="p">,</span> <span class="n">R</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">basis</span><span class="p">,</span> <span class="n">inner_product_definition</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\cos \phi&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
