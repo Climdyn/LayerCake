@@ -410,7 +410,7 @@ class Cake(object):
                     jt = ImmutableSparseNDimArray(self.jacobian_tensor.todense())
                     jacobian_equations_list = jacobian_formatter(jt)
 
-                    return (equations_list, t.free_symbols), (jacobian_equations_list, jt.free_symbols)
+                    return (equations_list, list(t.free_symbols)), (jacobian_equations_list, list(jt.free_symbols))
 
                 else:
                     coo = self.tensor.coords.T
@@ -454,7 +454,7 @@ class Cake(object):
                 jt = self.jacobian_tensor
                 jacobian_equations_list = jacobian_formatter(jt)
 
-                return (equations_list, t.free_symbols), (jacobian_equations_list, jt.free_symbols)
+                return (equations_list, list(t.free_symbols)), (jacobian_equations_list, list(jt.free_symbols))
 
             else:
                 raise ValueError('Something went very wrong. Unable to determine the kind of the tensor.')
