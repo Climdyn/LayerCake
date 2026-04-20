@@ -352,4 +352,6 @@ res = solve_ivp(f, (0., 1000000.), ic)
 
 # plotting
 plt.plot(res.y[21], res.y[29])
+plt.xlabel(r'$\psi_{{\rm o}, 2}$')
+plt.xlabel(r'$\delta T_{{\rm o}, 2}$')
 plt.show()

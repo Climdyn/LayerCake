@@ -27,7 +27,7 @@ from layercake.inner_products.definition import StandardSymbolicInnerProductDefi
 # in numerical mode and then integrates (run) it, and plots the resulting trajectory in 2D.
 #
 # Note that the model is a two-layer one (250 and 750 HPa levels),
-# but reduced on a single layer at 500 hPa, with a baroclinic (ψ) and &
+# but reduced on a single layer at 500 hPa, with a baroclinic (ψ) and a
 # barotropic (θ) streamfunction on that level. (Hence the name "2-½ layer model".)
 #
 ##############################################################################################
@@ -249,5 +249,8 @@ ic = res.y[:, -1]
 res = solve_ivp(f, (0., 20000.), ic)
 
 # plotting
-plt.plot(res.y.T)
+plt.plot(res.y[2], res.y[1])
+plt.xlabel(r'$\psi_3$')
+plt.ylabel(r'$\psi_2$')
+
 plt.show()
