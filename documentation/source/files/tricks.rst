@@ -63,7 +63,7 @@ variation of :math:`k_d`:
     dk[1] = 0.1 * kdp_deriv
     Dk = ParameterField('D_k', u'D_k', dk, atmospheric_basis, inner_products_definition)
 
-with :math:`k_{d,2} = D_{k,2} = 0.1 \, k_d`.
+with :math:`k_{d,2} = D_{k,1} = 0.1 \, k_d` (note the difference of index because of Python-specific indexing starting from zero).
 The equations LaTeX representation now clearly shows the new terms:
 
 .. figure:: tricks/mod_eqs.png
