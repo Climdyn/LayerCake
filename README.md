@@ -53,7 +53,7 @@ to see if everything runs smoothly (this should take less than 5 minutes to run)
 
 ## Documentation
 
-To build the documentation, please run (with the conda environment activated): ::
+To build the documentation, please run (with the conda environment activated):
 
     cd documentation
     make html
@@ -67,7 +67,7 @@ Once built, the documentation is available [here](./documentation/build/html/ind
 A few examples are available in the [examples](./examples) folder. More examples will be provided as the code is 
 developed.
 
-## Forthcoming development
+## Contributing
 
-LayerCake is in alpha development phase, with many new functionalities planned over the next few months.
-Stay tuned !
+LayerCake is in betaa development phase, bug reports and tests of the features are welcome.
+Please simply raise an issue on [Github](https://github.com/Climdyn/LayerCake/issues).
