@@ -80,12 +80,61 @@ is clearly visible on the 2-dimensional section of the attractor:
 
 (Compare with the first figure above.)
 
-Usage of mathematical expressions in the PDEs
----------------------------------------------
+.. Section below should be revisited when a proper example exists
+.. Usage of mathematical expressions in the PDEs
+.. ---------------------------------------------
 
-TODO
+.. Mathematical function can appear in some models PDEs. In general, these are functions of the model's domain coordinates.
+.. For example, in the `stratospheric example model <https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/stratospheric_planetary_flow.py>`_
+..present in the `atmospheric examples folder <../../../../examples/atmospheric/>`_, a
 
 Free-threading
 --------------
 
-TODO
+Since Python 3.14, a `free-threaded version of Python is available <https://docs.python.org/3/howto/free-threading-python.html>`_.
+LayerCake has been tested for it and seems so far to run smoothly.
+
+This feature is particularly useful if you try to derive complicate, big models with a
+large number of modes. LayerCake will then use multiple threads to perform |Sympy| symbolic evaluations,
+while the integration of the inner products will still be done using multiple processes.
+When being used in a free-threading environment, this is the default behavior, but this can be controlled by environment
+variables:
+
+* The :code:`LAYERCAKE_PARALLEL_METHOD` environment variable defines how the Sympy symbolic evaluations are done. It can take two different values:
+    + :code:`threads`: the evaluations will be done using threads
+    + :code:`processes`: the evaluations will be done using processes. In some complicate cases, it might lead to wrong answers or even crash. This mode is thus not recommended unless you know what you are doing.
+  If this environment variable is not defined, then LayerCake default behavior is to use threads.
+* The :code:`LAYERCAKE_PARALLEL_INTEGRATION` environment variable controls the Sympy symbolic integration parallelization. If set to :code:`none`, the parallelization will be deactivated.
+  Otherwise, it will parallelized using processes.
+  If this environment variable is not defined, then LayerCake default behavior is to parallelize using processes.
+
+For example,
+
+.. code:: bash
+
+    LAYERCAKE_PARALLEL_METHOD=processes python examples/atmospheric/barotropic_one_layer.py
+
+will launch the <https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/barotropic_one_layer.py>`_
+script with Sympy symbolic evaluation being done using processes.
+
+Installing the free-threaded version of Python can be done using Anaconda, by typing:
+
+.. code:: bash
+
+    conda env create -f environment_freethreading.yml
+
+which will create a conda environment :code:`layercake_ft`.
+Upon activation:
+
+.. code:: bash
+
+    conda activate layercake_ft
+
+any Python code will be run in `free-threading` mode.
+
+.. warning::
+
+    Python free-threading mode is still somewhat experimental, and
+    the obtained models and results must be
+    scrutinized with care and double-checked.
+
