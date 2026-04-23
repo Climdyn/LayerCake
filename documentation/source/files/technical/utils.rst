@@ -19,3 +19,6 @@ Module with various submodules with useful functions used throughout the code.
 
 .. automodule:: layercake.utils.integration
     :members:
+
+.. automodule:: layercake.utils.matrix
+    :members:
