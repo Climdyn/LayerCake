@@ -1,13 +1,13 @@
 User guide
 ==========
 
-This guide explains how the LayerCake framework can be used to transform a set of two-dimensional partial differential
+This guide explains how the LayerCake framework can be used to transform a set of two-dimensional partial differential equations (PDEs)
 
 .. math::
 
     \partial_t \mathcal{F}^{\mathrm LHS}_i \left[\psi_1, \ldots, \psi_N\right] = \mathcal{F}^{\mathrm{RHS}}_i \left[\psi_1, \ldots, \psi_N\right] \qquad , \quad i = 1,\ldots,N
 
-equations (PDEs) defined on a particular domain into a system of ordinary differential equations (ODEs)
+defined on a particular domain into a system of ordinary differential equations (ODEs)
 with an automated `Galerkin method`_. This method projects all the fields :math:`\psi_j` on given function basis :math:`\phi_{j,k}`:
 
 .. math::
@@ -197,7 +197,7 @@ If one type :code:`atmospheric_basis` in a terminal after defining it way above,
     [sqrt(2)*cos(y), 2*sin(y)*cos(n*x), 2*sin(y)*sin(n*x), sqrt(2)*cos(2*y), 2*sin(2*y)*cos(n*x), 2*sin(2*y)*sin(n*x), 2*sin(y)*cos(2*n*x), 2*sin(y)*sin(2*n*x), 2*sin(2*y)*cos(2*n*x), 2*sin(2*y)*sin(2*n*x)]
 
 We also need to create an inner product definition so that LayerCake knows how you want your PDEs to be projected.
-In general, using the :class:`~layercake.inner_products.definition.StandardSymbolicInnerProductDefinition` definition is sufficient for most model:
+In general, using the :class:`~layercake.inner_products.definition.StandardSymbolicInnerProductDefinition` definition is sufficient for most models:
 
 .. code:: ipython3
 
