@@ -13,7 +13,7 @@ from sympy import MutableSparseMatrix
 from sympy.matrices.exceptions import NonInvertibleMatrixError
 
 def block_matrix_inverse(P, blocks_extent, simplify=True):
-    """Function to invert a symbolic matrix :math:`P` devided by blocks.
+    """Function to invert a symbolic matrix :math:`P` divided by blocks.
 
     Parameters
     ----------
