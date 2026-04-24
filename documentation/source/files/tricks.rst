@@ -80,13 +80,59 @@ is clearly visible on the 2-dimensional section of the attractor:
 
 (Compare with the first figure above.)
 
-.. Section below should be revisited when a proper example exists
-.. Usage of mathematical expressions in the PDEs
-.. ---------------------------------------------
+Usage of mathematical expressions in the PDEs
+---------------------------------------------
 
-.. Mathematical function can appear in some models PDEs. In general, these are functions of the model's domain coordinates.
-.. For example, in the `stratospheric example model <https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/stratospheric_planetary_flow.py>`_
-..present in the `atmospheric examples folder <../../../../examples/atmospheric/>`_, a
+Mathematical function can appear in some models PDEs. In general, these are functions of the model's domain coordinates.
+Modelling terms involving mathematical functions (of the coordinates) can be implemented in LayerCake using the
+:class:`~layercake.arithmetic.symbolic.expressions.Expression` class. In this section, we recycle the example of the
+previous one by modifying again the friction with the bottom layer in
+the `Reinhold & Pierrehumber model <https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/baroclinic_one_layer.py>`_:
+
+.. math::
+
+    k_{d} \to k_{d} + F(y) = k_d  + k_{d,y} \, \sin(y)
+
+which means that the friction is higher in the higher latitude.
+
+To implement this, we simply need to create an :class:`~layercake.arithmetic.symbolic.expressions.Expression` object to
+represent :math:`F(y)` as follow:
+
+.. code:: ipython3
+
+    # Variable bottom friction
+    from sympy import sin
+    kd_deriv_y = Parameter(0.1 * kd_deriv, symbol=Symbol('k_dy'), latex='k_{d,y}')
+    F = Expression(kd_deriv_y.symbol * sin(y), expression_parameters=[kd_deriv_y,], latex=r'k_{d,y} \sin(y)')
+
+where we set :math:`k_{d,y} = 0.1 \, k_d`.
+Then the variable friction with the bottom can be added like in the previous section, involving the expression
+:code:`F` as prefactor:
+
+.. code:: ipython3
+
+    dfriction = OperatorTerm(psi, Laplacian, atmospheric_basis.coordinate_system, prefactor=F, sign=-1)
+    dofriction = OperatorTerm(theta, Laplacian, atmospheric_basis.coordinate_system, prefactor=F)
+    barotropic_equation.add_rhs_terms([dfriction, dofriction])
+
+    dfriction = OperatorTerm(psi, Laplacian, atmospheric_basis.coordinate_system, prefactor=F, sign=1)
+    dofriction = OperatorTerm(theta, Laplacian, atmospheric_basis.coordinate_system, prefactor=F, sign=-1)
+    baroclinic_equation.add_rhs_terms([dfriction, dofriction])
+
+and this result in the following equations in LayeCake:
+
+.. figure:: tricks/mod_eqs_siny.png
+    :align: center
+
+where the terms involving :math:`\sin(y)` are appearing.
+
+Constructing this model and then integrating it then yield:
+
+.. figure:: tricks/RP1982mod_siny.png
+    :scale: 100%
+    :align: center
+
+(Again, you can compare with the first figure above.)
 
 Free-threading
 --------------
@@ -103,6 +149,7 @@ variables:
 * The :code:`LAYERCAKE_PARALLEL_METHOD` environment variable defines how the Sympy symbolic evaluations are done. It can take two different values:
     + :code:`threads`: the evaluations will be done using threads
     + :code:`processes`: the evaluations will be done using processes. In some complicate cases, it might lead to wrong answers or even crash. This mode is thus not recommended unless you know what you are doing.
+
   If this environment variable is not defined, then LayerCake default behavior is to use threads.
 * The :code:`LAYERCAKE_PARALLEL_INTEGRATION` environment variable controls the Sympy symbolic integration parallelization. If set to :code:`none`, the parallelization will be deactivated.
   Otherwise, it will parallelized using processes.
@@ -114,8 +161,13 @@ For example,
 
     LAYERCAKE_PARALLEL_METHOD=processes python examples/atmospheric/barotropic_one_layer.py
 
-will launch the <https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/barotropic_one_layer.py>`_
+will launch the `barotropic one layer <https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/barotropic_one_layer.py>`_
 script with Sympy symbolic evaluation being done using processes.
+
+.. warning::
+
+    Launching the previous line with symbolic evaluation being done in processes with a free-threaded Python will result in
+    a crash. Use the free-threaded Python only if :code:`LAYERCAKE_PARALLEL_METHOD` is set to :code:`threads`.
 
 Installing the free-threaded version of Python can be done using Anaconda, by typing:
 
