@@ -4,6 +4,8 @@
 >
 > -- *Michael Gambon - Layer Cake (2004)*
 
+[![Documentation Status](https://img.shields.io/badge/docs-passing-green.svg)](https://climdyn.github.io/LayerCake/)
+
 ## General Information
 
 LayerCake is a framework to design models based on systems of partial differential equations (PDEs), 
@@ -69,5 +71,5 @@ developed.
 
 ## Contributing
 
-LayerCake is in betaa development phase, bug reports and tests of the features are welcome.
+LayerCake is in beta development phase, bug reports and tests of the features are welcome.
 Please simply raise an issue on [Github](https://github.com/Climdyn/LayerCake/issues).

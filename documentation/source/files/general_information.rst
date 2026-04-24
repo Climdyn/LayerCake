@@ -68,8 +68,8 @@ Examples
 A few examples are available in the `examples <../../../../examples>`_ folder. More examples will be provided as the code is
 developed.
 
-Forthcoming development
------------------------
+Contributing
+------------
 
-LayerCake is in alpha development phase, with many new functionalities planned over the next few months.
-Stay tuned !
+LayerCake is in beta development phase, bug reports and tests of the features are welcome.
+Please simply raise an issue on `Github <https://github.com/Climdyn/LayerCake/issues>`_.
