@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.utils.parallel &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/tricks.html">Various tricks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.utils.parallel</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.utils.parallel</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Parallel computations utility module</span>
+<span class="sd">    ====================================</span>
+
+<span class="sd">    Defines low-level functions to deal with parallel computation tasks.</span>
+
+<span class="sd">    Warnings</span>
+<span class="sd">    --------</span>
+<span class="sd">    Those are low-level computation routines which are not user-friendly.</span>
+<span class="sd">    Usage must be thoroughly tested.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">_thread</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">thread</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="ne">TimeoutError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pebble</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcessExpired</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.utilities.iterables</span><span class="w"> </span><span class="kn">import</span> <span class="n">multiset_permutations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">symbolic_integration</span><span class="p">,</span> <span class="n">numerical_integration</span>
+
+
+<div class="viewcode-block" id="parallel_integration">
+<a class="viewcode-back" href="../../../files/technical/utils.html#layercake.utils.parallel.parallel_integration">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parallel_integration</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">args_list</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">symbolic_int</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Functions to integrate |Sympy| expressions, either symbolically or numerically, in parallel.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pool: pebble.ProcessPool</span>
+<span class="sd">        A Pebble pool of workers.</span>
+<span class="sd">    args_list: list(tuple)</span>
+<span class="sd">        A list of tuples with the following arguments for the integration subfunctions:</span>
+
+<span class="sd">        * `indices`: Tuple of integers labelling the integrations in the integration queue.</span>
+<span class="sd">          Will be returned by the worker.</span>
+<span class="sd">        * `integrals_definition`: A callable returning the integral(s) as a |Sympy| expression.</span>
+<span class="sd">        * `integrals_arguments`: A tuple with the arguments to be provided to the `integrals_definition` callable.</span>
+<span class="sd">    substitutions: list(tuple)</span>
+<span class="sd">        List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.</span>
+<span class="sd">        The 2-tuples contain first a |Sympy|  expression and then the value to substitute.</span>
+<span class="sd">    destination: None or sparse.DOK or ~numpy.ndarray</span>
+<span class="sd">        Place where to store the output. If an array is provided, it will append the output of the integrations to it.</span>
+<span class="sd">        If `None`, it will create a new dictionary and return it.</span>
+<span class="sd">        If `symbolic_int` is `True`, then `destination` should be `None`.</span>
+<span class="sd">    timeout: None or bool or int</span>
+<span class="sd">        Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate</span>
+<span class="sd">        |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.</span>
+<span class="sd">        The options are:</span>
+
+<span class="sd">        * `None`: This is the &quot;full-symbolic&quot; mode. No timeout will be applied, and the switch to numerical integration will never happen.</span>
+<span class="sd">          Can result in very long and improbable computation time.</span>
+<span class="sd">        * `True`: This is the &quot;full-numerical&quot; mode. Symbolic computations do not occur, and the workers try directly to integrate</span>
+<span class="sd">          numerically.</span>
+<span class="sd">        * `False`: Same as `None`.</span>
+<span class="sd">        * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the</span>
+<span class="sd">          numerical integration.</span>
+<span class="sd">    permute: bool, optional</span>
+<span class="sd">        Permute the indices provided, except the first one, and return the result for all these indices.</span>
+<span class="sd">        Default to `False`.</span>
+<span class="sd">    symbolic_int: bool, optional</span>
+<span class="sd">        Force symbolic integration and do not substitute the substitutions at the end, making the output a list of |Sympy| expressions.</span>
+<span class="sd">        Default to `False`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple(2-tuple)</span>
+<span class="sd">        A list with the results, as 2-tuple with the labelling indices and the output of the integration, either as a float or as</span>
+<span class="sd">        a |Sympy| integration.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">symbolic_int</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">new_args_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">+</span><span class="p">[</span><span class="n">substitutions</span><span class="p">])</span> <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">args_list</span><span class="p">]</span>
+        <span class="n">future</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">symbolic_integration</span><span class="p">,</span> <span class="n">new_args_list</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="n">num_args_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">symbolic_int</span><span class="p">:</span>
+                    <span class="n">expr</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">permute</span><span class="p">:</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">idx</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+                        <span class="n">perm_idx</span> <span class="o">=</span> <span class="n">multiset_permutations</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perm_idx</span><span class="p">:</span>
+                            <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">perm</span>
+                            <span class="n">destination</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">idx</span><span class="p">)]</span> <span class="o">=</span> <span class="n">expr</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">destination</span><span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">expr</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">destination</span><span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">))</span>
+                    <span class="n">expr_subs</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">permute</span><span class="p">:</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">idx</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+                        <span class="n">perm_idx</span> <span class="o">=</span> <span class="n">multiset_permutations</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perm_idx</span><span class="p">:</span>
+                            <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">perm</span>
+                            <span class="n">destination</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">idx</span><span class="p">)]</span> <span class="o">=</span> <span class="n">expr_subs</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">destination</span><span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">expr_subs</span>
+
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+                <span class="n">num_args_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">args_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">substitutions</span><span class="p">])</span>
+            <span class="k">except</span> <span class="n">ProcessExpired</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0;0m&quot;</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;An integration process expired. &quot;</span> <span class="o">+</span> <span class="n">start</span> <span class="o">+</span>
+                              <span class="s2">&quot;Be suspicious of the resulting inner products and tensors&quot;</span> <span class="o">+</span> <span class="n">end</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">. Exit code: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">exitcode</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0;0m&quot;</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Something went wrong with an integration process. &quot;</span> <span class="o">+</span> <span class="n">start</span> <span class="o">+</span>
+                              <span class="s2">&quot;Be suspicious of the resulting inner products and tensors&quot;</span> <span class="o">+</span> <span class="n">end</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Function raised </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">traceback</span><span class="p">)</span>  <span class="c1"># Python&#39;s traceback of remote process</span>
+
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">num_args_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">substitutions</span><span class="p">]</span> <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">args_list</span><span class="p">]</span>
+
+    <span class="n">future</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">numerical_integration</span><span class="p">,</span> <span class="n">num_args_list</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">permute</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="n">perm_idx</span> <span class="o">=</span> <span class="n">multiset_permutations</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">perm_idx</span><span class="p">:</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">perm</span>
+                    <span class="n">destination</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">idx</span><span class="p">)]</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+                <span class="n">destination</span><span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">return_dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">destination</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_inner_product_arguments</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">_inner_product_arguments</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="parallel_symbolic_evaluation">
+<a class="viewcode-back" href="../../../files/technical/utils.html#layercake.utils.parallel.parallel_symbolic_evaluation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parallel_symbolic_evaluation</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">indices_list</span><span class="p">,</span> <span class="n">inner_product</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">numerical</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Functions to evaluate |Sympy| inner products expressions inside tensors in parallel.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pool: concurrent.futures.ThreadPoolExecutor or concurrent.futures.ProcessPoolExecutor</span>
+<span class="sd">        A pool of workers.</span>
+<span class="sd">    indices_list: list(tuple)</span>
+<span class="sd">        A list of tuples with the indices of the tensor entries.</span>
+<span class="sd">    inner_product: callable</span>
+<span class="sd">        A callable defining the inner products.</span>
+<span class="sd">    basis: list(SymbolicBasis)</span>
+<span class="sd">        List of symbolic function basis on which each element of the term(s) inner products must be decomposed.</span>
+<span class="sd">    numerical: bool</span>
+<span class="sd">        Whether to compute numerical or symbolic inner products.</span>
+<span class="sd">    term: ArithmeticTerms</span>
+<span class="sd">        Arithmetic term(s) from which the inner products will be computed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple(2-tuple)</span>
+<span class="sd">        A list with the results, as 2-tuple with the labelling indices and the output of the evaluation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args_list_in</span> <span class="o">=</span> <span class="p">[(</span><span class="n">basis</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">numerical</span><span class="p">,</span> <span class="n">inner_product</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span> <span class="k">for</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">indices_list</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_inner_product_arguments</span><span class="p">,</span> <span class="n">args_list_in</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_quit_function</span><span class="p">(</span><span class="n">fn_name</span><span class="p">):</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">interrupt_main</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="exit_after">
+<a class="viewcode-back" href="../../../files/technical/utils.html#layercake.utils.parallel.exit_after">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">exit_after</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    use as decorator to exit process if </span>
+<span class="sd">    function takes longer than s seconds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">outer</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">timer</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">_quit_function</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="p">])</span>
+            <span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">timer</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">inner</span>
+    <span class="k">return</span> <span class="n">outer</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Various tricks &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Code References" href="references.html" />
+    <link rel="prev" title="User guide" href="user_guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Various tricks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#spatially-varying-parameters">Spatially varying parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-of-mathematical-expressions-in-the-pdes">Usage of mathematical expressions in the PDEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#free-threading">Free-threading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Various tricks</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/files/tricks.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="various-tricks">
+<h1>Various tricks<a class="headerlink" href="#various-tricks" title="Link to this heading"></a></h1>
+<p>On this page, we list several tricks on how to do this or that, related to particular aspects
+of the modelling based on systems of partial differential equations.</p>
+<section id="spatially-varying-parameters">
+<h2>Spatially varying parameters<a class="headerlink" href="#spatially-varying-parameters" title="Link to this heading"></a></h2>
+<p>It is possible in LayerCake to add parameters varying as a function of the coordinates.
+To illustrate this, we are going to modify a spatially uniform parameter in one of the
+<a class="reference external" href="../../../../examples/">examples</a>, namely the
+<a class="reference external" href="https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/baroclinic_one_layer.py">Reinhold &amp; Pierrehumber model</a> one.</p>
+<p>In this model, two terms are representing the friction of the bottom layer with the ground:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(-\frac{k_d}{2} \nabla^2 (\psi - \theta)\)</span> for the equation involving the barotropic streamfunction <span class="math notranslate nohighlight">\(\psi\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(+\frac{k_d}{2} \nabla^2 (\psi - \theta)\)</span> for the equation involving the baroclinic streamfunction <span class="math notranslate nohighlight">\(\theta\)</span></p></li>
+</ul>
+<p>where the parameter controlling the friction is <span class="math notranslate nohighlight">\(k_d\)</span>. The full equations of the model can be found <a class="reference external" href="https://qgs.readthedocs.io/en/latest/files/model/oro_model.html#mid-layer-equations-and-the-thermal-wind-relation">here</a>.</p>
+<p>Running the <a class="reference external" href="../../../../examples/atmospheric/baroclinic_one_layer.py">LayerCake code</a>  produces the following figure:</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/RP1982.png"><img alt="../_images/RP1982.png" src="../_images/RP1982.png" style="width: 640.0px; height: 480.0px;" />
+</a>
+</figure>
+<p>which is a section of the model’s attractor in the <span class="math notranslate nohighlight">\(\psi_2, \psi_3\)</span> plane.</p>
+<p>Now we can modify the original model’s equations by making the parameter <span class="math notranslate nohighlight">\(k_d\)</span> varies as</p>
+<div class="math notranslate nohighlight">
+\[k_{d,0} + 2 \, k_{d,2} \cos(n x) \sin(y)\]</div>
+<p>This can be done by using the <a class="reference internal" href="technical/arithmetic.html#layercake.arithmetic.terms.operations.ProductOfTerms" title="layercake.arithmetic.terms.operations.ProductOfTerms"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProductOfTerms</span></code></a> objects to do the product of
+a <a class="reference internal" href="technical/arithmetic.html#layercake.arithmetic.terms.linear.LinearTerm" title="layercake.arithmetic.terms.linear.LinearTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearTerm</span></code></a> term involving a <a class="reference internal" href="technical/variables.html#layercake.variables.field.ParameterField" title="layercake.variables.field.ParameterField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterField</span></code></a> field representing
+the spatial variation of the parameter, and the Laplacian terms representing <span class="math notranslate nohighlight">\(\nabla^2 (\psi - \theta)\)</span>.
+It can be implemented with a few lines added to the <a class="reference external" href="https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/baroclinic_one_layer.py">Reinhold &amp; Pierrehumber model code</a>:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dfriction</span> <span class="o">=</span> <span class="n">ProductOfTerms</span><span class="p">(</span><span class="n">LinearTerm</span><span class="p">(</span><span class="n">Dk</span><span class="p">),</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">psi</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">,</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">dofriction</span> <span class="o">=</span> <span class="n">ProductOfTerms</span><span class="p">(</span><span class="n">LinearTerm</span><span class="p">(</span><span class="n">Dk</span><span class="p">),</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">))</span>
+<span class="n">barotropic_equation</span><span class="o">.</span><span class="n">add_rhs_terms</span><span class="p">([</span><span class="n">dfriction</span><span class="p">,</span> <span class="n">dofriction</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>in the barotropic equation and</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dfriction</span> <span class="o">=</span> <span class="n">ProductOfTerms</span><span class="p">(</span><span class="n">LinearTerm</span><span class="p">(</span><span class="n">Dk</span><span class="p">),</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">psi</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">dofriction</span> <span class="o">=</span> <span class="n">ProductOfTerms</span><span class="p">(</span><span class="n">LinearTerm</span><span class="p">(</span><span class="n">Dk</span><span class="p">),</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">,</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">baroclinic_equation</span><span class="o">.</span><span class="n">add_rhs_terms</span><span class="p">([</span><span class="n">dfriction</span><span class="p">,</span> <span class="n">dofriction</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>in the baroclinic equation, where <code class="code docutils literal notranslate"><span class="pre">Dk</span></code> is the <a class="reference internal" href="technical/variables.html#layercake.variables.field.ParameterField" title="layercake.variables.field.ParameterField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterField</span></code></a> object defining the spatial
+variation of <span class="math notranslate nohighlight">\(k_d\)</span></p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Variable bottom friction</span>
+<span class="n">dk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atmospheric_basis</span><span class="p">))</span>
+<span class="n">dk</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">kdp_deriv</span>
+<span class="n">Dk</span> <span class="o">=</span> <span class="n">ParameterField</span><span class="p">(</span><span class="s1">&#39;D_k&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;D_k&#39;</span><span class="p">,</span> <span class="n">dk</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="p">,</span> <span class="n">inner_products_definition</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>with <span class="math notranslate nohighlight">\(k_{d,2} = D_{k,1} = 0.1 \, k_d\)</span> (note the difference of index because of the Python-specific indexing starting from zero).
+The equations LaTeX representation now clearly shows the new terms:</p>
+<figure class="align-center">
+<img alt="../_images/mod_eqs.png" src="../_images/mod_eqs.png" />
+</figure>
+<p>with the appearance of the <span class="math notranslate nohighlight">\(D_k \nabla^2\)</span> terms.</p>
+<p>The impact of this spatial variation of the bottom friction coefficient on the model’s dynamics
+is clearly visible on the 2-dimensional section of the attractor:</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/RP1982mod.png"><img alt="../_images/RP1982mod.png" src="../_images/RP1982mod.png" style="width: 640.0px; height: 480.0px;" />
+</a>
+</figure>
+<p>(Compare with the first figure above.)</p>
+</section>
+<section id="usage-of-mathematical-expressions-in-the-pdes">
+<h2>Usage of mathematical expressions in the PDEs<a class="headerlink" href="#usage-of-mathematical-expressions-in-the-pdes" title="Link to this heading"></a></h2>
+<p>Mathematical function can appear in some models PDEs. In general, these are functions of the model’s domain coordinates.
+Modelling terms involving mathematical functions (of the coordinates) can be implemented in LayerCake using the
+<a class="reference internal" href="technical/arithmetic.html#layercake.arithmetic.symbolic.expressions.Expression" title="layercake.arithmetic.symbolic.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a> class. In this section, we recycle the example of the
+previous one by modifying again the friction with the bottom layer in
+the <a class="reference external" href="https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/baroclinic_one_layer.py">Reinhold &amp; Pierrehumber model</a>:</p>
+<div class="math notranslate nohighlight">
+\[k_{d} \to k_{d} + F(y) = k_d  + k_{d,y} \, \sin(y)\]</div>
+<p>which means that the friction is higher in the higher latitude.</p>
+<p>To implement this, we simply need to create an <a class="reference internal" href="technical/arithmetic.html#layercake.arithmetic.symbolic.expressions.Expression" title="layercake.arithmetic.symbolic.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a> object to
+represent <span class="math notranslate nohighlight">\(F(y)\)</span> as follow:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Variable bottom friction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sin</span>
+<span class="n">kd_deriv_y</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">kd_deriv</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;k_dy&#39;</span><span class="p">),</span> <span class="n">latex</span><span class="o">=</span><span class="s1">&#39;k_{d,y}&#39;</span><span class="p">)</span>
+<span class="n">F</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">kd_deriv_y</span><span class="o">.</span><span class="n">symbol</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">expression_parameters</span><span class="o">=</span><span class="p">[</span><span class="n">kd_deriv_y</span><span class="p">,],</span> <span class="n">latex</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;k_{d,y} \sin(y)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where we set <span class="math notranslate nohighlight">\(k_{d,y} = 0.1 \, k_d\)</span>.
+Then the variable friction with the bottom can be added like in the previous section, involving the expression
+<code class="code docutils literal notranslate"><span class="pre">F</span></code> as prefactor:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dfriction</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">psi</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="n">F</span><span class="p">,</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">dofriction</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="n">F</span><span class="p">)</span>
+<span class="n">barotropic_equation</span><span class="o">.</span><span class="n">add_rhs_terms</span><span class="p">([</span><span class="n">dfriction</span><span class="p">,</span> <span class="n">dofriction</span><span class="p">])</span>
+
+<span class="n">dfriction</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">psi</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="n">F</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">dofriction</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">atmospheric_basis</span><span class="o">.</span><span class="n">coordinate_system</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="n">F</span><span class="p">,</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">baroclinic_equation</span><span class="o">.</span><span class="n">add_rhs_terms</span><span class="p">([</span><span class="n">dfriction</span><span class="p">,</span> <span class="n">dofriction</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>and this result in the following equations in LayeCake:</p>
+<figure class="align-center">
+<img alt="../_images/mod_eqs_siny.png" src="../_images/mod_eqs_siny.png" />
+</figure>
+<p>where the terms involving <span class="math notranslate nohighlight">\(\sin(y)\)</span> are appearing.</p>
+<p>Constructing this model and then integrating it then yield:</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/RP1982mod_siny.png"><img alt="../_images/RP1982mod_siny.png" src="../_images/RP1982mod_siny.png" style="width: 640.0px; height: 480.0px;" />
+</a>
+</figure>
+<p>(Again, you can compare with the first figure above.)</p>
+</section>
+<section id="free-threading">
+<h2>Free-threading<a class="headerlink" href="#free-threading" title="Link to this heading"></a></h2>
+<p>Since Python 3.14, a <a class="reference external" href="https://docs.python.org/3/howto/free-threading-python.html">free-threaded version of Python is available</a>.
+LayerCake has been tested for it and seems so far to run smoothly.</p>
+<p>This feature is particularly useful if you try to derive complicate, big models with a
+large number of modes. LayerCake will then use multiple threads to perform <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbolic evaluations,
+while the integration of the inner products will still be done using multiple processes.
+When being used in a free-threading environment, this is the default behavior, but this can be controlled by environment
+variables:</p>
+<ul>
+<li><dl class="simple">
+<dt>The <code class="code docutils literal notranslate"><span class="pre">LAYERCAKE_PARALLEL_METHOD</span></code> environment variable defines how the Sympy symbolic evaluations are done. It can take two different values:</dt><dd><ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">threads</span></code>: the evaluations will be done using threads</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">processes</span></code>: the evaluations will be done using processes. In some complicate cases, it might lead to wrong answers or even crash. This mode is thus not recommended unless you know what you are doing.</p></li>
+</ul>
+</dd>
+</dl>
+<p>If this environment variable is not defined, then LayerCake default behavior is to use threads.</p>
+</li>
+<li><p>The <code class="code docutils literal notranslate"><span class="pre">LAYERCAKE_PARALLEL_INTEGRATION</span></code> environment variable controls the Sympy symbolic integration parallelization. If set to <code class="code docutils literal notranslate"><span class="pre">none</span></code>, the parallelization will be deactivated.
+Otherwise, it will be parallelized using processes.
+If this environment variable is not defined, then LayerCake default behavior is to parallelize using processes.</p></li>
+</ul>
+<p>For example,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">LAYERCAKE_PARALLEL_METHOD</span><span class="o">=</span>processes<span class="w"> </span>python<span class="w"> </span>examples/atmospheric/barotropic_one_layer.py
+</pre></div>
+</div>
+<p>will launch the <a class="reference external" href="https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/barotropic_one_layer.py">barotropic one layer</a>
+script with Sympy symbolic evaluation being done using processes.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Launching the previous line with symbolic evaluation being done in processes with a free-threaded Python will result in
+a crash. Use the free-threaded Python only if <code class="code docutils literal notranslate"><span class="pre">LAYERCAKE_PARALLEL_METHOD</span></code> is set to <code class="code docutils literal notranslate"><span class="pre">threads</span></code>.</p>
+</div>
+<p>Installing the free-threaded version of Python can be done using Anaconda, by typing:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment_freethreading.yml
+</pre></div>
+</div>
+<p>which will create a conda environment <code class="code docutils literal notranslate"><span class="pre">layercake_ft</span></code>.
+Upon activation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>layercake_ft
+</pre></div>
+</div>
+<p>any Python code will be run in <cite>free-threading</cite> mode.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Python free-threading mode is still somewhat experimental, and
+the obtained models and results must be
+scrutinized with care and double-checked.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="user_guide.html" class="btn btn-neutral float-left" title="User guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="references.html" class="btn btn-neutral float-right" title="Code References" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

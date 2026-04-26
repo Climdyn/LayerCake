@@ -1,0 +1,1538 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Variables module &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="General utility module" href="utils.html" />
+    <link rel="prev" title="Code References" href="../references.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tricks.html">Various tricks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../references.html">Code References</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Variables module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#variable-definition-module">Variable definition module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description-of-the-classes">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.variable.Variable"><code class="docutils literal notranslate"><span class="pre">Variable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.Variable.name"><code class="docutils literal notranslate"><span class="pre">Variable.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.Variable.symbol"><code class="docutils literal notranslate"><span class="pre">Variable.symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.Variable.units"><code class="docutils literal notranslate"><span class="pre">Variable.units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.Variable.latex"><code class="docutils literal notranslate"><span class="pre">Variable.latex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.Variable.dynamical"><code class="docutils literal notranslate"><span class="pre">Variable.dynamical</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.variable.VariablesArray"><code class="docutils literal notranslate"><span class="pre">VariablesArray</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.VariablesArray.dynamical"><code class="docutils literal notranslate"><span class="pre">VariablesArray.dynamical</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.VariablesArray.latex"><code class="docutils literal notranslate"><span class="pre">VariablesArray.latex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.VariablesArray.latexes"><code class="docutils literal notranslate"><span class="pre">VariablesArray.latexes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.VariablesArray.name"><code class="docutils literal notranslate"><span class="pre">VariablesArray.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.VariablesArray.names"><code class="docutils literal notranslate"><span class="pre">VariablesArray.names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.VariablesArray.symbol"><code class="docutils literal notranslate"><span class="pre">VariablesArray.symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.VariablesArray.symbols"><code class="docutils literal notranslate"><span class="pre">VariablesArray.symbols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.variable.VariablesArray.units"><code class="docutils literal notranslate"><span class="pre">VariablesArray.units</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#coordinate-definition-module">Coordinate definition module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.coordinate.Coordinate"><code class="docutils literal notranslate"><span class="pre">Coordinate</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.coordinate.Coordinate.name"><code class="docutils literal notranslate"><span class="pre">Coordinate.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.coordinate.Coordinate.symbol"><code class="docutils literal notranslate"><span class="pre">Coordinate.symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.coordinate.Coordinate.extent"><code class="docutils literal notranslate"><span class="pre">Coordinate.extent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.coordinate.Coordinate.units"><code class="docutils literal notranslate"><span class="pre">Coordinate.units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.coordinate.Coordinate.infinitesimal_length"><code class="docutils literal notranslate"><span class="pre">Coordinate.infinitesimal_length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.coordinate.Coordinate.infinitesimal_length_units"><code class="docutils literal notranslate"><span class="pre">Coordinate.infinitesimal_length_units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.coordinate.Coordinate.latex"><code class="docutils literal notranslate"><span class="pre">Coordinate.latex</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#coordinate-systems-definition-module">Coordinate systems definition module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem.coordinates"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem.coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem.name"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem.parameters"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem.coordinates_name"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem.coordinates_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem.coordinates_symbol"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem.coordinates_symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem.coordinates_symbol_as_list"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem.coordinates_symbol_as_list</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem.extent"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem.extent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem.infinitesimal_volume"><code class="docutils literal notranslate"><span class="pre">CoordinateSystem.infinitesimal_volume</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.systems.PlanarCartesianCoordinateSystem"><code class="docutils literal notranslate"><span class="pre">PlanarCartesianCoordinateSystem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.PlanarCartesianCoordinateSystem.coordinates"><code class="docutils literal notranslate"><span class="pre">PlanarCartesianCoordinateSystem.coordinates</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.systems.SphericalCoordinateSystem"><code class="docutils literal notranslate"><span class="pre">SphericalCoordinateSystem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.SphericalCoordinateSystem.coordinates"><code class="docutils literal notranslate"><span class="pre">SphericalCoordinateSystem.coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.systems.SphericalCoordinateSystem.parameters"><code class="docutils literal notranslate"><span class="pre">SphericalCoordinateSystem.parameters</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#field-definition-module">Field definition module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.field.Field"><code class="docutils literal notranslate"><span class="pre">Field</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.name"><code class="docutils literal notranslate"><span class="pre">Field.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.symbol"><code class="docutils literal notranslate"><span class="pre">Field.symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.basis"><code class="docutils literal notranslate"><span class="pre">Field.basis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.inner_product_definition"><code class="docutils literal notranslate"><span class="pre">Field.inner_product_definition</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.units"><code class="docutils literal notranslate"><span class="pre">Field.units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.latex"><code class="docutils literal notranslate"><span class="pre">Field.latex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.state"><code class="docutils literal notranslate"><span class="pre">Field.state</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.coordinate_system"><code class="docutils literal notranslate"><span class="pre">Field.coordinate_system</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.Field.function"><code class="docutils literal notranslate"><span class="pre">Field.function</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.field.FunctionField"><code class="docutils literal notranslate"><span class="pre">FunctionField</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.name"><code class="docutils literal notranslate"><span class="pre">FunctionField.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.symbol"><code class="docutils literal notranslate"><span class="pre">FunctionField.symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.symbolic_expression"><code class="docutils literal notranslate"><span class="pre">FunctionField.symbolic_expression</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.basis"><code class="docutils literal notranslate"><span class="pre">FunctionField.basis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.inner_product_definition"><code class="docutils literal notranslate"><span class="pre">FunctionField.inner_product_definition</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.units"><code class="docutils literal notranslate"><span class="pre">FunctionField.units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.latex"><code class="docutils literal notranslate"><span class="pre">FunctionField.latex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.parameters"><code class="docutils literal notranslate"><span class="pre">FunctionField.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.expression_parameters"><code class="docutils literal notranslate"><span class="pre">FunctionField.expression_parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.force_substitution"><code class="docutils literal notranslate"><span class="pre">FunctionField.force_substitution</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.force_symbolic_substitution"><code class="docutils literal notranslate"><span class="pre">FunctionField.force_symbolic_substitution</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.descriptions"><code class="docutils literal notranslate"><span class="pre">FunctionField.descriptions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.dimensional_values"><code class="docutils literal notranslate"><span class="pre">FunctionField.dimensional_values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.input_dimensional"><code class="docutils literal notranslate"><span class="pre">FunctionField.input_dimensional</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.nondimensional_values"><code class="docutils literal notranslate"><span class="pre">FunctionField.nondimensional_values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.numerical_expression"><code class="docutils literal notranslate"><span class="pre">FunctionField.numerical_expression</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.return_dimensional"><code class="docutils literal notranslate"><span class="pre">FunctionField.return_dimensional</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.symbolic_expressions"><code class="docutils literal notranslate"><span class="pre">FunctionField.symbolic_expressions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.FunctionField.symbols"><code class="docutils literal notranslate"><span class="pre">FunctionField.symbols</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.field.ParameterField"><code class="docutils literal notranslate"><span class="pre">ParameterField</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.name"><code class="docutils literal notranslate"><span class="pre">ParameterField.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.symbol"><code class="docutils literal notranslate"><span class="pre">ParameterField.symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.basis"><code class="docutils literal notranslate"><span class="pre">ParameterField.basis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.inner_product_definition"><code class="docutils literal notranslate"><span class="pre">ParameterField.inner_product_definition</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.units"><code class="docutils literal notranslate"><span class="pre">ParameterField.units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.latex"><code class="docutils literal notranslate"><span class="pre">ParameterField.latex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.parameters"><code class="docutils literal notranslate"><span class="pre">ParameterField.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.descriptions"><code class="docutils literal notranslate"><span class="pre">ParameterField.descriptions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.dimensional_values"><code class="docutils literal notranslate"><span class="pre">ParameterField.dimensional_values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.input_dimensional"><code class="docutils literal notranslate"><span class="pre">ParameterField.input_dimensional</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.nondimensional_values"><code class="docutils literal notranslate"><span class="pre">ParameterField.nondimensional_values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.return_dimensional"><code class="docutils literal notranslate"><span class="pre">ParameterField.return_dimensional</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.symbolic_expressions"><code class="docutils literal notranslate"><span class="pre">ParameterField.symbolic_expressions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.field.ParameterField.symbols"><code class="docutils literal notranslate"><span class="pre">ParameterField.symbols</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#parameter-module">Parameter module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#main-classes">Main classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.parameter.Parameter"><code class="docutils literal notranslate"><span class="pre">Parameter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.Parameter.description"><code class="docutils literal notranslate"><span class="pre">Parameter.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.Parameter.latex"><code class="docutils literal notranslate"><span class="pre">Parameter.latex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.Parameter.symbol"><code class="docutils literal notranslate"><span class="pre">Parameter.symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.Parameter.symbolic_expression"><code class="docutils literal notranslate"><span class="pre">Parameter.symbolic_expression</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.Parameter.units"><code class="docutils literal notranslate"><span class="pre">Parameter.units</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.parameter.ParametersArray"><code class="docutils literal notranslate"><span class="pre">ParametersArray</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.ParametersArray.descriptions"><code class="docutils literal notranslate"><span class="pre">ParametersArray.descriptions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.ParametersArray.symbolic_expressions"><code class="docutils literal notranslate"><span class="pre">ParametersArray.symbolic_expressions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.ParametersArray.symbols"><code class="docutils literal notranslate"><span class="pre">ParametersArray.symbols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.variables.parameter.ParametersArray.units"><code class="docutils literal notranslate"><span class="pre">ParametersArray.units</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#variables-utility-module">Variables utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.utils.combine_units"><code class="docutils literal notranslate"><span class="pre">combine_units()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.variables.utils.power_units"><code class="docutils literal notranslate"><span class="pre">power_units()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">General utility module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inner_products.html">Inner products module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formatters.html">Formatters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basis.html">Basis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bakery.html">The Bakery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arithmetic.html">Arithmetic module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../references.html">Code References</a></li>
+      <li class="breadcrumb-item active">Variables module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/files/technical/variables.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="variables-module">
+<h1>Variables module<a class="headerlink" href="#variables-module" title="Link to this heading"></a></h1>
+<p>Module to define all kind of variables in the models.</p>
+<section id="variable-definition-module">
+<span id="module-layercake.variables.variable"></span><h2>Variable definition module<a class="headerlink" href="#variable-definition-module" title="Link to this heading"></a></h2>
+<p>Variables are objects with a name, a symbol and units. They represent any formal quantity in the models.</p>
+<section id="description-of-the-classes">
+<h3>Description of the classes<a class="headerlink" href="#description-of-the-classes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.variables.variable.Variable" title="layercake.variables.variable.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>: Abstract base class to define variables in the models.</p></li>
+<li><p><a class="reference internal" href="#layercake.variables.variable.VariablesArray" title="layercake.variables.variable.VariablesArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariablesArray</span></code></a>: Base class to define array of variables in the models.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.variable.Variable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.variable.</span></span><span class="sig-name descname"><span class="pre">Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/variable.html#Variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.variable.Variable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class to define variable object in the models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the variable.</p></li>
+<li><p><strong>symbol</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol to represent the variable in symbolic expressions.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The units of the variable.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.
+Empty by default.</p></li>
+<li><p><strong>latex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Latex string representing the variable.
+Empty by default.</p></li>
+<li><p><strong>dynamical</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the variable can vary over time.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.variable.Variable.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#layercake.variables.variable.Variable.name" title="Link to this definition"></a></dt>
+<dd><p>Name of the variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.variable.Variable.symbol">
+<span class="sig-name descname"><span class="pre">symbol</span></span><a class="headerlink" href="#layercake.variables.variable.Variable.symbol" title="Link to this definition"></a></dt>
+<dd><p>Symbol of the variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.variable.Variable.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#layercake.variables.variable.Variable.units" title="Link to this definition"></a></dt>
+<dd><p>The units of the variable specified as atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.variable.Variable.latex">
+<span class="sig-name descname"><span class="pre">latex</span></span><a class="headerlink" href="#layercake.variables.variable.Variable.latex" title="Link to this definition"></a></dt>
+<dd><p>Latex string representing the variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.Variable.dynamical">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamical</span></span><a class="headerlink" href="#layercake.variables.variable.Variable.dynamical" title="Link to this definition"></a></dt>
+<dd><p>Whether the variable can vary over time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.variable.</span></span><span class="sig-name descname"><span class="pre">VariablesArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/variable.html#VariablesArray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.variable.VariablesArray" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
+<p>Base class of model’s array of variables values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Values of the variables array.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – General name of the variables.</p></li>
+<li><p><strong>symbol</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol to represent the variables in symbolic expressions.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The units of the provided value. Used to compute the conversion between dimensional and nondimensional
+value. Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.
+Empty by default.</p></li>
+<li><p><strong>latex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – A latex string representing the variables. Used in plots.
+Empty by default.</p></li>
+<li><p><strong>dynamical</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the variables are varying over time. Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray.dynamical">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamical</span></span><a class="headerlink" href="#layercake.variables.variable.VariablesArray.dynamical" title="Link to this definition"></a></dt>
+<dd><p>Whether the variables can vary over time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray.latex">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">latex</span></span><a class="headerlink" href="#layercake.variables.variable.VariablesArray.latex" title="Link to this definition"></a></dt>
+<dd><p>Returns the general latex expression of the variables in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray.latexes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">latexes</span></span><a class="headerlink" href="#layercake.variables.variable.VariablesArray.latexes" title="Link to this definition"></a></dt>
+<dd><p>Returns the latex expressions of the variables in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#layercake.variables.variable.VariablesArray.name" title="Link to this definition"></a></dt>
+<dd><p>Returns the general name of the variables in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray.names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#layercake.variables.variable.VariablesArray.names" title="Link to this definition"></a></dt>
+<dd><p>Returns the names of the variables in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray.symbol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbol</span></span><a class="headerlink" href="#layercake.variables.variable.VariablesArray.symbol" title="Link to this definition"></a></dt>
+<dd><p>Returns the general symbol of the variables in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray.symbols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbols</span></span><a class="headerlink" href="#layercake.variables.variable.VariablesArray.symbols" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbols of the variables in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.variable.VariablesArray.units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#layercake.variables.variable.VariablesArray.units" title="Link to this definition"></a></dt>
+<dd><p>The units of the dimensional values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="coordinate-definition-module">
+<span id="module-layercake.variables.coordinate"></span><h2>Coordinate definition module<a class="headerlink" href="#coordinate-definition-module" title="Link to this heading"></a></h2>
+<p>A coordinate is a <code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code> used to define the models’ domains, i.e. as a part of a <code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinatesSystem</span></code>,
+to uniquely determine and standardize the position of the points of the domain.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.coordinate.Coordinate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.coordinate.</span></span><span class="sig-name descname"><span class="pre">Coordinate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infinitesimal_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infinitesimal_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/coordinate.html#Coordinate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.coordinate.Coordinate" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.variables.variable.Variable" title="layercake.variables.variable.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></p>
+<p>Class to define a physical coordinate in the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the coordinate.</p></li>
+<li><p><strong>symbol</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>) – Sympy symbol of the coordinate</p></li>
+<li><p><strong>extent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a><em>)</em>) – 2-tuple giving the natural extent of the coordinate, i.e. the lower and higher bounds of the coordinate’s interval.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The units of the coordinate. Used to compute the conversion between dimensional and nondimensional
+value. Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.</p></li>
+<li><p><strong>infinitesimal_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a><em>, </em><em>optional</em>) – Infinitesimal length associated with the</p></li>
+<li><p><strong>infinitesimal_length_units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Infinitesimal length units. Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.</p></li>
+<li><p><strong>latex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Latex string representing the coordinate.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.coordinate.Coordinate.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#layercake.variables.coordinate.Coordinate.name" title="Link to this definition"></a></dt>
+<dd><p>Name of the coordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.coordinate.Coordinate.symbol">
+<span class="sig-name descname"><span class="pre">symbol</span></span><a class="headerlink" href="#layercake.variables.coordinate.Coordinate.symbol" title="Link to this definition"></a></dt>
+<dd><p>Sympy symbol of the coordinate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.coordinate.Coordinate.extent">
+<span class="sig-name descname"><span class="pre">extent</span></span><a class="headerlink" href="#layercake.variables.coordinate.Coordinate.extent" title="Link to this definition"></a></dt>
+<dd><p>2-tuple giving the natural extent of the coordinate, i.e. the lower and higher bounds of the coordinate’s interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.coordinate.Coordinate.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#layercake.variables.coordinate.Coordinate.units" title="Link to this definition"></a></dt>
+<dd><p>The units of the coordinate. Used to compute the conversion between dimensional and nondimensional
+value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.coordinate.Coordinate.infinitesimal_length">
+<span class="sig-name descname"><span class="pre">infinitesimal_length</span></span><a class="headerlink" href="#layercake.variables.coordinate.Coordinate.infinitesimal_length" title="Link to this definition"></a></dt>
+<dd><p>Infinitesimal length associated with the</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.coordinate.Coordinate.infinitesimal_length_units">
+<span class="sig-name descname"><span class="pre">infinitesimal_length_units</span></span><a class="headerlink" href="#layercake.variables.coordinate.Coordinate.infinitesimal_length_units" title="Link to this definition"></a></dt>
+<dd><p>Infinitesimal length units</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.coordinate.Coordinate.latex">
+<span class="sig-name descname"><span class="pre">latex</span></span><a class="headerlink" href="#layercake.variables.coordinate.Coordinate.latex" title="Link to this definition"></a></dt>
+<dd><p>Latex string representing the coordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Coordinates with infinite extent are not currently supported.</p>
+</div>
+</dd></dl>
+
+<section id="coordinate-systems-definition-module">
+<span id="module-layercake.variables.systems"></span><h2>Coordinate systems definition module<a class="headerlink" href="#coordinate-systems-definition-module" title="Link to this heading"></a></h2>
+<p>Coordinate systems defined on models’ domains.</p>
+<section id="id1">
+<h3>Description of the classes<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateSystem</span></code></a>: Base class to define coordinate systems for the the models.</p></li>
+<li><p><a class="reference internal" href="#layercake.variables.systems.PlanarCartesianCoordinateSystem" title="layercake.variables.systems.PlanarCartesianCoordinateSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlanarCartesianCoordinateSystem</span></code></a>: Cartesian coordinate system defined on a plane.</p></li>
+<li><p><a class="reference internal" href="#layercake.variables.systems.SphericalCoordinateSystem" title="layercake.variables.systems.SphericalCoordinateSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">SphericalCoordinateSystem</span></code></a>: Coordinate system defined on a sphere.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.systems.</span></span><span class="sig-name descname"><span class="pre">CoordinateSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/systems.html#CoordinateSystem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class to define a coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><em>Coordinate</em><em>)</em>) – List of coordinates on which the basis is defined.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for the coordinate system.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>) or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>(</em><a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em><em>, </em><em>optional</em>) – List of parameters used to define the coordinates infinitesimal length.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem.coordinates">
+<span class="sig-name descname"><span class="pre">coordinates</span></span><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem.coordinates" title="Link to this definition"></a></dt>
+<dd><p>List of coordinates on which the basis is defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<em>Coordinate</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem.name" title="Link to this definition"></a></dt>
+<dd><p>Optional name for the coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem.parameters" title="Link to this definition"></a></dt>
+<dd><p>List of parameters used to define the coordinates infinitesimal length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem.coordinates_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordinates_name</span></span><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem.coordinates_name" title="Link to this definition"></a></dt>
+<dd><p>List of the coordinates names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem.coordinates_symbol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordinates_symbol</span></span><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem.coordinates_symbol" title="Link to this definition"></a></dt>
+<dd><p>Symbols of the coordinates as a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem.coordinates_symbol_as_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordinates_symbol_as_list</span></span><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem.coordinates_symbol_as_list" title="Link to this definition"></a></dt>
+<dd><p>Symbols of the coordinates as a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem.extent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extent</span></span><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem.extent" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of the coordinates extents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a> or <a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.systems.CoordinateSystem.infinitesimal_volume">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">infinitesimal_volume</span></span><a class="headerlink" href="#layercake.variables.systems.CoordinateSystem.infinitesimal_volume" title="Link to this definition"></a></dt>
+<dd><p>Infinitesimal volume spanned by the coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.systems.PlanarCartesianCoordinateSystem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.systems.</span></span><span class="sig-name descname"><span class="pre">PlanarCartesianCoordinateSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/systems.html#PlanarCartesianCoordinateSystem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.systems.PlanarCartesianCoordinateSystem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateSystem</span></code></a></p>
+<p>Class to define a planar Cartesian coordinate system.
+Coordinates are <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a><em>)</em><em>)</em>) – Defines the extent of the plane.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.systems.PlanarCartesianCoordinateSystem.coordinates">
+<span class="sig-name descname"><span class="pre">coordinates</span></span><a class="headerlink" href="#layercake.variables.systems.PlanarCartesianCoordinateSystem.coordinates" title="Link to this definition"></a></dt>
+<dd><p>x and y coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<em>Coordinate</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.systems.SphericalCoordinateSystem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.systems.</span></span><span class="sig-name descname"><span class="pre">SphericalCoordinateSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/systems.html#SphericalCoordinateSystem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.systems.SphericalCoordinateSystem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateSystem</span></code></a></p>
+<p>Class to define a coordinate system on the sphere.
+Coordinates are the azimuth angle (longitude) <span class="math notranslate nohighlight">\(\lambda\)</span> and the
+elevation angle (latitude) <span class="math notranslate nohighlight">\(\varphi\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>) – The radius of the sphere.</p></li>
+<li><p><strong>extent</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a><em> or </em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a><em>)</em><em>)</em><em>, </em><em>optional</em>) – Defines the extent of the coordinates on the sphere.
+If not provided, the coordinate system covers the whole sphere.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.systems.SphericalCoordinateSystem.coordinates">
+<span class="sig-name descname"><span class="pre">coordinates</span></span><a class="headerlink" href="#layercake.variables.systems.SphericalCoordinateSystem.coordinates" title="Link to this definition"></a></dt>
+<dd><p>lambda and phi coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<em>Coordinate</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.systems.SphericalCoordinateSystem.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.variables.systems.SphericalCoordinateSystem.parameters" title="Link to this definition"></a></dt>
+<dd><p>List of parameters used to define the coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="field-definition-module">
+<span id="module-layercake.variables.field"></span><h2>Field definition module<a class="headerlink" href="#field-definition-module" title="Link to this heading"></a></h2>
+<p>This module defines spatial fields in the models.</p>
+<section id="id2">
+<h3>Description of the classes<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.variables.field.Field" title="layercake.variables.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>: Class defining the spatial fields.</p></li>
+<li><p><a class="reference internal" href="#layercake.variables.field.ParameterField" title="layercake.variables.field.ParameterField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterField</span></code></a>: Class defining static spatial field that can be viewed as models’ parameters.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.field.Field">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.field.</span></span><span class="sig-name descname"><span class="pre">Field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_product_definition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">state_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/field.html#Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.field.Field" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.variables.variable.Variable" title="layercake.variables.variable.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></p>
+<p>Class defining the spatial fields in the models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the field.</p></li>
+<li><p><strong>symbol</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol to represent the field in symbolic expressions.</p></li>
+<li><p><strong>basis</strong> (<a class="reference internal" href="basis.html#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis"><em>SymbolicBasis</em></a>) – A symbolic basis of functions on which the Galerkin expansion of the field is performed.</p></li>
+<li><p><strong>inner_product_definition</strong> (<a class="reference internal" href="inner_products.html#layercake.inner_products.definition.InnerProductDefinition" title="layercake.inner_products.definition.InnerProductDefinition"><em>InnerProductDefinition</em></a>) – Inner product definition object used to compute the inner products between the elements of the basis.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The units of the variable.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.
+Empty by default.</p></li>
+<li><p><strong>latex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Latex string representing the variable.
+Empty by default.</p></li>
+<li><p><strong>state</strong> (<a class="reference internal" href="#layercake.variables.variable.VariablesArray" title="layercake.variables.variable.VariablesArray"><em>VariablesArray</em></a>) – Field state array: array containing the coefficient of the field’s Galerkin expansion.</p></li>
+<li><p><strong>state_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Used to create the field state array if <cite>state</cite> is not a <code class="xref py py-class docutils literal notranslate"><span class="pre">VariableArray</span></code>.
+Passed to the <code class="xref py py-class docutils literal notranslate"><span class="pre">VariableArray</span></code> constructor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#layercake.variables.field.Field.name" title="Link to this definition"></a></dt>
+<dd><p>Name of the field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.symbol">
+<span class="sig-name descname"><span class="pre">symbol</span></span><a class="headerlink" href="#layercake.variables.field.Field.symbol" title="Link to this definition"></a></dt>
+<dd><p>The <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol representing the field in symbolic expressions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.basis">
+<span class="sig-name descname"><span class="pre">basis</span></span><a class="headerlink" href="#layercake.variables.field.Field.basis" title="Link to this definition"></a></dt>
+<dd><p>The symbolic basis of functions on which the Galerkin expansion of the field is performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="basis.html#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis">SymbolicBasis</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.inner_product_definition">
+<span class="sig-name descname"><span class="pre">inner_product_definition</span></span><a class="headerlink" href="#layercake.variables.field.Field.inner_product_definition" title="Link to this definition"></a></dt>
+<dd><p>The inner product definition object used to compute the inner products between the elements of the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="inner_products.html#layercake.inner_products.definition.InnerProductDefinition" title="layercake.inner_products.definition.InnerProductDefinition">InnerProductDefinition</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#layercake.variables.field.Field.units" title="Link to this definition"></a></dt>
+<dd><p>The units of the variable.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.latex">
+<span class="sig-name descname"><span class="pre">latex</span></span><a class="headerlink" href="#layercake.variables.field.Field.latex" title="Link to this definition"></a></dt>
+<dd><p>Latex string representing the variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.state">
+<span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#layercake.variables.field.Field.state" title="Link to this definition"></a></dt>
+<dd><p>Field state array: array containing the coefficient of the field’s Galerkin expansion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#layercake.variables.variable.VariablesArray" title="layercake.variables.variable.VariablesArray">VariablesArray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.coordinate_system">
+<span class="sig-name descname"><span class="pre">coordinate_system</span></span><a class="headerlink" href="#layercake.variables.field.Field.coordinate_system" title="Link to this definition"></a></dt>
+<dd><p>Coordinate system on which the basis of functions and the inner product are defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem">CoordinateSystem</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.Field.function">
+<span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#layercake.variables.field.Field.function" title="Link to this definition"></a></dt>
+<dd><p>A Sympy symbolic representation of the field as a function of space and time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.field.</span></span><span class="sig-name descname"><span class="pre">FunctionField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_product_definition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_substitutions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_substitution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_symbolic_substitution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters_array_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/field.html#FunctionField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.field.FunctionField" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.variables.variable.Variable" title="layercake.variables.variable.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></p>
+<p>Class defining a static spatial fields in the models, specified as a function of the model’s coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the field.</p></li>
+<li><p><strong>symbol</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>) – Symbol representing the field.</p></li>
+<li><p><strong>symbolic_expression</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expression to represent the field mathematical expression in symbolic expressions.</p></li>
+<li><p><strong>basis</strong> (<a class="reference internal" href="basis.html#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis"><em>SymbolicBasis</em></a>) – A symbolic basis of functions on which the Galerkin expansion of the field is performed.</p></li>
+<li><p><strong>expression_parameters</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em><em>, </em><em>optional</em>) – List of parameters appearing in the symbolic expression.
+If <cite>None</cite>, assumes that no parameters are appearing there.</p></li>
+<li><p><strong>inner_product_definition</strong> (<a class="reference internal" href="inner_products.html#layercake.inner_products.definition.InnerProductDefinition" title="layercake.inner_products.definition.InnerProductDefinition"><em>InnerProductDefinition</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Inner product definition object used to compute the inner products between the elements of the basis.
+If <cite>None</cite>, the Galerkin expansion will not be computed, and then this field can only be used in symbolic expressions.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The units of the variable.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.
+Empty by default.</p></li>
+<li><p><strong>latex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Latex string representing the variable.
+Empty by default.</p></li>
+<li><p><strong>extra_substitutions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em><em>, </em><em>optional</em>) – List of 2-tuples containing extra symbolic substitutions to be made at the end of the integral computation.
+The 2-tuples contain first a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p></li>
+<li><p><strong>force_substitution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Force the substitution by the numerical values of the parameters arrays, even in the symbolic case.
+Default to <cite>False</cite>.</p></li>
+<li><p><strong>force_symbolic_substitution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Force the substitution by the symbolic expressions resulting from the projection of the function field onto
+the provided <cite>basis</cite>. Only relevant when working in the symbolic case.
+Is superseded by the <cite>force_substitution</cite> argument, i.e. the latter should be set to <cite>False</cite> for this parameter to work.
+Default to <cite>False</cite>.</p></li>
+<li><p><strong>**parameters_array_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Used to create the field state <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametersArray</span></code> object.
+Passed to the <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametersArray</span></code> class constructor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.name" title="Link to this definition"></a></dt>
+<dd><p>Name of the field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.symbol">
+<span class="sig-name descname"><span class="pre">symbol</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.symbol" title="Link to this definition"></a></dt>
+<dd><p>Symbol representing the field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.symbolic_expression">
+<span class="sig-name descname"><span class="pre">symbolic_expression</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.symbolic_expression" title="Link to this definition"></a></dt>
+<dd><p>A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expression to represent the field mathematical expression in symbolic expressions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.basis">
+<span class="sig-name descname"><span class="pre">basis</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.basis" title="Link to this definition"></a></dt>
+<dd><p>The symbolic basis of functions on which the Galerkin expansion of the field is performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="basis.html#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis">SymbolicBasis</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.inner_product_definition">
+<span class="sig-name descname"><span class="pre">inner_product_definition</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.inner_product_definition" title="Link to this definition"></a></dt>
+<dd><p>The inner product definition object used to compute the inner products between the elements of the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="inner_products.html#layercake.inner_products.definition.InnerProductDefinition" title="layercake.inner_products.definition.InnerProductDefinition">InnerProductDefinition</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.units" title="Link to this definition"></a></dt>
+<dd><p>The units of the variable.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.latex">
+<span class="sig-name descname"><span class="pre">latex</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.latex" title="Link to this definition"></a></dt>
+<dd><p>Latex string representing the variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.parameters" title="Link to this definition"></a></dt>
+<dd><p>Array containing the coefficients of the field Galerkin expansion, computed from the specified basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#layercake.variables.parameter.ParametersArray" title="layercake.variables.parameter.ParametersArray">ParametersArray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.expression_parameters">
+<span class="sig-name descname"><span class="pre">expression_parameters</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.expression_parameters" title="Link to this definition"></a></dt>
+<dd><p>List of parameters appearing in the symbolic expression.
+If <cite>None</cite>, assumes that no parameters are appearing there.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>), optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.force_substitution">
+<span class="sig-name descname"><span class="pre">force_substitution</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.force_substitution" title="Link to this definition"></a></dt>
+<dd><p>Force the substitution by the numerical values of the parameters arrays, even in the symbolic case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a>, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.force_symbolic_substitution">
+<span class="sig-name descname"><span class="pre">force_symbolic_substitution</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.force_symbolic_substitution" title="Link to this definition"></a></dt>
+<dd><p>Force the substitution by the symbolic expressions resulting from the projection of the function field onto
+the provided <cite>basis</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a>, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.descriptions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptions</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.descriptions" title="Link to this definition"></a></dt>
+<dd><p>Description of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.dimensional_values">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dimensional_values</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.dimensional_values" title="Link to this definition"></a></dt>
+<dd><p>Returns the dimensional value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.input_dimensional">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_dimensional</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.input_dimensional" title="Link to this definition"></a></dt>
+<dd><p>Indicate if the provided value is dimensional or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.nondimensional_values">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nondimensional_values</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.nondimensional_values" title="Link to this definition"></a></dt>
+<dd><p>Returns the nondimensional value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.numerical_expression">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">numerical_expression</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.numerical_expression" title="Link to this definition"></a></dt>
+<dd><p>The numeric expression of the function, i.e. with parameters replaced by their numerical value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.return_dimensional">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_dimensional</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.return_dimensional" title="Link to this definition"></a></dt>
+<dd><p>Indicate if the returned value is dimensional or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.symbolic_expressions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbolic_expressions</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.symbolic_expressions" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbolic expressions of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.FunctionField.symbols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbols</span></span><a class="headerlink" href="#layercake.variables.field.FunctionField.symbols" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbol of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.field.</span></span><span class="sig-name descname"><span class="pre">ParameterField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_product_definition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters_array_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/field.html#ParameterField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.field.ParameterField" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.variables.variable.Variable" title="layercake.variables.variable.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></p>
+<p>Class defining a static spatial fields in the models.
+Can be viewed as a model parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the field.</p></li>
+<li><p><strong>symbol</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol to represent the field in symbolic expressions.</p></li>
+<li><p><strong>parameters_array</strong> (<a class="reference internal" href="#layercake.variables.parameter.ParametersArray" title="layercake.variables.parameter.ParametersArray"><em>ParametersArray</em></a><em> or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>) – Array containing the coefficients of the field Galerkin expansion.</p></li>
+<li><p><strong>basis</strong> (<a class="reference internal" href="basis.html#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis"><em>SymbolicBasis</em></a>) – A symbolic basis of functions on which the Galerkin expansion of the field is performed.</p></li>
+<li><p><strong>inner_product_definition</strong> (<a class="reference internal" href="inner_products.html#layercake.inner_products.definition.InnerProductDefinition" title="layercake.inner_products.definition.InnerProductDefinition"><em>InnerProductDefinition</em></a>) – Inner product definition object used to compute the inner products between the elements of the basis.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The units of the variable.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.
+Empty by default.</p></li>
+<li><p><strong>latex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Latex string representing the variable.
+Empty by default.</p></li>
+<li><p><strong>parameters_array_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Used to create the field state if <cite>parameters_array</cite> is not a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametersArray</span></code> object.
+Passed to the <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametersArray</span></code> class constructor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.name" title="Link to this definition"></a></dt>
+<dd><p>Name of the field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.symbol">
+<span class="sig-name descname"><span class="pre">symbol</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.symbol" title="Link to this definition"></a></dt>
+<dd><p>The <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol representing the field in symbolic expressions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.basis">
+<span class="sig-name descname"><span class="pre">basis</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.basis" title="Link to this definition"></a></dt>
+<dd><p>The symbolic basis of functions on which the Galerkin expansion of the field is performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="basis.html#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis">SymbolicBasis</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.inner_product_definition">
+<span class="sig-name descname"><span class="pre">inner_product_definition</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.inner_product_definition" title="Link to this definition"></a></dt>
+<dd><p>The inner product definition object used to compute the inner products between the elements of the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="inner_products.html#layercake.inner_products.definition.InnerProductDefinition" title="layercake.inner_products.definition.InnerProductDefinition">InnerProductDefinition</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.units" title="Link to this definition"></a></dt>
+<dd><p>The units of the variable.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.latex">
+<span class="sig-name descname"><span class="pre">latex</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.latex" title="Link to this definition"></a></dt>
+<dd><p>Latex string representing the variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.parameters" title="Link to this definition"></a></dt>
+<dd><p>Array containing the coefficients of the field Galerkin expansion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#layercake.variables.parameter.ParametersArray" title="layercake.variables.parameter.ParametersArray">ParametersArray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.descriptions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptions</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.descriptions" title="Link to this definition"></a></dt>
+<dd><p>Description of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.dimensional_values">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dimensional_values</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.dimensional_values" title="Link to this definition"></a></dt>
+<dd><p>Returns the dimensional value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.input_dimensional">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_dimensional</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.input_dimensional" title="Link to this definition"></a></dt>
+<dd><p>Indicate if the provided value is dimensional or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.nondimensional_values">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nondimensional_values</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.nondimensional_values" title="Link to this definition"></a></dt>
+<dd><p>Returns the nondimensional value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.return_dimensional">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_dimensional</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.return_dimensional" title="Link to this definition"></a></dt>
+<dd><p>Indicate if the returned value is dimensional or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.symbolic_expressions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbolic_expressions</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.symbolic_expressions" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbolic expressions of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.field.ParameterField.symbols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbols</span></span><a class="headerlink" href="#layercake.variables.field.ParameterField.symbols" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbol of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="parameter-module">
+<span id="module-layercake.variables.parameter"></span><h2>Parameter module<a class="headerlink" href="#parameter-module" title="Link to this heading"></a></h2>
+<p>This module contains the basic parameter class to hold model’s parameters values.
+It allows to manipulate dimensional and nondimensional parameter easily.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">layercake.variables.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ParametersArray</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># creating a parameter initialized with a nondimensional value</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">0.2e0</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">description</span><span class="o">=</span><span class="s2">&quot;static stability of the atmosphere (nondimensional)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span>
+<span class="go">0.2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># creating a parameter initialized with a dimensional value</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">2.1581898457499433e-06</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">units</span><span class="o">=</span><span class="s1">&#39;[m^2][s^-2][Pa^-2]&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">description</span><span class="o">=</span><span class="s2">&quot;static stability of the atmosphere&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span>
+<span class="go">2.1581898457499433e-06</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># creating a parameters array initialized with a nondimensional values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">ParametersArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">],[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">]]),</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;atmosphere bottom friction coefficient (nondimensional&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span>
+<span class="go">ArrayParameters([[0.1, 0.2],</span>
+<span class="go">                 [0.3, 0.4]], dtype=object)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># you can also ask for the value of one particular value of the array</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">0.1</span>
+</pre></div>
+</div>
+<section id="main-classes">
+<h3>Main classes<a class="headerlink" href="#main-classes" title="Link to this heading"></a></h3>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.parameter.Parameter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.parameter.</span></span><span class="sig-name descname"><span class="pre">Parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_expression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/parameter.html#Parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.parameter.Parameter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<p>Base class of model’s parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Value of the parameter.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The units of the provided value.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g <cite>‘[m^2][s^-2][Pa^-2]’</cite>.
+Empty by default.</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – String describing the parameter.</p></li>
+<li><p><strong>symbol</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a><em>, </em><em>optional</em>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol to represent the parameter in symbolic expressions.</p></li>
+<li><p><strong>latex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – A latex string to define the parameter in the latex equations.</p></li>
+<li><p><strong>symbolic_expression</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a><em>, </em><em>optional</em>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expression to represent a relationship to other parameters.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Parameter is immutable. Once instantiated, it cannot be altered. To create a new parameter, one must
+re-instantiate it.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.Parameter.description">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#layercake.variables.parameter.Parameter.description" title="Link to this definition"></a></dt>
+<dd><p>Description of the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.Parameter.latex">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">latex</span></span><a class="headerlink" href="#layercake.variables.parameter.Parameter.latex" title="Link to this definition"></a></dt>
+<dd><p>A latex string defining the parameter in the latex equations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.Parameter.symbol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbol</span></span><a class="headerlink" href="#layercake.variables.parameter.Parameter.symbol" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbol of the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.Parameter.symbolic_expression">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbolic_expression</span></span><a class="headerlink" href="#layercake.variables.parameter.Parameter.symbolic_expression" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbolic expression of the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.Parameter.units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#layercake.variables.parameter.Parameter.units" title="Link to this definition"></a></dt>
+<dd><p>The units of the dimensional value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.variables.parameter.ParametersArray">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.variables.parameter.</span></span><span class="sig-name descname"><span class="pre">ParametersArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_expressions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/parameter.html#ParametersArray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.parameter.ParametersArray" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
+<p>Base class of model’s array of parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>) or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference internal" href="#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em>) – Values of the parameter array.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The units of the provided value.
+Should be specified by joining atoms like <cite>‘[unit^power]’</cite>, e.g ‘<cite>[m^2][s^-2][Pa^-2]’</cite>.
+Empty by default.</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>) or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – String or an iterable of strings, describing the parameters.
+If an iterable, should have the same length or shape as <cite>values</cite>.</p></li>
+<li><p><strong>~numpy.ndarray</strong><strong>(</strong><strong>~sympy.core.symbol.Symbol</strong><strong>)</strong> (<em>symbols ~sympy.core.symbol.Symbol</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a><em>) </em><em>or</em>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol or an iterable of symbols, to represent the parameters in symbolic expressions.
+If an iterable, should have the same length or shape as <cite>values</cite>.</p></li>
+<li><p><strong>optional</strong> – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol or an iterable of symbols, to represent the parameters in symbolic expressions.
+If an iterable, should have the same length or shape as <cite>values</cite>.</p></li>
+<li><p><strong>symbolic_expressions</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a><em>) or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a><em>)</em><em>, </em><em>optional</em>) – A <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> expression or an iterable of expressions, to represent a relationship to other parameters.
+If an iterable, should have the same length or shape as <cite>values</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.ParametersArray.descriptions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptions</span></span><a class="headerlink" href="#layercake.variables.parameter.ParametersArray.descriptions" title="Link to this definition"></a></dt>
+<dd><p>Description of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.ParametersArray.symbolic_expressions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbolic_expressions</span></span><a class="headerlink" href="#layercake.variables.parameter.ParametersArray.symbolic_expressions" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbolic expressions of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.ParametersArray.symbols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symbols</span></span><a class="headerlink" href="#layercake.variables.parameter.ParametersArray.symbols" title="Link to this definition"></a></dt>
+<dd><p>Returns the symbol of the parameters in the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="layercake.variables.parameter.ParametersArray.units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#layercake.variables.parameter.ParametersArray.units" title="Link to this definition"></a></dt>
+<dd><p>The units of the dimensional value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="variables-utility-module">
+<span id="module-layercake.variables.utils"></span><h2>Variables utility module<a class="headerlink" href="#variables-utility-module" title="Link to this heading"></a></h2>
+<p>Defines useful functions.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.variables.utils.combine_units">
+<span class="sig-prename descclassname"><span class="pre">layercake.variables.utils.</span></span><span class="sig-name descname"><span class="pre">combine_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/utils.html#combine_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.utils.combine_units" title="Link to this definition"></a></dt>
+<dd><p>Combine units strings together with a given operation on the exponents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>units1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – First units string to combine.</p></li>
+<li><p><strong>units2</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Second units string to combine.</p></li>
+<li><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Operation to perform on the units exponents. Presently can be <cite>‘-’</cite> or <cite>‘+’</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting units string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.variables.utils.power_units">
+<span class="sig-prename descclassname"><span class="pre">layercake.variables.utils.</span></span><span class="sig-name descname"><span class="pre">power_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/variables/utils.html#power_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.variables.utils.power_units" title="Link to this definition"></a></dt>
+<dd><p>Apply power to a units strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Units to take power of.</p></li>
+<li><p><strong>power</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Power.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting units string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../references.html" class="btn btn-neutral float-left" title="Code References" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.html" class="btn btn-neutral float-right" title="General utility module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

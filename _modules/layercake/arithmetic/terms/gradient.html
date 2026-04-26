@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.arithmetic.terms.gradient &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../files/tricks.html">Various tricks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.arithmetic.terms.gradient</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.arithmetic.terms.gradient</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Gradient module</span>
+<span class="sd">    ===============</span>
+
+<span class="sd">    This module defines a function to compute the terms for the scalar product of gradients of fields</span>
+<span class="sd">    in partial differential equations.</span>
+<span class="sd">    A function to compute derived forms of the gradient products involving the vorticity is also</span>
+<span class="sd">    provided.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.terms.operations</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProductOfTerms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.terms.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">OperatorTerm</span><span class="p">,</span> <span class="n">ComposedOperatorsTerm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.symbolic.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">Laplacian</span><span class="p">,</span> <span class="n">D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.symbolic.expressions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Expression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.variables.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">combine_units</span><span class="p">,</span> <span class="n">power_units</span>
+
+
+<div class="viewcode-block" id="gradients_product">
+<a class="viewcode-back" href="../../../../files/technical/arithmetic.html#layercake.arithmetic.terms.gradient.gradients_product">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gradients_product</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">,</span> <span class="n">coordinate_system</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefactors</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function returning a list of :class:`~layercake.arithmetic.terms.operations.ProductOfTerms` components of</span>
+<span class="sd">    the partial differential equation&#39;s scalar product of gradients:</span>
+
+<span class="sd">    .. math:: P(\\psi, \\phi) = e_1^2 \\, \\partial_{u_1} \\psi \\, \\partial_{u_1} \\phi + e_2^2 \\, \\partial_{u_2} \\psi \\, \\partial_{u_2} \\phi</span>
+
+<span class="sd">    where :math:`\\phi` and :math:`\\psi` are two fields defined on the model&#39;s domain,</span>
+<span class="sd">    :math:`u_1, u_2` are the coordinates of the model, and :math:`e_1, e_2` are the inverse of the infinitesimal</span>
+<span class="sd">    length of the coordinates (which can be functions of the :math:`u_1, u_2` coordinates).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field1: ~field.Field or ~field.ParameterField</span>
+<span class="sd">        Field on which the first gradient of the scalar product act (corresponds to the field :math:`\\psi` in the formula above).</span>
+<span class="sd">    field2: ~field.Field or ~field.ParameterField</span>
+<span class="sd">        Field on which the second gradient of the scalar product act (corresponds to the field :math:`\\phi` in the formula above).</span>
+<span class="sd">    coordinate_system: ~systems.CoordinateSystem</span>
+<span class="sd">        Coordinate system on which the model is defined.</span>
+<span class="sd">    sign: int, optional</span>
+<span class="sd">        Sign in front of the term. Either +1 or -1.</span>
+<span class="sd">        Default to +1.</span>
+<span class="sd">    prefactors: tuple(~parameter.Parameter or ~expressions.Expression), optional</span>
+<span class="sd">        2-tuple providing the prefactors in front of each of the two terms composing the scalar product of gradients.</span>
+<span class="sd">        This is added on top of the infinitesimal length prefactor.</span>
+<span class="sd">        Must be specified as model parameters or symbolic expressions.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple(~operations.ProductOfTerms)</span>
+<span class="sd">        2-tuple containing arithmetic terms representing each term of the scalar product of gradients.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">uc</span> <span class="o">=</span> <span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">vc</span> <span class="o">=</span> <span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">symbol</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">symbol</span>
+
+    <span class="n">uunits</span> <span class="o">=</span> <span class="n">combine_units</span><span class="p">(</span><span class="n">uc</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">uc</span><span class="o">.</span><span class="n">infinitesimal_length_units</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">)</span>
+    <span class="n">vunits</span> <span class="o">=</span> <span class="n">combine_units</span><span class="p">(</span><span class="n">vc</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">vc</span><span class="o">.</span><span class="n">infinitesimal_length_units</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">uc</span><span class="o">.</span><span class="n">infinitesimal_length</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">vc</span><span class="o">.</span><span class="n">infinitesimal_length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">prefactor1</span> <span class="o">=</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">prefactor2</span> <span class="o">=</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prefs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">uc</span><span class="o">.</span><span class="n">infinitesimal_length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prefs1</span> <span class="o">=</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="o">*</span> <span class="n">prefs</span>
+            <span class="n">prefactor1</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">prefs1</span><span class="p">,</span>
+                                    <span class="n">expression_parameters</span><span class="o">=</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                    <span class="n">units</span><span class="o">=</span><span class="n">combine_units</span><span class="p">(</span><span class="n">prefactors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">power_units</span><span class="p">(</span><span class="n">uunits</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;-&#39;</span><span class="p">),</span>
+                                    <span class="n">latex</span><span class="o">=</span><span class="n">prefs1</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">15</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prefactor1</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">prefs</span><span class="p">,</span>
+                                    <span class="n">expression_parameters</span><span class="o">=</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                    <span class="n">units</span><span class="o">=</span><span class="n">power_units</span><span class="p">(</span><span class="n">uunits</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+                                    <span class="n">latex</span><span class="o">=</span><span class="n">prefs</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">15</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">prefs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">vc</span><span class="o">.</span><span class="n">infinitesimal_length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prefs2</span> <span class="o">=</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="o">*</span> <span class="n">prefs</span>
+            <span class="n">prefactor2</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">prefs2</span><span class="p">,</span>
+                                    <span class="n">expression_parameters</span><span class="o">=</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                    <span class="n">units</span><span class="o">=</span><span class="n">combine_units</span><span class="p">(</span><span class="n">prefactors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">power_units</span><span class="p">(</span><span class="n">vunits</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;-&#39;</span><span class="p">),</span>
+                                    <span class="n">latex</span><span class="o">=</span><span class="n">prefs2</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">15</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prefactor2</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">prefs</span><span class="p">,</span>
+                                    <span class="n">expression_parameters</span><span class="o">=</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                    <span class="n">units</span><span class="o">=</span><span class="n">power_units</span><span class="p">(</span><span class="n">vunits</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+                                    <span class="n">latex</span><span class="o">=</span><span class="n">prefs</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">15</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">du_field1</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="n">prefactor1</span><span class="p">)</span>
+    <span class="n">du_field2</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">field2</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+
+    <span class="n">dv_field1</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="n">prefactor2</span><span class="p">)</span>
+    <span class="n">dv_field2</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">field2</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+    <span class="n">product1</span> <span class="o">=</span> <span class="n">ProductOfTerms</span><span class="p">(</span><span class="n">du_field1</span><span class="p">,</span> <span class="n">du_field2</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="n">sign</span><span class="p">)</span>
+    <span class="n">product2</span> <span class="o">=</span> <span class="n">ProductOfTerms</span><span class="p">(</span><span class="n">dv_field1</span><span class="p">,</span> <span class="n">dv_field2</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="n">sign</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">product1</span><span class="p">,</span> <span class="n">product2</span></div>
+
+
+
+<div class="viewcode-block" id="vorticity_gradients_product">
+<a class="viewcode-back" href="../../../../files/technical/arithmetic.html#layercake.arithmetic.terms.gradient.vorticity_gradients_product">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">vorticity_gradients_product</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">,</span> <span class="n">coordinate_system</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefactors</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function returning a list of :class:`~layercake.arithmetic.terms.operations.ProductOfTerms` components of</span>
+<span class="sd">    the vorticity advection in the partial differential equation,</span>
+<span class="sd">    provided by the expression :math:`P(\\psi, \\nabla^2 \\phi)`,</span>
+<span class="sd">    where :math:`P` is the partial differential equation&#39;s scalar product of gradients :func:`~layercake.arithmetic.terms.gradient.gradients_product`:</span>
+
+<span class="sd">    .. math:: P(\\psi, \\nabla^2 \\phi) = e_1^2 \\, \\partial_{u_1} \\psi \\, \\partial_{u_1} \\nabla^2 \\phi + e_2^2 \\, \\partial_{u_2} \\psi \\, \\partial_{u_2} \\nabla^2 \\phi</span>
+
+<span class="sd">    where :math:`\\phi` and :math:`\\psi` are two fields defined on the model&#39;s domain,</span>
+<span class="sd">    :math:`u_1, u_2` are the coordinates of the model, and :math:`e_1, e_2` are the inverse of the infinitesimal</span>
+<span class="sd">    length of the coordinates (which can be functions of the :math:`u_1, u_2` coordinates).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field1: ~field.Field or ~field.ParameterField</span>
+<span class="sd">        First field, advected by the vorticity.</span>
+<span class="sd">    field2: ~field.Field or ~field.ParameterField</span>
+<span class="sd">        Second field with which the vorticity :math:`\\nabla^2` is computed.</span>
+<span class="sd">    coordinate_system: ~systems.CoordinateSystem</span>
+<span class="sd">        Coordinate system on which the model is defined.</span>
+<span class="sd">    sign: int, optional</span>
+<span class="sd">        Sign in front of the vorticity advection term. Either +1 or -1.</span>
+<span class="sd">        Default to +1.</span>
+<span class="sd">    prefactors: tuple(~parameter.Parameter or ~expressions.Expression), optional</span>
+<span class="sd">        2-tuple providing the prefactors in front of each of the two terms composing the Jacobian.</span>
+<span class="sd">        This is added on top of the infinitesimal length prefactor.</span>
+<span class="sd">        Must be specified as model parameters or symbolic expressions.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple(~operations.ProductOfTerms)</span>
+<span class="sd">        2-tuple containing arithmetic terms representing each term of the vorticity advection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">uc</span> <span class="o">=</span> <span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">vc</span> <span class="o">=</span> <span class="n">coordinate_system</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">symbol</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">symbol</span>
+
+    <span class="n">uunits</span> <span class="o">=</span> <span class="n">combine_units</span><span class="p">(</span><span class="n">uc</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">uc</span><span class="o">.</span><span class="n">infinitesimal_length_units</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">)</span>
+    <span class="n">vunits</span> <span class="o">=</span> <span class="n">combine_units</span><span class="p">(</span><span class="n">vc</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">vc</span><span class="o">.</span><span class="n">infinitesimal_length_units</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">uc</span><span class="o">.</span><span class="n">infinitesimal_length</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">vc</span><span class="o">.</span><span class="n">infinitesimal_length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">prefactor1</span> <span class="o">=</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">prefactor2</span> <span class="o">=</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prefs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">uc</span><span class="o">.</span><span class="n">infinitesimal_length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prefs1</span> <span class="o">=</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="o">*</span> <span class="n">prefs</span>
+            <span class="n">prefactor1</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">prefs1</span><span class="p">,</span>
+                                    <span class="n">expression_parameters</span><span class="o">=</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                    <span class="n">units</span><span class="o">=</span><span class="n">combine_units</span><span class="p">(</span><span class="n">prefactors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">power_units</span><span class="p">(</span><span class="n">uunits</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;-&#39;</span><span class="p">),</span>
+                                    <span class="n">latex</span><span class="o">=</span><span class="n">prefs1</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">15</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prefactor1</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">prefs</span><span class="p">,</span>
+                                    <span class="n">expression_parameters</span><span class="o">=</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                    <span class="n">units</span><span class="o">=</span><span class="n">power_units</span><span class="p">(</span><span class="n">uunits</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+                                    <span class="n">latex</span><span class="o">=</span><span class="n">prefs</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">15</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">prefs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">vc</span><span class="o">.</span><span class="n">infinitesimal_length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prefs2</span> <span class="o">=</span> <span class="n">prefactors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="o">*</span> <span class="n">prefs</span>
+            <span class="n">prefactor2</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">prefs2</span><span class="p">,</span>
+                                    <span class="n">expression_parameters</span><span class="o">=</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                    <span class="n">units</span><span class="o">=</span><span class="n">combine_units</span><span class="p">(</span><span class="n">prefactors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">power_units</span><span class="p">(</span><span class="n">vunits</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;-&#39;</span><span class="p">),</span>
+                                    <span class="n">latex</span><span class="o">=</span><span class="n">prefs2</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">15</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prefactor2</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="n">prefs</span><span class="p">,</span>
+                                    <span class="n">expression_parameters</span><span class="o">=</span><span class="n">coordinate_system</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+                                    <span class="n">units</span><span class="o">=</span><span class="n">power_units</span><span class="p">(</span><span class="n">vunits</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+                                    <span class="n">latex</span><span class="o">=</span><span class="n">prefs</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">15</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">du_field1</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="n">prefactor1</span><span class="p">)</span>
+    <span class="n">dv_field1</span> <span class="o">=</span> <span class="n">OperatorTerm</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="n">prefactor2</span><span class="p">)</span>
+
+    <span class="n">du_lap_field2</span> <span class="o">=</span> <span class="n">ComposedOperatorsTerm</span><span class="p">(</span><span class="n">field2</span><span class="p">,</span> <span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">),</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">coordinate_system</span><span class="p">))</span>
+    <span class="n">dv_lap_field2</span> <span class="o">=</span> <span class="n">ComposedOperatorsTerm</span><span class="p">(</span><span class="n">field2</span><span class="p">,</span> <span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">Laplacian</span><span class="p">),</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">coordinate_system</span><span class="p">))</span>
+
+    <span class="n">product1</span> <span class="o">=</span> <span class="n">ProductOfTerms</span><span class="p">(</span><span class="n">du_field1</span><span class="p">,</span> <span class="n">du_lap_field2</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="n">sign</span><span class="p">)</span>
+    <span class="n">product2</span> <span class="o">=</span> <span class="n">ProductOfTerms</span><span class="p">(</span><span class="n">dv_field1</span><span class="p">,</span> <span class="n">dv_lap_field2</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="n">sign</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">product1</span><span class="p">,</span> <span class="n">product2</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

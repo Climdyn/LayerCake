@@ -1,0 +1,544 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.arithmetic.equation &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/tricks.html">Various tricks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.arithmetic.equation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.arithmetic.equation</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Equation definition module</span>
+<span class="sd">    ==========================</span>
+
+<span class="sd">    Main class to define partial differential equation.</span>
+<span class="sd">    This class is the workhorse of LayerCake to define and specify</span>
+<span class="sd">    partial differential equation.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">Eq</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.terms.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArithmeticTerms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">isin</span>
+
+
+<span class="c1"># TODO: deal with the cases where lists of terms are empty - maybe nothing is needed but to check</span>
+
+<div class="viewcode-block" id="Equation">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.Equation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Equation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main class to define and specify partial differential equations.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The left-hand side is always expressed as a partial time derivative of</span>
+<span class="sd">    something: :math:`\\partial_t` .</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field: ~field.Field</span>
+<span class="sd">        The spatial field over which the partial differential equation.</span>
+<span class="sd">    lhs_terms: ~arithmetic.terms.base.ArithmeticTerms or list(~arithmetic.terms.base.ArithmeticTerms), optional</span>
+<span class="sd">        Terms on the left-hand side of the equation. At least one must involve the field defined above.</span>
+<span class="sd">    name: str, optional</span>
+<span class="sd">        Name for the equation.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field: ~field.Field</span>
+<span class="sd">        The spatial field over which the partial differential equation.</span>
+<span class="sd">    rhs_terms: list(~arithmetic.terms.base.ArithmeticTerms)</span>
+<span class="sd">        List of additive terms in the right-hand side of the equation.</span>
+<span class="sd">    lhs_terms: ListOfArithmeticTerms(~arithmetic.terms.base.ArithmeticTerms)</span>
+<span class="sd">        Term on the left-hand side of the equation.</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Optional name for the equation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_t</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">lhs_terms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">_equation</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhs_terms</span> <span class="o">=</span> <span class="n">ListOfAdditiveArithmeticTerms</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lhs_terms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span> <span class="o">=</span> <span class="n">ListOfAdditiveArithmeticTerms</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lhs_terms</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span> <span class="o">=</span> <span class="n">ListOfAdditiveArithmeticTerms</span><span class="p">(</span><span class="n">lhs_terms</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span> <span class="o">=</span> <span class="n">ListOfAdditiveArithmeticTerms</span><span class="p">([</span><span class="n">lhs_terms</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Equation.add_rhs_term">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.Equation.add_rhs_term">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_rhs_term</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a term to the right-hand side of the equation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        term: ~arithmetic.terms.base.ArithmeticTerms</span>
+<span class="sd">            Term to be added to the right-hand side of the equation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">ArithmeticTerms</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Provided term must be a valid ArithmeticTerm object.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Equation.add_rhs_terms">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.Equation.add_rhs_terms">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_rhs_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">terms</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add multiple terms to the right-hand side of the equation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        terms: list(~arithmetic.terms.base.ArithmeticTerms)</span>
+<span class="sd">            Terms to be added to the right-hand side of the equation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_rhs_term</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Equation.add_lhs_term">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.Equation.add_lhs_term">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_lhs_term</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a term to the left-hand side of the equation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        term: ~arithmetic.terms.base.ArithmeticTerms</span>
+<span class="sd">            Term to be added to the left-hand side of the equation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">ArithmeticTerms</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Provided term must be a valid ArithmeticTerm object.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Equation.add_lhs_terms">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.Equation.add_lhs_terms">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_lhs_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">terms</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add multiple terms to the left-hand side of the equation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        terms: list(~arithmetic.terms.base.ArithmeticTerms)</span>
+<span class="sd">            Terms to be added to the left-hand side of the equation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_lhs_term</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">terms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Alias for the list of RHS arithmetic terms.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhs_terms</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">other_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~field.Field): List of additional fields present in the equation.&quot;&quot;&quot;</span>
+        <span class="n">other_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">equation_term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="ow">and</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">dynamical</span> <span class="ow">and</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other_fields</span><span class="p">:</span>
+                    <span class="n">other_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">other_fields</span> <span class="o">=</span> <span class="n">other_fields</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_fields_in_lhs</span>
+        <span class="k">return</span> <span class="n">other_fields</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">other_fields_in_lhs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~field.Field): List of additional fields present in the LHS of the equation.&quot;&quot;&quot;</span>
+        <span class="n">other_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">equation_term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="ow">and</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">dynamical</span> <span class="ow">and</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other_fields</span><span class="p">:</span>
+                    <span class="n">other_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">other_fields</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameter_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~field.ParameterField): List of non-dynamical parameter fields present in the equation.&quot;&quot;&quot;</span>
+        <span class="n">parameter_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">equation_term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">dynamical</span> <span class="ow">and</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameter_fields</span><span class="p">:</span>
+                    <span class="n">parameter_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">equation_term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">dynamical</span> <span class="ow">and</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameter_fields</span><span class="p">:</span>
+                    <span class="n">parameter_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parameter_fields</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~parameter.Parameter): List of parameters present in the equation.&quot;&quot;&quot;</span>
+        <span class="n">parameters_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">terms</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">:</span>
+            <span class="n">params_list</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">isin</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">parameters_list</span><span class="p">):</span>
+                    <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">param_field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_fields</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_field</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isin</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">parameters_list</span><span class="p">):</span>
+                    <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parameters_list</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameters_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~sympy.core.symbol.Symbol): List of parameter&#39;s symbols present in the equation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbolic_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: Symbolic expression of the equation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Eq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic_lhs</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhs_terms</span><span class="o">.</span><span class="n">symbolic_expression</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">numerical_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: Expression of the equation with parameters replaced by their</span>
+<span class="sd">        configured values.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Eq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_lhs</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhs_terms</span><span class="o">.</span><span class="n">symbolic_expression</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbolic_rhs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: Symbolic expression of the right-hand side of the equation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhs_terms</span><span class="o">.</span><span class="n">symbolic_expression</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">numerical_rhs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: Expression of the right-hand side of the equation with</span>
+<span class="sd">        parameters replaced by their configured values.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhs_terms</span><span class="o">.</span><span class="n">numerical_expression</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbolic_lhs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: Symbolic expression of the left-hand side of the equation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="o">.</span><span class="n">symbolic_expression</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">numerical_lhs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: Expression of the left-hand side of the equation with</span>
+<span class="sd">        parameters replaced by their configured values.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="o">.</span><span class="n">numerical_expression</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lhs_inner_products</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray) or list(sparse.COO(float)): Inner products of each term of</span>
+<span class="sd">        the left-hand side of the equation, if available.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">term</span><span class="o">.</span><span class="n">inner_products</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lhs_inner_products_addition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.matrices.immutable.ImmutableSparseMatrix or ~sympy.tensor.array.ImmutableSparseNDimArray or sparse.COO(float): Added left-hand</span>
+<span class="sd">        side inner products of the equation, if available. Might raise an error if not all terms are compatible.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inner_products</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="n">term</span><span class="o">.</span><span class="n">inner_products</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maximum_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Maximum rank of the right-hand side terms tensors.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">terms</span><span class="o">.</span><span class="n">maximum_rank</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="o">.</span><span class="n">maximum_rank</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Equation.compute_inner_products">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.Equation.compute_inner_products">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_inner_products</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the inner products tensor of the left-hand and right-hand side terms.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        basis: SymbolicBasis</span>
+<span class="sd">            Basis with which to compute the inner products.</span>
+<span class="sd">        numerical: bool, optional</span>
+<span class="sd">            Whether the resulting computed inner products must be numerical or symbolic.</span>
+<span class="sd">            Default to `False`, i.e. symbolic output.</span>
+<span class="sd">        num_threads: int or None, optional</span>
+<span class="sd">            Number of threads to use to compute the inner products. If `None` use all the cpus available.</span>
+<span class="sd">            Default to `None`.</span>
+<span class="sd">        timeout: int or float or bool or None, optional</span>
+<span class="sd">            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate</span>
+<span class="sd">            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.</span>
+<span class="sd">            The options are:</span>
+
+<span class="sd">            * `None`: This is the &quot;full-symbolic&quot; mode. No timeout will be applied, and the switch to numerical integration will never happen.</span>
+<span class="sd">              Can result in very long and improbable computation time.</span>
+<span class="sd">            * `True`: This is the &quot;full-numerical&quot; mode. Symbolic computations do not occur, and the workers try directly to integrate</span>
+<span class="sd">              numerically.</span>
+<span class="sd">            * `False`: Same as `None`.</span>
+<span class="sd">            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the</span>
+<span class="sd">              numerical integration.</span>
+<span class="sd">        permute: bool, optional</span>
+<span class="sd">            If `True`, applies all the possible permutations to the tensor indices</span>
+<span class="sd">            from 1 to the rank of the tensor.</span>
+<span class="sd">            Default to `False`, i.e. no permutation is applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="o">.</span><span class="n">compute_inner_products</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">numerical</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">num_threads</span><span class="p">,</span> <span class="n">permute</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhs_terms</span><span class="o">.</span><span class="n">compute_inner_products</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">numerical</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">num_threads</span><span class="p">,</span> <span class="n">permute</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Equation.to_latex">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.Equation.to_latex">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enclose_lhs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a LaTeX string representing the equation mathematically.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        enclose_lhs: bool, optional</span>
+<span class="sd">            Whether to enclose the left-hand side term inside parenthesis.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_lhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the left-hand side latex string.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_rhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the right-hand side latex string.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `False`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The LaTeX string representing the equation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lhs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latex</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">lhs</span> <span class="o">+=</span> <span class="n">term</span><span class="o">.</span><span class="n">latex</span>
+        <span class="k">if</span> <span class="n">drop_first_lhs_char</span><span class="p">:</span>
+            <span class="n">lhs</span> <span class="o">=</span> <span class="n">lhs</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">enclose_lhs</span><span class="p">:</span>
+            <span class="n">latex_string</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\frac{\partial}{\partial t} &#39;</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;\left(&#39;</span> <span class="o">+</span> <span class="n">lhs</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;\right)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">latex_string</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\frac{\partial}{\partial t} &#39;</span> <span class="o">+</span> <span class="n">lhs</span>
+
+        <span class="n">first_term</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">terms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latex</span>
+        <span class="k">if</span> <span class="n">drop_first_rhs_char</span><span class="p">:</span>
+            <span class="n">first_term</span> <span class="o">=</span> <span class="n">first_term</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="n">latex_string</span> <span class="o">+=</span> <span class="s1">&#39; = &#39;</span> <span class="o">+</span> <span class="n">first_term</span>
+
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">terms</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">latex_string</span> <span class="o">+=</span> <span class="n">term</span><span class="o">.</span><span class="n">latex</span>
+
+        <span class="k">return</span> <span class="n">latex_string</span></div>
+
+
+<div class="viewcode-block" id="Equation.show_latex">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.Equation.show_latex">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enclose_lhs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Show the LaTeX string representing the equation mathematically rendered in a window.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        enclose_lhs: bool, optional</span>
+<span class="sd">            Whether to enclose the left-hand side term inside parenthesis.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_lhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the left-hand side latex string.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_rhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the right-hand side latex string.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">latex_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">enclose_lhs</span><span class="o">=</span><span class="n">enclose_lhs</span><span class="p">,</span>
+                                     <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="n">drop_first_lhs_char</span><span class="p">,</span>
+                                     <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="n">drop_first_rhs_char</span>
+                                     <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;$</span><span class="si">%s</span><span class="s1">$&#39;</span> <span class="o">%</span> <span class="n">latex_string</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_expression</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">eq</span><span class="o">.</span><span class="n">lhs</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">eq</span><span class="o">.</span><span class="n">rhs</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="ListOfAdditiveArithmeticTerms">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.ListOfAdditiveArithmeticTerms">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ListOfAdditiveArithmeticTerms</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class holding list of additive arithmetic terms in equations.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ListOfAdditiveArithmeticTerms.compute_inner_products">
+<a class="viewcode-back" href="../../../files/technical/arithmetic.html#layercake.arithmetic.equation.ListOfAdditiveArithmeticTerms.compute_inner_products">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_inner_products</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the inner products tensor of the all the terms of the list.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        basis: SymbolicBasis</span>
+<span class="sd">            Basis with which to compute the inner products.</span>
+<span class="sd">        numerical: bool, optional</span>
+<span class="sd">            Whether the resulting computed inner products must be numerical or symbolic.</span>
+<span class="sd">            Default to `False`, i.e. symbolic output.</span>
+<span class="sd">        num_threads: int or None, optional</span>
+<span class="sd">            Number of threads to use to compute the inner products. If `None` use all the cpus available.</span>
+<span class="sd">            Default to `None`.</span>
+<span class="sd">        timeout: int or float or bool or None, optional</span>
+<span class="sd">            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate</span>
+<span class="sd">            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.</span>
+<span class="sd">            The options are:</span>
+
+<span class="sd">            * `None`: This is the &quot;full-symbolic&quot; mode. No timeout will be applied, and the switch to numerical integration will never happen.</span>
+<span class="sd">              Can result in very long and improbable computation time.</span>
+<span class="sd">            * `True`: This is the &quot;full-numerical&quot; mode. Symbolic computations do not occur, and the workers try directly to integrate</span>
+<span class="sd">              numerically.</span>
+<span class="sd">            * `False`: Same as `None`.</span>
+<span class="sd">            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the</span>
+<span class="sd">              numerical integration.</span>
+<span class="sd">        permute: bool, optional</span>
+<span class="sd">            If `True`, applies all the possible permutations to the tensor indices</span>
+<span class="sd">            from 1 to the rank of the tensor.</span>
+<span class="sd">            Default to `False`, i.e. no permutation is applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">term</span><span class="o">.</span><span class="n">compute_inner_products</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">numerical</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">num_threads</span><span class="p">,</span> <span class="n">permute</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maximum_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Maximum rank of the right-hand side terms tensors.&quot;&quot;&quot;</span>
+        <span class="n">max_rank</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">max_rank</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_rank</span><span class="p">,</span> <span class="n">term</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">max_rank</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">same_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool: Check if all terms have the same rank.&quot;&quot;&quot;</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">rank</span> <span class="o">!=</span> <span class="n">rank</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbolic_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: Symbolic expression of the collection of additive arithmetic terms.&quot;&quot;&quot;</span>
+
+        <span class="n">rterm</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">Zero</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">rterm</span> <span class="o">+=</span> <span class="n">term</span><span class="o">.</span><span class="n">symbolic_expression</span>
+        <span class="k">return</span> <span class="n">rterm</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">numerical_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.expr.Expr: Expression of the collection of additive arithmetic terms with</span>
+<span class="sd">        parameters replaced by their configured values.&quot;&quot;&quot;</span>
+
+        <span class="n">rterm</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">Zero</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">rterm</span> <span class="o">+=</span> <span class="n">term</span><span class="o">.</span><span class="n">numerical_expression</span>
+        <span class="k">return</span> <span class="n">rterm</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

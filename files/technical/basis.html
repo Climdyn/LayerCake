@@ -1,0 +1,871 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basis module &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="The Bakery" href="bakery.html" />
+    <link rel="prev" title="Formatters module" href="formatters.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tricks.html">Various tricks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../references.html">Code References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="variables.html">Variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">General utility module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inner_products.html">Inner products module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formatters.html">Formatters module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Basis module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basis-definition-module-base-class">Basis definition module (base class)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description-of-the-classes">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.base.Basis"><code class="docutils literal notranslate"><span class="pre">Basis</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.Basis.functions"><code class="docutils literal notranslate"><span class="pre">Basis.functions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.Basis.coordinate_system"><code class="docutils literal notranslate"><span class="pre">Basis.coordinate_system</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.base.NumericBasis"><code class="docutils literal notranslate"><span class="pre">NumericBasis</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.NumericBasis.num_functions"><code class="docutils literal notranslate"><span class="pre">NumericBasis.num_functions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis.substitutions"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis.substitutions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis.coordinate_system"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis.coordinate_system</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis.parameters"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis.derivative"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis.derivative()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis.directional_derivative"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis.directional_derivative()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis.num_functions"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis.num_functions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis.set_parameters"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis.set_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.base.SymbolicBasis.subs_functions"><code class="docutils literal notranslate"><span class="pre">SymbolicBasis.subs_functions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#fourier-basis-definition-module">Fourier Basis definition module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Description of the classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis"><code class="docutils literal notranslate"><span class="pre">PlanarBasinFourierBasis</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.substitutions"><code class="docutils literal notranslate"><span class="pre">PlanarBasinFourierBasis.substitutions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.coordinate_system"><code class="docutils literal notranslate"><span class="pre">PlanarBasinFourierBasis.coordinate_system</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.parameters"><code class="docutils literal notranslate"><span class="pre">PlanarBasinFourierBasis.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.length"><code class="docutils literal notranslate"><span class="pre">PlanarBasinFourierBasis.length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.set_parameters"><code class="docutils literal notranslate"><span class="pre">PlanarBasinFourierBasis.set_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis"><code class="docutils literal notranslate"><span class="pre">PlanarChannelFourierBasis</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.substitutions"><code class="docutils literal notranslate"><span class="pre">PlanarChannelFourierBasis.substitutions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.coordinate_system"><code class="docutils literal notranslate"><span class="pre">PlanarChannelFourierBasis.coordinate_system</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.parameters"><code class="docutils literal notranslate"><span class="pre">PlanarChannelFourierBasis.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.length"><code class="docutils literal notranslate"><span class="pre">PlanarChannelFourierBasis.length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.set_parameters"><code class="docutils literal notranslate"><span class="pre">PlanarChannelFourierBasis.set_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber"><code class="docutils literal notranslate"><span class="pre">WaveNumber</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber.type"><code class="docutils literal notranslate"><span class="pre">WaveNumber.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber.P"><code class="docutils literal notranslate"><span class="pre">WaveNumber.P</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber.M"><code class="docutils literal notranslate"><span class="pre">WaveNumber.M</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber.H"><code class="docutils literal notranslate"><span class="pre">WaveNumber.H</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber.nx"><code class="docutils literal notranslate"><span class="pre">WaveNumber.nx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber.ny"><code class="docutils literal notranslate"><span class="pre">WaveNumber.ny</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.planar_fourier.basin_wavenumbers"><code class="docutils literal notranslate"><span class="pre">basin_wavenumbers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.planar_fourier.channel_wavenumbers"><code class="docutils literal notranslate"><span class="pre">channel_wavenumbers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.planar_fourier.contiguous_basin_basis"><code class="docutils literal notranslate"><span class="pre">contiguous_basin_basis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.planar_fourier.contiguous_channel_basis"><code class="docutils literal notranslate"><span class="pre">contiguous_channel_basis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.planar_fourier.fourier_functions"><code class="docutils literal notranslate"><span class="pre">fourier_functions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spherical-harmonics-basis-definition-module">Spherical Harmonics Basis definition module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicsBasis</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.substitutions"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicsBasis.substitutions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.coordinate_system"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicsBasis.coordinate_system</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.parameters"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicsBasis.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.find_functions"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicsBasis.find_functions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.set_parameters"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicsBasis.set_parameters()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bakery.html">The Bakery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arithmetic.html">Arithmetic module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../references.html">Code References</a></li>
+      <li class="breadcrumb-item active">Basis module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/files/technical/basis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="basis-module">
+<h1>Basis module<a class="headerlink" href="#basis-module" title="Link to this heading"></a></h1>
+<p>This module contains the code related to the definition of basis of functions in the models.</p>
+<section id="basis-definition-module-base-class">
+<span id="module-layercake.basis.base"></span><h2>Basis definition module (base class)<a class="headerlink" href="#basis-definition-module-base-class" title="Link to this heading"></a></h2>
+<p>Abstract base classes defining the functions (modes) of the basis of the model and used to configure it.</p>
+<section id="description-of-the-classes">
+<h3>Description of the classes<a class="headerlink" href="#description-of-the-classes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.basis.base.Basis" title="layercake.basis.base.Basis"><code class="xref py py-class docutils literal notranslate"><span class="pre">Basis</span></code></a>: General base class.</p></li>
+<li><p><a class="reference internal" href="#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis"><code class="xref py py-class docutils literal notranslate"><span class="pre">SymbolicBasis</span></code></a>: Base class for symbolic functions basis.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.basis.base.Basis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.basis.base.</span></span><span class="sig-name descname"><span class="pre">Basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinate_system</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/base.html#Basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.Basis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>General base class for a basis of functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coordinate_system</strong> (<a class="reference internal" href="variables.html#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><em>CoordinateSystem</em></a>) – Coordinate system on which the basis is defined.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.base.Basis.functions">
+<span class="sig-name descname"><span class="pre">functions</span></span><a class="headerlink" href="#layercake.basis.base.Basis.functions" title="Link to this definition"></a></dt>
+<dd><p>List of functions of the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.base.Basis.coordinate_system">
+<span class="sig-name descname"><span class="pre">coordinate_system</span></span><a class="headerlink" href="#layercake.basis.base.Basis.coordinate_system" title="Link to this definition"></a></dt>
+<dd><p>Coordinate system on which the basis is defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="variables.html#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><em>CoordinateSystem</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.basis.base.NumericBasis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.basis.base.</span></span><span class="sig-name descname"><span class="pre">NumericBasis</span></span><a class="reference internal" href="../../_modules/layercake/basis/base.html#NumericBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.NumericBasis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.basis.base.Basis" title="layercake.basis.base.Basis"><code class="xref py py-class docutils literal notranslate"><span class="pre">Basis</span></code></a></p>
+<p>General base class for a basis of numeric functions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.base.NumericBasis.num_functions">
+<span class="sig-name descname"><span class="pre">num_functions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/base.html#NumericBasis.num_functions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.NumericBasis.num_functions" title="Link to this definition"></a></dt>
+<dd><p>Return the basis functions with as python callable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of callable basis functions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(callable)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.basis.base.</span></span><span class="sig-name descname"><span class="pre">SymbolicBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinate_system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/base.html#SymbolicBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.SymbolicBasis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.basis.base.Basis" title="layercake.basis.base.Basis"><code class="xref py py-class docutils literal notranslate"><span class="pre">Basis</span></code></a></p>
+<p>General base class for a basis of symbolic functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinate_system</strong> (<a class="reference internal" href="variables.html#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><em>CoordinateSystem</em></a>) – Coordinate system on which the basis is defined.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em>) – Dictionary holding the parameters appearing in the equations defining the basis.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis.substitutions">
+<span class="sig-name descname"><span class="pre">substitutions</span></span><a class="headerlink" href="#layercake.basis.base.SymbolicBasis.substitutions" title="Link to this definition"></a></dt>
+<dd><p>List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
+a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span> symbol or expression and then the value to substitute.
+Parameters of the basis are automatically added to this list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis.coordinate_system">
+<span class="sig-name descname"><span class="pre">coordinate_system</span></span><a class="headerlink" href="#layercake.basis.base.SymbolicBasis.coordinate_system" title="Link to this definition"></a></dt>
+<dd><p>Coordinate system on which the basis is defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="variables.html#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><em>CoordinateSystem</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.basis.base.SymbolicBasis.parameters" title="Link to this definition"></a></dt>
+<dd><p>Dictionary holding the parameters appearing in the equations defining the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis.derivative">
+<span class="sig-name descname"><span class="pre">derivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/base.html#SymbolicBasis.derivative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.SymbolicBasis.derivative" title="Link to this definition"></a></dt>
+<dd><p>Return the basis functions differentiated with respect to <cite>symbol</cite> as a new basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>symbol</strong> (<em>Sympy symbol</em>) – The symbol with respect to which the basis is to be differentiated.</p></li>
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – The order of the derivative. Default to first order.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new basis object with the differentiated basis function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis">SymbolicBasis</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis.directional_derivative">
+<span class="sig-name descname"><span class="pre">directional_derivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/base.html#SymbolicBasis.directional_derivative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.SymbolicBasis.directional_derivative" title="Link to this definition"></a></dt>
+<dd><p>Return the basis functions differentiated with respect to the coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – The order of the derivative. Default to first order.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new basis object with the differentiated basis function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis">SymbolicBasis</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis.num_functions">
+<span class="sig-name descname"><span class="pre">num_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extra_subs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/base.html#SymbolicBasis.num_functions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.SymbolicBasis.num_functions" title="Link to this definition"></a></dt>
+<dd><p>Return the basis functions with as python callable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extra_subs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em><em>, </em><em>optional</em>) – List of 2-tuples containing extra substitutions to be made with the functions before transforming them into
+python callable. The 2-tuples contain first a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of callable basis functions</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(callable)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis.set_parameters">
+<span class="sig-name descname"><span class="pre">set_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/base.html#SymbolicBasis.set_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.SymbolicBasis.set_parameters" title="Link to this definition"></a></dt>
+<dd><p>Setter for the <cite>parameters</cite> attributes.
+Must be redefined for subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em>) – Dictionary holding the parameters appearing in the equations defining the basis.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.base.SymbolicBasis.subs_functions">
+<span class="sig-name descname"><span class="pre">subs_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extra_subs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/base.html#SymbolicBasis.subs_functions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.base.SymbolicBasis.subs_functions" title="Link to this definition"></a></dt>
+<dd><p>Return the basis functions with the substitutions stored in the object being applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extra_subs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>)</em><em>, </em><em>optional</em>) – List of 2-tuples containing extra substitutions to be made with the functions. The 2-tuples contain first
+a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of the substituted basis functions</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="fourier-basis-definition-module">
+<span id="module-layercake.basis.planar_fourier"></span><h2>Fourier Basis definition module<a class="headerlink" href="#fourier-basis-definition-module" title="Link to this heading"></a></h2>
+<p>Classes and functions defining Fourier basis of functions (<a class="reference external" href="https://en.wikipedia.org/wiki/Fourier_series">Fourier modes</a>) on a plane.</p>
+<section id="id1">
+<h3>Description of the classes<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis" title="layercake.basis.planar_fourier.PlanarChannelFourierBasis"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlanarChannelFourierBasis</span></code></a>: Fourier basis defined on a zonally periodic channel, with no-flux boundary conditions in the meridional direction <span class="math notranslate nohighlight">\(y\)</span>.</p></li>
+<li><p><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis" title="layercake.basis.planar_fourier.PlanarBasinFourierBasis"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlanarBasinFourierBasis</span></code></a>: Fourier basis defined on a closed basin, with no-flux boundary conditions in both the zonal and meridional direction <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarBasinFourierBasis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.basis.planar_fourier.</span></span><span class="sig-name descname"><span class="pre">PlanarBasinFourierBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#PlanarBasinFourierBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis"><code class="xref py py-class docutils literal notranslate"><span class="pre">SymbolicBasis</span></code></a></p>
+<p>Fourier basis defined on a closed basin, with no-flux boundary conditions in both the zonal and meridional
+direction <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em>) – List holding the parameters appearing in the equations defining the basis.</p></li>
+<li><p><strong>spectral_blocks</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Spectral blocks detailing the modes <span class="math notranslate nohighlight">\(x\)</span>- and <span class="math notranslate nohighlight">\(y\)</span>-wavenumber.
+Array of shape (<cite>nblocks</cite>, 2), where <cite>nblocks</cite> is the number of spectral blocks.</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) – Length of the domain along the <span class="math notranslate nohighlight">\(x\)</span> coordinate: <span class="math notranslate nohighlight">\(L_x\)</span> .
+Default to <cite>None</cite> for the default length of <span class="math notranslate nohighlight">\(2 \pi / n\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarBasinFourierBasis.substitutions">
+<span class="sig-name descname"><span class="pre">substitutions</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.substitutions" title="Link to this definition"></a></dt>
+<dd><p>List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
+a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarBasinFourierBasis.coordinate_system">
+<span class="sig-name descname"><span class="pre">coordinate_system</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.coordinate_system" title="Link to this definition"></a></dt>
+<dd><p>Coordinate system on which the basis is defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="variables.html#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><em>CoordinateSystem</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarBasinFourierBasis.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.parameters" title="Link to this definition"></a></dt>
+<dd><p>Dictionary holding the parameters appearing in the equations defining the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarBasinFourierBasis.length">
+<span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.length" title="Link to this definition"></a></dt>
+<dd><p>Length of the domain along the <span class="math notranslate nohighlight">\(x\)</span> coordinate: <span class="math notranslate nohighlight">\(L_x\)</span> .
+<cite>None</cite> for the default length of <span class="math notranslate nohighlight">\(2 \pi / n\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarBasinFourierBasis.set_parameters">
+<span class="sig-name descname"><span class="pre">set_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#PlanarBasinFourierBasis.set_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis.set_parameters" title="Link to this definition"></a></dt>
+<dd><p>Setter for the parameters’ dictionary.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>List holding the parameters appearing in the equations defining the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarChannelFourierBasis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.basis.planar_fourier.</span></span><span class="sig-name descname"><span class="pre">PlanarChannelFourierBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#PlanarChannelFourierBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis"><code class="xref py py-class docutils literal notranslate"><span class="pre">SymbolicBasis</span></code></a></p>
+<p>Fourier basis defined on a zonally periodic channel on a 2D plane, with no-flux boundary conditions in the meridional
+direction <span class="math notranslate nohighlight">\(y\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em>) – List holding the parameters appearing in the equations defining the basis.</p></li>
+<li><p><strong>spectral_blocks</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Spectral blocks detailing the modes <span class="math notranslate nohighlight">\(x\)</span>- and <span class="math notranslate nohighlight">\(y\)</span>-wavenumber.
+Array of shape (<cite>nblocks</cite>, 2), where <cite>nblocks</cite> is the number of spectral blocks.</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) – Length of the domain along the <span class="math notranslate nohighlight">\(x\)</span> coordinate: <span class="math notranslate nohighlight">\(L_x\)</span> .
+Default to <cite>None</cite> for the default length of <span class="math notranslate nohighlight">\(2 \pi / n\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarChannelFourierBasis.substitutions">
+<span class="sig-name descname"><span class="pre">substitutions</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.substitutions" title="Link to this definition"></a></dt>
+<dd><p>List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
+a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarChannelFourierBasis.coordinate_system">
+<span class="sig-name descname"><span class="pre">coordinate_system</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.coordinate_system" title="Link to this definition"></a></dt>
+<dd><p>Coordinate system on which the basis is defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="variables.html#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><em>CoordinateSystem</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarChannelFourierBasis.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.parameters" title="Link to this definition"></a></dt>
+<dd><p>Dictionary holding the parameters appearing in the equations defining the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarChannelFourierBasis.length">
+<span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.length" title="Link to this definition"></a></dt>
+<dd><p>Length of the domain along the <span class="math notranslate nohighlight">\(x\)</span> coordinate: <span class="math notranslate nohighlight">\(L_x\)</span> .
+<cite>None</cite> for the default length of <span class="math notranslate nohighlight">\(2 \pi / n\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> or <a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.PlanarChannelFourierBasis.set_parameters">
+<span class="sig-name descname"><span class="pre">set_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#PlanarChannelFourierBasis.set_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.PlanarChannelFourierBasis.set_parameters" title="Link to this definition"></a></dt>
+<dd><p>Setter for the parameters’ dictionary.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>List holding the parameters appearing in the equations defining the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.WaveNumber">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.basis.planar_fourier.</span></span><span class="sig-name descname"><span class="pre">WaveNumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#WaveNumber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.WaveNumber" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class to define model base functions wavenumber. The basis function available are:</p>
+<ul class="simple">
+<li><p><cite>‘A’</cite> for a function of the form <span class="math notranslate nohighlight">\(F^A_{P} (x, y) =  \sqrt{2}\, \cos(P y) = \sqrt{2}\, \cos(n_y\, y)\)</span></p></li>
+<li><p><cite>‘K’</cite> for a function of the form <span class="math notranslate nohighlight">\(F^K_{M,P} (x, y) =  2\cos(M nx)\, \sin(P y) = 2\cos(n_x\,  n\, x)\, \sin(n_y\, y)\)</span></p></li>
+<li><p><cite>‘L’</cite> for a function of the form <span class="math notranslate nohighlight">\(F^L_{H,P} (x, y) = 2\sin(H nx)\, \sin(P y) = 2\sin(n_x\, n \,x)\, \sin(n_y\, y)\)</span></p></li>
+</ul>
+<p>where <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> are the nondimensional model’s domain coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – One character string to define the type of basis function. It can be <cite>‘A’</cite>, <cite>‘K’</cite> or <cite>‘L’</cite>.</p></li>
+<li><p><strong>P</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The <span class="math notranslate nohighlight">\(y\)</span> wavenumber integer.</p></li>
+<li><p><strong>M</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The <span class="math notranslate nohighlight">\(x\)</span> wavenumber integer.</p></li>
+<li><p><strong>H</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The <span class="math notranslate nohighlight">\(x\)</span> wavenumber integer.</p></li>
+<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The <span class="math notranslate nohighlight">\(x\)</span> wavenumber.</p></li>
+<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The <span class="math notranslate nohighlight">\(y\)</span> wavenumber.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.WaveNumber.type">
+<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.WaveNumber.type" title="Link to this definition"></a></dt>
+<dd><p>One character string to define the type of basis function. It can be <cite>‘A’</cite>, <cite>‘K’</cite> or <cite>‘L’</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.WaveNumber.P">
+<span class="sig-name descname"><span class="pre">P</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.WaveNumber.P" title="Link to this definition"></a></dt>
+<dd><p>The <span class="math notranslate nohighlight">\(y\)</span> wavenumber integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.WaveNumber.M">
+<span class="sig-name descname"><span class="pre">M</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.WaveNumber.M" title="Link to this definition"></a></dt>
+<dd><p>The <span class="math notranslate nohighlight">\(x\)</span> wavenumber integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.WaveNumber.H">
+<span class="sig-name descname"><span class="pre">H</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.WaveNumber.H" title="Link to this definition"></a></dt>
+<dd><p>The <span class="math notranslate nohighlight">\(x\)</span> wavenumber integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.WaveNumber.nx">
+<span class="sig-name descname"><span class="pre">nx</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.WaveNumber.nx" title="Link to this definition"></a></dt>
+<dd><p>The <span class="math notranslate nohighlight">\(x\)</span> wavenumber.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.WaveNumber.ny">
+<span class="sig-name descname"><span class="pre">ny</span></span><a class="headerlink" href="#layercake.basis.planar_fourier.WaveNumber.ny" title="Link to this definition"></a></dt>
+<dd><p>The <span class="math notranslate nohighlight">\(y\)</span> wavenumber.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.basin_wavenumbers">
+<span class="sig-prename descclassname"><span class="pre">layercake.basis.planar_fourier.</span></span><span class="sig-name descname"><span class="pre">basin_wavenumbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectral_blocks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#basin_wavenumbers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.basin_wavenumbers" title="Link to this definition"></a></dt>
+<dd><p>Functions that returns the <a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber" title="layercake.basis.planar_fourier.WaveNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveNumber</span></code></a> objects corresponding to a given list of spectral blocks for a
+closed basin spatial domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>spectral_blocks</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Spectral blocks detailing the modes <span class="math notranslate nohighlight">\(x\)</span>- and <span class="math notranslate nohighlight">\(y\)</span>-wavenumber.
+Array of shape (<cite>nblocks</cite>, 2), where <cite>nblocks</cite> is the number of spectral blocks.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The array of wavenumber objects corresponding to the given spectral blocks.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber" title="layercake.basis.planar_fourier.WaveNumber">WaveNumber</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.channel_wavenumbers">
+<span class="sig-prename descclassname"><span class="pre">layercake.basis.planar_fourier.</span></span><span class="sig-name descname"><span class="pre">channel_wavenumbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectral_blocks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#channel_wavenumbers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.channel_wavenumbers" title="Link to this definition"></a></dt>
+<dd><p>Functions that returns the <a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber" title="layercake.basis.planar_fourier.WaveNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveNumber</span></code></a> objects corresponding to a given list of spectral blocks for a
+channel-like spatial domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>spectral_blocks</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Spectral blocks detailing the modes <span class="math notranslate nohighlight">\(x\)</span>- and <span class="math notranslate nohighlight">\(y\)</span>-wavenumber.
+Array of shape (nblocks, 2), where <cite>nblocks</cite> is the number of spectral blocks.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The array of wavenumber objects corresponding to the given spectral blocks.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>ndarray</em></a>(<a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber" title="layercake.basis.planar_fourier.WaveNumber">WaveNumber</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.contiguous_basin_basis">
+<span class="sig-prename descclassname"><span class="pre">layercake.basis.planar_fourier.</span></span><span class="sig-name descname"><span class="pre">contiguous_basin_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nxmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nymax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#contiguous_basin_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.contiguous_basin_basis" title="Link to this definition"></a></dt>
+<dd><p>Function that returns the basis for contiguous spectral blocks of modes on a closed basin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nxmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum x-wavenumber to fill the spectral block up to.</p></li>
+<li><p><strong>nymax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum <span class="math notranslate nohighlight">\(y\)</span>-wavenumber to fill the spectral block up to.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em>) – List holding the parameters appearing in the equations defining the basis.</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) – Length of the domain along the <span class="math notranslate nohighlight">\(x\)</span> coordinate: <span class="math notranslate nohighlight">\(L_x\)</span> .
+Default to <cite>None</cite> for the default length of <span class="math notranslate nohighlight">\(2 \pi / n\)</span>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The closed basin contiguous basis up to the specified spectral truncation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#layercake.basis.planar_fourier.PlanarBasinFourierBasis" title="layercake.basis.planar_fourier.PlanarBasinFourierBasis">PlanarBasinFourierBasis</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.contiguous_channel_basis">
+<span class="sig-prename descclassname"><span class="pre">layercake.basis.planar_fourier.</span></span><span class="sig-name descname"><span class="pre">contiguous_channel_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nxmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nymax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#contiguous_channel_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.contiguous_channel_basis" title="Link to this definition"></a></dt>
+<dd><p>Function that returns the basis for contiguous spectral blocks of modes on a channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nxmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum x-wavenumber to fill the spectral block up to.</p></li>
+<li><p><strong>nymax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum <span class="math notranslate nohighlight">\(y\)</span>-wavenumber to fill the spectral block up to.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em>) – List holding the parameters appearing in the equations defining the basis.</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) – Length of the domain along the <span class="math notranslate nohighlight">\(x\)</span> coordinate: <span class="math notranslate nohighlight">\(L_x\)</span> .
+Default to <cite>None</cite> for the default length of <span class="math notranslate nohighlight">\(2 \pi / n\)</span>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The channel contiguous basis up to the specified spectral truncation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ChannelFourierBasis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="layercake.basis.planar_fourier.fourier_functions">
+<span class="sig-prename descclassname"><span class="pre">layercake.basis.planar_fourier.</span></span><span class="sig-name descname"><span class="pre">fourier_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wave_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate_system</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/planar_fourier.html#fourier_functions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.planar_fourier.fourier_functions" title="Link to this definition"></a></dt>
+<dd><p>Function that return Fourier modes expressions:</p>
+<ul class="simple">
+<li><p><cite>‘A’</cite> for a function of the form <span class="math notranslate nohighlight">\(F^A_{P} (x, y) =  \sqrt{2}\, \cos(P y) = \sqrt{2}\, \cos(n_y\, y)\)</span></p></li>
+<li><p><cite>‘K’</cite> for a function of the form <span class="math notranslate nohighlight">\(F^K_{M,P} (x, y) =  2\cos(M nx)\, \sin(P y) = 2\cos(n_x\,  n\, x)\, \sin(n_y\, y)\)</span></p></li>
+<li><p><cite>‘L’</cite> for a function of the form <span class="math notranslate nohighlight">\(F^L_{H,P} (x, y) = 2\sin(H nx)\, \sin(P y) = 2\sin(n_x\, n \,x)\, \sin(n_y\, y)\)</span></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wave_number</strong> (<a class="reference internal" href="#layercake.basis.planar_fourier.WaveNumber" title="layercake.basis.planar_fourier.WaveNumber"><em>WaveNumber</em></a>) – The wavenumber and type information of the mode to be returned.</p></li>
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.symbol.Symbol" title="(in SymPy v1.14.0)"><em>Symbol</em></a>) – The aspect ratio symbol.</p></li>
+<li><p><strong>coordinate_system</strong> (<a class="reference internal" href="variables.html#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><em>CoordinateSystem</em></a>) – Coordinate system on which the basis is defined.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Symbolic expression of the mode.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.sympy.org/latest/modules/core.html#sympy.core.expr.Expr" title="(in SymPy v1.14.0)"><em>Expr</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="spherical-harmonics-basis-definition-module">
+<span id="module-layercake.basis.spherical_harmonics"></span><h2>Spherical Harmonics Basis definition module<a class="headerlink" href="#spherical-harmonics-basis-definition-module" title="Link to this heading"></a></h2>
+<p>Classes defining <a class="reference external" href="https://en.wikipedia.org/wiki/Spherical_harmonics">Spherical Harmonics</a> basis of functions on a plane.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="layercake.basis.spherical_harmonics.SphericalHarmonicsBasis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">layercake.basis.spherical_harmonics.</span></span><span class="sig-name descname"><span class="pre">SphericalHarmonicsBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'T'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_constant_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_num_factorial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/spherical_harmonics.html#SphericalHarmonicsBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#layercake.basis.base.SymbolicBasis" title="layercake.basis.base.SymbolicBasis"><code class="xref py py-class docutils literal notranslate"><span class="pre">SymbolicBasis</span></code></a></p>
+<p>Complex or real spherical harmonics basis defined on a sphere
+with a given radius <span class="math notranslate nohighlight">\(R\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>(</em><a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a><em>)</em>) – List holding the parameters appearing in the equations defining the basis.</p></li>
+<li><p><strong>truncation_parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Dictionary of parameter associated with the specified truncature.
+For example, for the default triangular truncation, it expects an entry <cite>‘M’</cite>
+in the dictionary, determining the level of truncation <cite>TM</cite>.</p></li>
+<li><p><strong>complex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the spherical harmonics are defined using complex functions.
+Default to <cite>False</cite>.</p></li>
+<li><p><strong>truncation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Type of truncation to use.
+Default to <cite>“T”</cite> for a triangular truncature.</p></li>
+<li><p><strong>exclude_constant_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the spherical harmonics corresponding to a constant should be discarded.
+Default to <cite>True</cite>.</p></li>
+<li><p><strong>use_num_factorial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Use a numerical factorial instead of a symbolic one. Might speed up computations in certain cases.
+Default to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.substitutions">
+<span class="sig-name descname"><span class="pre">substitutions</span></span><a class="headerlink" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.substitutions" title="Link to this definition"></a></dt>
+<dd><p>List of 2-tuples containing the substitutions to be made with the functions. The 2-tuples contain first
+a <span class="raw-html"><a href="https://www.sympy.org/">Sympy</a></span>  expression and then the value to substitute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.coordinate_system">
+<span class="sig-name descname"><span class="pre">coordinate_system</span></span><a class="headerlink" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.coordinate_system" title="Link to this definition"></a></dt>
+<dd><p>Coordinate system on which the basis is defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="variables.html#layercake.variables.systems.CoordinateSystem" title="layercake.variables.systems.CoordinateSystem"><em>CoordinateSystem</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.parameters" title="Link to this definition"></a></dt>
+<dd><p>Dictionary holding the parameters appearing in the equations defining the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.find_functions">
+<span class="sig-name descname"><span class="pre">find_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/spherical_harmonics.html#SphericalHarmonicsBasis.find_functions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.find_functions" title="Link to this definition"></a></dt>
+<dd><p>Function which returns the index of the basis function of given n, m indices in the basis list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Spectral indices of the sought function.</p></li>
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Spectral indices of the sought function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index of the basis function in the list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.set_parameters">
+<span class="sig-name descname"><span class="pre">set_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/layercake/basis/spherical_harmonics.html#SphericalHarmonicsBasis.set_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#layercake.basis.spherical_harmonics.SphericalHarmonicsBasis.set_parameters" title="Link to this definition"></a></dt>
+<dd><p>Setter for the parameters’ dictionary.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>List holding the parameters appearing in the equations defining the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>(<a class="reference internal" href="variables.html#layercake.variables.parameter.Parameter" title="layercake.variables.parameter.Parameter"><em>Parameter</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="formatters.html" class="btn btn-neutral float-left" title="Formatters module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bakery.html" class="btn btn-neutral float-right" title="The Bakery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

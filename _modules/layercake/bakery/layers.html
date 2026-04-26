@@ -1,0 +1,691 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.bakery.layers &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/tricks.html">Various tricks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.bakery.layers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.bakery.layers</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Layer definition module</span>
+<span class="sd">    =======================</span>
+
+<span class="sd">    This module defines the layer object, i.e. the collection of partial differential equations</span>
+<span class="sd">    (represented by :class:`~layercake.arithmetic.equation.Equation` objects) which governs the time evolution of</span>
+<span class="sd">    a given fluid/media layer of the system at hand.</span>
+<span class="sd">    It also computes and includes the ordinary differential equations representation of the</span>
+<span class="sd">    partial differential equations, when projected on a given basis (Galerkin procedure).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinAlgError</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sparse</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutableSparseNDimArray</span><span class="p">,</span> <span class="n">MutableSparseMatrix</span><span class="p">,</span> <span class="n">ImmutableMatrix</span><span class="p">,</span> <span class="n">ImmutableSparseNDimArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">zeros</span> <span class="k">as</span> <span class="n">sympy_zeros</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.matrices.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NonInvertibleMatrixError</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.terms.constant</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstantTerm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.arithmetic.terms.operations</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProductOfTerms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.variables.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterField</span><span class="p">,</span> <span class="n">FunctionField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.symbolic_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">symbolic_tensordot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">isin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">layercake.utils.matrix</span><span class="w"> </span><span class="kn">import</span> <span class="n">block_matrix_inverse</span>
+
+
+<div class="viewcode-block" id="Layer">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.layers.Layer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Layer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to gather partial differential equations modelling</span>
+<span class="sd">    a given fluid/media layer of the system at hand.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str, optional</span>
+<span class="sd">        Name for the layer.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    equations: list(~equation.Equation)</span>
+<span class="sd">        A list of the equation objects included in the layer.</span>
+<span class="sd">    tensor: sparse.COO or ~sympy.tensor.array.ImmutableSparseNDimArray</span>
+<span class="sd">        The tensor representing the ordinary differential equations tendencies.</span>
+<span class="sd">        Can be either a numerical or a symbolic representation, depending on the user&#39;s choice.</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Optional name for the layer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">equations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cake_order</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_simplify_after_LHS_inversion</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cake_first_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">_layers_first_index</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cake_order</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cake_last_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">_layers_last_index</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cake_order</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Layer.add_equation">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.layers.Layer.add_equation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_equation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equation</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an equation object to the layer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        equation: ~equation.Equation</span>
+<span class="sd">            Equation object to add to the layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">equation</span><span class="p">)</span>
+        <span class="n">equation</span><span class="o">.</span><span class="n">_layer</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">equation</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">_layer</span> <span class="o">=</span> <span class="bp">self</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~field.Field): Returns the list of dynamical fields of the layer, i.e. the fields whose time</span>
+<span class="sd">        evolution is provided by the partial differential equations of the layer.&quot;&quot;&quot;</span>
+        <span class="n">fields_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">:</span>
+            <span class="n">fields_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fields_list</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">other_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~field.Field): Returns the list of dynamical fields of other layers, i.e. the fields whose time</span>
+<span class="sd">        evolution is provided by the partial differential equations of other layers.&quot;&quot;&quot;</span>
+        <span class="n">layer_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span>
+        <span class="n">other_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">other_fields</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer_fields</span><span class="p">:</span>
+                    <span class="n">other_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">other_fields</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">other_fields_in_lhs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~field.Field): Returns the list of dynamical fields of other layers present in the LHS of the layer&#39;s equations,</span>
+<span class="sd">        i.e. the fields whose time evolution is provided by the partial differential equations of other layers.&quot;&quot;&quot;</span>
+        <span class="n">layer_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span>
+        <span class="n">other_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">other_fields_in_lhs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer_fields</span><span class="p">:</span>
+                    <span class="n">other_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">other_fields</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~parameter.Parameter): Returns the list of parameters of the layer, i.e. the explicit parameters</span>
+<span class="sd">        appearing in the partial differential equations of the layer.&quot;&quot;&quot;</span>
+        <span class="n">parameters_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">isin</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">parameters_list</span><span class="p">):</span>
+                    <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parameters_list</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameters_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list(~sympy.core.symbol.Symbol): List of parameter&#39;s symbols present in the layer</span>
+<span class="sd">        partial differential equations.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fields_layer_tensor_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">extent</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="n">ni</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+            <span class="n">extent</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ni</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">ni</span>
+        <span class="k">return</span> <span class="n">extent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Dimension of the full ordinary differential equations system of the layer, resulting from</span>
+<span class="sd">        the Galerkin expansion.&quot;&quot;&quot;</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="n">dim</span> <span class="o">+=</span> <span class="n">field</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_of_equations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Number of partial differential equations in the layer.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maximum_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Maximum over the ranks of the equations in the layer.&quot;&quot;&quot;</span>
+        <span class="n">max_rank</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">:</span>
+            <span class="n">max_rank</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_rank</span><span class="p">,</span> <span class="n">eq</span><span class="o">.</span><span class="n">maximum_rank</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">max_rank</span>
+
+<div class="viewcode-block" id="Layer.compute_inner_products">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.layers.Layer.compute_inner_products">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_inner_products</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the inner products tensors, either symbolic or numerical ones, of all the terms</span>
+<span class="sd">        of the layer equations, including the left-hand side terms.</span>
+<span class="sd">        Computations are parallelized on multiple CPUs.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        numerical: bool, optional</span>
+<span class="sd">            Whether to compute numerical or symbolic inner products.</span>
+<span class="sd">            Default to `True` (numerical inner products as output).</span>
+<span class="sd">        timeout: int or bool or None, optional</span>
+<span class="sd">            Control the switch from symbolic to numerical integration. By default, `parallel_integration` workers will try to integrate</span>
+<span class="sd">            |Sympy| expressions symbolically, but a fallback to numerical integration can be enforced.</span>
+<span class="sd">            The options are:</span>
+
+<span class="sd">            * `None`: This is the &quot;full-symbolic&quot; mode. No timeout will be applied, and the switch to numerical integration will never happen.</span>
+<span class="sd">              Can result in very long and improbable computation time.</span>
+<span class="sd">            * `True`: This is the &quot;full-numerical&quot; mode. Symbolic computations do not occur, and the workers try directly to integrate</span>
+<span class="sd">              numerically.</span>
+<span class="sd">            * `False`: Same as `None`.</span>
+<span class="sd">            * An integer: defines a timeout after which, if a symbolic integration have not completed, the worker switch to the</span>
+<span class="sd">              numerical integration.</span>
+<span class="sd">        num_threads: None or int, optional</span>
+<span class="sd">            Number of CPUs to use in parallel for the computations. If `None`, use all the CPUs available.</span>
+<span class="sd">            Default to `None`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">eq</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">):</span>
+            <span class="n">eq</span><span class="o">.</span><span class="n">compute_inner_products</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="n">numerical</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Layer.compute_tensor">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.layers.Layer.compute_tensor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compute_inner_products</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">compute_inner_products_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">substitutions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basis_subs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">parameters_subs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lhs_inversion_in_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the tensor of the symbolic or numerical representation of the ordinary differential</span>
+<span class="sd">        equations tendencies of the layer.</span>
+<span class="sd">        Results are stored in the :attr:`~Layer.tensor` attribute.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        numerical: bool, optional</span>
+<span class="sd">            Whether to compute the numerical or the symbolic tensor.</span>
+<span class="sd">            Default to `True` (numerical tensor as output).</span>
+<span class="sd">        compute_inner_products: bool, optional</span>
+<span class="sd">            Whether the inner products tensors of the layer equations&#39; terms must be computed first.</span>
+<span class="sd">            Default to `False`. Please note that if the inner products are not computed firsthand, the tensor computation</span>
+<span class="sd">            will fail.</span>
+<span class="sd">        compute_inner_products_kwargs: dict, optional</span>
+<span class="sd">            Arguments to pass to the computation of the inner products.</span>
+<span class="sd">        substitutions: list(tuple), optional</span>
+<span class="sd">            List of 2-tuples containing extra symbolic substitutions to be made at the end of the tensor computation.</span>
+<span class="sd">            Only applies for the symbolic tendencies.</span>
+<span class="sd">            The 2-tuples contain first a |Sympy|  expression and then the value to substitute.</span>
+<span class="sd">        basis_subs: bool, optional</span>
+<span class="sd">            Whether to substitute the parameters appearing in the definition of the basis of functions by</span>
+<span class="sd">            their numerical value.</span>
+<span class="sd">            Only applies for the symbolic tendencies.</span>
+<span class="sd">            Default to `False`.</span>
+<span class="sd">        parameters_subs: list(~parameter.Parameter), optional</span>
+<span class="sd">            List of model&#39;s parameters to substitute in the symbolic tendencies&#39; tensor.</span>
+<span class="sd">            Only applies for the symbolic tendencies.</span>
+<span class="sd">        lhs_inversion_in_layer: bool, optional</span>
+<span class="sd">            Try to inverse the LHS matrix and take the matricial product with the RHS. Default to `True`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">compute_inner_products_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">used_compute_inner_products_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">used_compute_inner_products_kwargs</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">compute_inner_products_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">numerical</span> <span class="ow">and</span> <span class="s1">&#39;timeout&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_compute_inner_products_kwargs</span><span class="p">:</span>
+            <span class="n">used_compute_inner_products_kwargs</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;numerical&#39;</span> <span class="ow">in</span> <span class="n">used_compute_inner_products_kwargs</span><span class="p">:</span>
+            <span class="n">used_compute_inner_products_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;numerical&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">compute_inner_products</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compute_inner_products</span><span class="p">(</span><span class="n">numerical</span><span class="o">=</span><span class="n">numerical</span><span class="p">,</span> <span class="o">**</span><span class="n">used_compute_inner_products_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_rank</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_rank</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">numerical</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dok&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dok&#39;</span><span class="p">)</span>
+            <span class="n">lhs_mat_inverted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">lhs_order</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">eq</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">):</span>
+                <span class="n">ndim</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_fields_in_lhs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">lhs_inversion_in_layer</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Field(s) in the LHS are not found in the layer and there is no cake.&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;dok&#39;</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">lhs_term</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">:</span>
+                        <span class="n">ofield</span> <span class="o">=</span> <span class="n">lhs_term</span><span class="o">.</span><span class="n">field</span>
+                        <span class="n">ofield_order</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="n">ondim</span> <span class="o">=</span> <span class="n">ofield</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">tfield</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">ofield</span> <span class="ow">is</span> <span class="n">tfield</span><span class="p">:</span>
+                                <span class="k">break</span>
+                            <span class="n">tndim</span> <span class="o">=</span> <span class="n">tfield</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                            <span class="n">ofield_order</span> <span class="o">+=</span> <span class="n">tndim</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field </span><span class="si">{</span><span class="n">ofield</span><span class="si">}</span><span class="s1"> not found in the cake.&#39;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="p">[</span><span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">ofield_order</span><span class="p">:</span><span class="n">ofield_order</span> <span class="o">+</span> <span class="n">ondim</span><span class="p">]</span> <span class="o">=</span> \
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="p">[</span><span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">ofield_order</span><span class="p">:</span><span class="n">ofield_order</span> <span class="o">+</span> <span class="n">ondim</span><span class="p">]</span> <span class="o">+</span> <span class="n">lhs_term</span><span class="o">.</span><span class="n">inner_products</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="n">eq</span><span class="o">.</span><span class="n">other_fields_in_lhs</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">lhs_term</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">:</span>
+                            <span class="n">ofield</span> <span class="o">=</span> <span class="n">lhs_term</span><span class="o">.</span><span class="n">field</span>
+                            <span class="n">ofield_order</span> <span class="o">=</span> <span class="mi">1</span>
+                            <span class="n">ondim</span> <span class="o">=</span> <span class="n">ofield</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">tfield</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">ofield</span> <span class="ow">is</span> <span class="n">tfield</span><span class="p">:</span>
+                                    <span class="k">break</span>
+                                <span class="n">tndim</span> <span class="o">=</span> <span class="n">tfield</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                                <span class="n">ofield_order</span> <span class="o">+=</span> <span class="n">tndim</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="p">[</span><span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">ofield_order</span><span class="p">:</span><span class="n">ofield_order</span> <span class="o">+</span> <span class="n">ondim</span><span class="p">]</span> <span class="o">=</span> \
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="p">[</span><span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">ofield_order</span><span class="p">:</span><span class="n">ofield_order</span> <span class="o">+</span> <span class="n">ondim</span><span class="p">]</span> <span class="o">+</span> <span class="n">lhs_term</span><span class="o">.</span><span class="n">inner_products</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">lhs_mat_inverted</span><span class="p">[</span><span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">lhs_inner_products_addition</span><span class="o">.</span><span class="n">todense</span><span class="p">())</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">LinAlgError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The left-hand side of the equation </span><span class="si">{</span><span class="n">eq</span><span class="si">}</span><span class="s1"> is not invertible with the provided basis.&#39;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">equation_term</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">rhs_terms</span><span class="p">:</span>
+                    <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="n">lhs_order</span><span class="p">,</span> <span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">)]</span>
+                    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+                        <span class="n">term_field</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span>
+                        <span class="k">if</span> <span class="n">term_field</span><span class="o">.</span><span class="n">dynamical</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">term_extent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">fields_tensor_extent</span><span class="p">[</span><span class="n">term_field</span><span class="p">]</span>
+                            <span class="k">elif</span> <span class="n">term_field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                                <span class="n">term_extent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields_layer_tensor_extent</span><span class="p">[</span><span class="n">term_field</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field </span><span class="si">{</span><span class="n">term_field</span><span class="si">}</span><span class="s1"> provided in equation </span><span class="si">{</span><span class="n">eq</span><span class="si">}</span><span class="s1"> cannot be found in the cake or in the layer.&#39;</span><span class="p">)</span>
+                            <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">*</span><span class="n">term_extent</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">zeros</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="n">slices</span><span class="o">+</span><span class="n">zeros</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equation_term</span><span class="p">,</span> <span class="n">ConstantTerm</span><span class="p">):</span>
+                        <span class="n">increment</span> <span class="o">=</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">increment</span> <span class="o">=</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">inner_products</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equation_term</span><span class="p">,</span> <span class="n">ProductOfTerms</span><span class="p">):</span>
+                            <span class="n">contract</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">terms</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">ParameterField</span><span class="p">,</span> <span class="n">FunctionField</span><span class="p">)):</span>
+                                    <span class="n">params</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                                    <span class="n">contract</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+                            <span class="k">if</span> <span class="n">contract</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">contract</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                                    <span class="n">params</span> <span class="o">=</span> <span class="n">contract</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                    <span class="n">increment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">increment</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)))</span>
+                                    <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">equation_term</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">ParameterField</span><span class="p">,</span> <span class="n">FunctionField</span><span class="p">)):</span>
+                                <span class="n">params</span> <span class="o">=</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                                <span class="n">increment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">increment</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)))</span>
+                                <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">increment</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">+</span> <span class="n">increment</span>
+                <span class="n">lhs_order</span> <span class="o">+=</span> <span class="n">ndim</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">lhs_mat_inverted</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="o">.</span><span class="n">todense</span><span class="p">()[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">LinAlgError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The left-hand side of the layer </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s1"> is not invertible with the provided basis.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">COO</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">lhs_mat_inverted</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">to_coo</span><span class="p">(),</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;LHS of layer </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s1"> has not been inverted. Its tensor hold the RHS tendencies alone.&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">to_coo</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">b_subs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">substitutions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">substitutions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">parameters_subs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">p_subs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">param</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">))</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters_subs</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p_subs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">MutableSparseNDimArray</span><span class="p">(</span><span class="n">iterable</span><span class="o">=</span><span class="p">{},</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span> <span class="o">=</span> <span class="n">MutableSparseMatrix</span><span class="p">(</span><span class="n">sympy_zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">lhs_mat_inverted</span> <span class="o">=</span> <span class="n">MutableSparseMatrix</span><span class="p">(</span><span class="n">sympy_zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">lhs_order</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">eq</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">):</span>
+                <span class="n">bsb</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">substitutions</span>
+                <span class="k">if</span> <span class="n">basis_subs</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">sbsb</span> <span class="ow">in</span> <span class="n">bsb</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">obsb</span> <span class="ow">in</span> <span class="n">b_subs</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">sbsb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">obsb</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                                <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">b_subs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sbsb</span><span class="p">)</span>
+                <span class="n">ndim</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_fields_in_lhs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">lhs_inversion_in_layer</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Field(s) in the LHS are not found in the layer or in the cake.&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span> <span class="o">=</span> <span class="n">MutableSparseMatrix</span><span class="p">(</span><span class="n">sympy_zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+                    <span class="k">for</span> <span class="n">lhs_term</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">:</span>
+                        <span class="n">ofield</span> <span class="o">=</span> <span class="n">lhs_term</span><span class="o">.</span><span class="n">field</span>
+                        <span class="n">ofield_order</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="n">ondim</span> <span class="o">=</span> <span class="n">ofield</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">tfield</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">ofield</span> <span class="ow">is</span> <span class="n">tfield</span><span class="p">:</span>
+                                <span class="k">break</span>
+                            <span class="n">tndim</span> <span class="o">=</span> <span class="n">tfield</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                            <span class="n">ofield_order</span> <span class="o">+=</span> <span class="n">tndim</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="p">[</span><span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">ofield_order</span><span class="p">:</span><span class="n">ofield_order</span> <span class="o">+</span> <span class="n">ondim</span><span class="p">]</span> <span class="o">+=</span> <span class="n">lhs_term</span><span class="o">.</span><span class="n">inner_products</span>
+                <span class="k">elif</span> <span class="n">eq</span><span class="o">.</span><span class="n">other_fields_in_lhs</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">lhs_term</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">lhs_terms</span><span class="p">:</span>
+                        <span class="n">ofield</span> <span class="o">=</span> <span class="n">lhs_term</span><span class="o">.</span><span class="n">field</span>
+                        <span class="n">ofield_order</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="n">ondim</span> <span class="o">=</span> <span class="n">ofield</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">tfield</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">ofield</span> <span class="ow">is</span> <span class="n">tfield</span><span class="p">:</span>
+                                <span class="k">break</span>
+                            <span class="n">tndim</span> <span class="o">=</span> <span class="n">tfield</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                            <span class="n">ofield_order</span> <span class="o">+=</span> <span class="n">tndim</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field </span><span class="si">{</span><span class="n">ofield</span><span class="si">}</span><span class="s1"> not found in the cake.&#39;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="p">[</span><span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">ofield_order</span><span class="p">:</span><span class="n">ofield_order</span> <span class="o">+</span> <span class="n">ondim</span><span class="p">]</span> <span class="o">+=</span> <span class="n">lhs_term</span><span class="o">.</span><span class="n">inner_products</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">blocks_extent</span> <span class="o">=</span> <span class="p">[(</span><span class="n">be</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">be</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">be</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields_layer_tensor_extent</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">block_inverse</span> <span class="o">=</span> <span class="n">block_matrix_inverse</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">lhs_inner_products_addition</span><span class="p">,</span> <span class="n">blocks_extent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simplify_after_LHS_inversion</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">NonInvertibleMatrixError</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">NonInvertibleMatrixError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The left-hand side of the equation </span><span class="si">{</span><span class="n">eq</span><span class="si">}</span><span class="s1"> is not invertible with the provided basis.&#39;</span><span class="p">)</span>
+                    <span class="n">lhs_mat_inverted</span><span class="p">[</span><span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">lhs_order</span><span class="p">:</span><span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">]</span> <span class="o">=</span> <span class="n">block_inverse</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">for</span> <span class="n">equation_term</span> <span class="ow">in</span> <span class="n">eq</span><span class="o">.</span><span class="n">rhs_terms</span><span class="p">:</span>
+                    <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="n">lhs_order</span><span class="p">,</span> <span class="n">lhs_order</span> <span class="o">+</span> <span class="n">ndim</span><span class="p">)]</span>
+                    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+                        <span class="n">term_field</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">field</span>
+                        <span class="k">if</span> <span class="n">term_field</span><span class="o">.</span><span class="n">dynamical</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">term_extent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cake</span><span class="o">.</span><span class="n">fields_tensor_extent</span><span class="p">[</span><span class="n">term_field</span><span class="p">]</span>
+                            <span class="k">elif</span> <span class="n">term_field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                                <span class="n">term_extent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields_layer_tensor_extent</span><span class="p">[</span><span class="n">term_field</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field </span><span class="si">{</span><span class="n">term_field</span><span class="si">}</span><span class="s1"> provided in equation </span><span class="si">{</span><span class="n">eq</span><span class="si">}</span><span class="s1"> cannot be found in the cake or in the layer.&#39;</span><span class="p">)</span>
+                            <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">*</span><span class="n">term_extent</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">zeros</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="n">slices</span><span class="o">+</span><span class="n">zeros</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equation_term</span><span class="p">,</span> <span class="n">ConstantTerm</span><span class="p">):</span>
+                        <span class="n">term_symbol_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                        <span class="n">term_symbol_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">symbols</span><span class="p">))</span>
+                        <span class="n">increment</span> <span class="o">=</span> <span class="n">ImmutableMatrix</span><span class="p">(</span><span class="n">term_symbol_list</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">term_symbol_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">increment</span> <span class="o">=</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">inner_products</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equation_term</span><span class="p">,</span> <span class="n">ProductOfTerms</span><span class="p">):</span>
+                            <span class="n">contract</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">terms</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">ParameterField</span><span class="p">,</span> <span class="n">FunctionField</span><span class="p">)):</span>
+                                    <span class="n">term_symbol_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                                    <span class="n">symbols_list</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">FunctionField</span><span class="p">):</span>
+                                        <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">force_substitution</span><span class="p">:</span>
+                                            <span class="n">symbols_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+                                        <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">force_symbolic_substitution</span><span class="p">:</span>
+                                            <span class="n">symbols_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">symbolic_parameters</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">symbols_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                        <span class="n">symbols_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+                                    <span class="n">term_symbol_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">symbols_list</span><span class="p">)</span>
+                                    <span class="n">params</span> <span class="o">=</span> <span class="n">ImmutableMatrix</span><span class="p">(</span><span class="n">term_symbol_list</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">term_symbol_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+                                    <span class="n">contract</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+                            <span class="k">if</span> <span class="n">contract</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">contract</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                                    <span class="n">params</span> <span class="o">=</span> <span class="n">contract</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                    <span class="n">increment</span> <span class="o">=</span> <span class="n">symbolic_tensordot</span><span class="p">(</span><span class="n">increment</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)))</span>
+                                    <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                                    <span class="n">iargs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">increment</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                                        <span class="n">iargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+                                    <span class="n">iargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                                    <span class="n">increment</span> <span class="o">=</span> <span class="n">increment</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">iargs</span><span class="p">)]</span>
+                        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">equation_term</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">ParameterField</span><span class="p">,</span> <span class="n">FunctionField</span><span class="p">)):</span>
+                                <span class="n">term_symbol_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                                <span class="n">symbols_list</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">FunctionField</span><span class="p">):</span>
+                                    <span class="k">if</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">force_substitution</span><span class="p">:</span>
+                                        <span class="n">symbols_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+                                    <span class="k">elif</span> <span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">force_symbolic_substitution</span><span class="p">:</span>
+                                        <span class="n">symbols_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">symbolic_parameters</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">symbols_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="n">symbols_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">equation_term</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+                                <span class="n">term_symbol_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">symbols_list</span><span class="p">)</span>
+                                <span class="n">params</span> <span class="o">=</span> <span class="n">ImmutableMatrix</span><span class="p">(</span><span class="n">term_symbol_list</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">term_symbol_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+                                <span class="n">increment</span> <span class="o">=</span> <span class="n">symbolic_tensordot</span><span class="p">(</span><span class="n">increment</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)))</span>
+                                <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                                <span class="n">iargs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">increment</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                                    <span class="n">iargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+                                <span class="n">iargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                                <span class="n">increment</span> <span class="o">=</span> <span class="n">increment</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">iargs</span><span class="p">)]</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">increment</span><span class="o">.</span><span class="n">is_Matrix</span><span class="p">:</span>
+                        <span class="n">increment</span> <span class="o">=</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">(</span><span class="n">increment</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">+</span> <span class="n">increment</span>
+                <span class="n">lhs_order</span> <span class="o">+=</span> <span class="n">ndim</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inversion</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span><span class="p">:</span>
+                <span class="n">blocks_extent</span> <span class="o">=</span> <span class="p">[(</span><span class="n">be</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">be</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">be</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields_layer_tensor_extent</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">lhs_mat_inverted</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">block_matrix_inverse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">blocks_extent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simplify_after_LHS_inversion</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">NonInvertibleMatrixError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">NonInvertibleMatrixError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The left-hand side of the layer </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s1"> is not invertible with the provided basis.&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_inverted</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="p">(</span><span class="n">ImmutableSparseNDimArray</span><span class="p">(</span><span class="n">symbolic_tensordot</span><span class="p">(</span><span class="n">lhs_mat_inverted</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                               <span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">b_subs</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">p_subs</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;LHS of layer </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s1"> has not been inverted. Its tensor hold the RHS tendencies alone.&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">ImmutableSparseNDimArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">b_subs</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">p_subs</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lhs_mat</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">b_subs</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">p_subs</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Layer.to_latex">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.layers.Layer.to_latex">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enclose_lhs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate the LaTeX strings representing the layer&#39;s equations mathematically.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        enclose_lhs: bool, optional</span>
+<span class="sd">            Whether to enclose the left-hand side term of the equations inside parenthesis.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_lhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the left-hand side latex string of the equations.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_rhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the right-hand side latex string of the equations.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `False`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list(str)</span>
+<span class="sd">            The LaTeX strings representing the layer&#39;s equations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">latex_string_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">equations</span><span class="p">:</span>
+            <span class="n">latex_string_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">enclose_lhs</span><span class="o">=</span><span class="n">enclose_lhs</span><span class="p">,</span>
+                                                 <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="n">drop_first_lhs_char</span><span class="p">,</span>
+                                                 <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="n">drop_first_rhs_char</span>
+                                                 <span class="p">)</span>
+                                     <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">latex_string_list</span></div>
+
+
+<div class="viewcode-block" id="Layer.show_latex">
+<a class="viewcode-back" href="../../../files/technical/bakery.html#layercake.bakery.layers.Layer.show_latex">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enclose_lhs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Show the LaTeX string representing the layer&#39;s equations mathematically rendered in a window.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        enclose_lhs: bool, optional</span>
+<span class="sd">            Whether to enclose the left-hand side term of the equations inside parenthesis.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_lhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the left-hand side latex string of the equations.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `True`.</span>
+<span class="sd">        drop_first_rhs_char: bool, optional</span>
+<span class="sd">            Whether to drop the first two character of the right-hand side latex string of the equations.</span>
+<span class="sd">            Useful to drop the sign in front of it.</span>
+<span class="sd">            Default to `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">latex_string_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">enclose_lhs</span><span class="o">=</span><span class="n">enclose_lhs</span><span class="p">,</span>
+                                          <span class="n">drop_first_lhs_char</span><span class="o">=</span><span class="n">drop_first_lhs_char</span><span class="p">,</span>
+                                          <span class="n">drop_first_rhs_char</span><span class="o">=</span><span class="n">drop_first_rhs_char</span>
+                                          <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_equations</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">latex_string_list</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_equations</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_equations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;$</span><span class="si">%s</span><span class="s1">$&#39;</span> <span class="o">%</span> <span class="n">s</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

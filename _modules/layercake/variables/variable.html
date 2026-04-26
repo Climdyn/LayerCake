@@ -1,0 +1,424 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layercake.variables.variable &mdash; LayerCake v0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=34cd777e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            LayerCake
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/general_information.html">General Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/tricks.html">Various tricks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../files/references.html">Code References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LayerCake</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">layercake.variables.variable</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for layercake.variables.variable</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Variable definition module</span>
+<span class="sd">    ==========================</span>
+
+<span class="sd">    Variables are objects with a name, a symbol and units. They represent any formal quantity in the models.</span>
+<span class="sd">    </span>
+<span class="sd">    Description of the classes</span>
+<span class="sd">    --------------------------</span>
+
+<span class="sd">    * :class:`Variable`: Abstract base class to define variables in the models.</span>
+<span class="sd">    * :class:`VariablesArray`: Base class to define array of variables in the models.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<div class="viewcode-block" id="Variable">
+<a class="viewcode-back" href="../../../files/technical/variables.html#layercake.variables.variable.Variable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Variable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class to define variable object in the models.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the variable.</span>
+<span class="sd">    symbol: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        A |Sympy| symbol to represent the variable in symbolic expressions.</span>
+<span class="sd">    units: str, optional</span>
+<span class="sd">        The units of the variable.</span>
+<span class="sd">        Should be specified by joining atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    latex: str, optional</span>
+<span class="sd">        Latex string representing the variable.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    dynamical: bool, optional</span>
+<span class="sd">        Whether the variable can vary over time.</span>
+<span class="sd">        Default to `False`.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the variable.</span>
+<span class="sd">    symbol: ~sympy.core.symbol.Symbol</span>
+<span class="sd">        Symbol of the variable.</span>
+<span class="sd">    units: str</span>
+<span class="sd">        The units of the variable specified as atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">    latex: str</span>
+<span class="sd">        Latex string representing the variable.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dynamical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">symbol</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+
+        <span class="k">if</span> <span class="n">latex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latex</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latex</span> <span class="o">=</span> <span class="n">latex</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamical</span> <span class="o">=</span> <span class="n">dynamical</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; (symbol: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,  units: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dynamical</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool: Whether the variable can vary over time.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamical</span></div>
+
+
+
+<div class="viewcode-block" id="VariablesArray">
+<a class="viewcode-back" href="../../../files/technical/variables.html#layercake.variables.variable.VariablesArray">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariablesArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class of model&#39;s array of variables values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    values: list(float) or ~numpy.ndarray(float)</span>
+<span class="sd">        Values of the variables array.</span>
+<span class="sd">    name: str</span>
+<span class="sd">        General name of the variables.</span>
+<span class="sd">    symbol: str or ~sympy.core.symbol.Symbol</span>
+<span class="sd">        A |Sympy| symbol to represent the variables in symbolic expressions.</span>
+<span class="sd">    units: str, optional</span>
+<span class="sd">        The units of the provided value. Used to compute the conversion between dimensional and nondimensional</span>
+<span class="sd">        value. Should be specified by joining atoms like `&#39;[unit^power]&#39;`, e.g &#39;`[m^2][s^-2][Pa^-2]&#39;`.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    latex: str, optional</span>
+<span class="sd">        A latex string representing the variables. Used in plots.</span>
+<span class="sd">        Empty by default.</span>
+<span class="sd">    dynamical: bool, optional</span>
+<span class="sd">        Whether the variables are varying over time. Default to `False`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">latex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dynamical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">symbol</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">))]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">))]</span>
+        <span class="k">if</span> <span class="n">latex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">latexes</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">latex</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">))]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">latexes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">new_arr</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new_arr</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="n">names</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">_symbols</span> <span class="o">=</span> <span class="n">symbols</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">_symbol</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">_latex</span> <span class="o">=</span> <span class="n">latex</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">_latexes</span> <span class="o">=</span> <span class="n">latexes</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">_units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">_dynamical</span> <span class="o">=</span> <span class="n">dynamical</span>
+
+        <span class="k">return</span> <span class="n">arr</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__array_finalize__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;_name&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symbols</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;_symbols&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symbol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;_symbol&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latex</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;_latex&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latexes</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;_latexes&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_units</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;_units&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamical</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;_dynamical&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~sympy.core.symbol.Symbol: Returns the general symbol of the variables in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbol</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;~numpy.ndarray(~sympy.core.symbol.Symbol): Returns the symbols of the variables in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbols</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str: Returns the general latex expression of the variables in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latex</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str: Returns the latex expressions of the variables in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latexes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str: Returns the general name of the variables in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str: Returns the names of the variables in the array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str: The units of the dimensional values.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_units</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dynamical</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool: Whether the variables can vary over time.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamical</span></div>
+
+
+    <span class="c1">#   Not sure these operations will be needed.</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __add__(self, other):</span>
+    <span class="c1">#     if isinstance(other, VariablesArray):</span>
+    <span class="c1">#         if other.shape == self.shape:  # Does not do broadcast</span>
+    <span class="c1">#             if self.units != other.units:</span>
+    <span class="c1">#                 raise ValueError(&#39;Cannot add the provided VariablesArray because their units are different.&#39;)</span>
+    <span class="c1">#             res = self + other</span>
+    <span class="c1">#             return VariablesArray(res,</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             return self + other</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return self + other</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __radd__(self, other):</span>
+    <span class="c1">#     return self.__add__(other)</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __sub__(self, other):</span>
+    <span class="c1">#     if isinstance(other, (Parameter, ScalingParameter, float, int)):</span>
+    <span class="c1">#         res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#         for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#             res[idx] = self[idx] - other</span>
+    <span class="c1">#         item = res[idx]</span>
+    <span class="c1">#         return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#     elif isinstance(other, ParametersArray):</span>
+    <span class="c1">#         if other.shape == self.shape:  # Does not do broadcast</span>
+    <span class="c1">#             res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#             for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#                 res[idx] = self[idx] - other[idx]</span>
+    <span class="c1">#             item = res[idx]</span>
+    <span class="c1">#             return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                    units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             return self - other</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return self - other</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __rsub__(self, other):</span>
+    <span class="c1">#     if isinstance(other, (Parameter, ScalingParameter, float, int)):</span>
+    <span class="c1">#         res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#         for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#             res[idx] = other - self[idx]</span>
+    <span class="c1">#         item = res[idx]</span>
+    <span class="c1">#         return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#     elif isinstance(other, ParametersArray):</span>
+    <span class="c1">#         if other.shape == self.shape:  # Does not do broadcast</span>
+    <span class="c1">#             res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#             for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#                 res[idx] = other - self[idx]</span>
+    <span class="c1">#             item = res[idx]</span>
+    <span class="c1">#             return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                    units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             return other - self</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return other - self</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __mul__(self, other):</span>
+    <span class="c1">#     if isinstance(other, (Parameter, ScalingParameter, float, int)):</span>
+    <span class="c1">#         res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#         for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#             res[idx] = self[idx] * other</span>
+    <span class="c1">#         item = res[idx]</span>
+    <span class="c1">#         return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#     elif isinstance(other, ParametersArray):</span>
+    <span class="c1">#         if other.shape == self.shape:  # Does not do broadcast</span>
+    <span class="c1">#             res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#             for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#                 res[idx] = self[idx] * other[idx]</span>
+    <span class="c1">#             item = res[idx]</span>
+    <span class="c1">#             return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                    units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             return self * other</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return self * other</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __rmul__(self, other):</span>
+    <span class="c1">#     return self.__mul__(other)</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __truediv__(self, other):</span>
+    <span class="c1">#     if isinstance(other, (Parameter, ScalingParameter, float, int)):</span>
+    <span class="c1">#         res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#         for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#             res[idx] = self[idx] / other</span>
+    <span class="c1">#         item = res[idx]</span>
+    <span class="c1">#         return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#     elif isinstance(other, ParametersArray):</span>
+    <span class="c1">#         if other.shape == self.shape:  # Does not do broadcast</span>
+    <span class="c1">#             res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#             for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#                 res[idx] = self[idx] / other[idx]</span>
+    <span class="c1">#             item = res[idx]</span>
+    <span class="c1">#             return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                    units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             return self / other</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return self / other</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __rtruediv__(self, other):</span>
+    <span class="c1">#     if isinstance(other, (Parameter, ScalingParameter, float, int)):</span>
+    <span class="c1">#         res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#         for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#             res[idx] = other / self[idx]</span>
+    <span class="c1">#         item = res[idx]</span>
+    <span class="c1">#         return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#     elif isinstance(other, ParametersArray):</span>
+    <span class="c1">#         if other.shape == self.shape:  # Does not do broadcast</span>
+    <span class="c1">#             res = np.empty(self.shape, dtype=object)</span>
+    <span class="c1">#             for idx in np.ndindex(self.shape):</span>
+    <span class="c1">#                 res[idx] = other / self[idx]</span>
+    <span class="c1">#             item = res[idx]</span>
+    <span class="c1">#             return ParametersArray(res, input_dimensional=item.return_dimensional, return_dimensional=item.return_dimensional,</span>
+    <span class="c1">#                                    units=item.units, scale_object=self._scale_object)</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             return other / self</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return other / self</span>
+    <span class="c1">#</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jonathan Demaeyer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
