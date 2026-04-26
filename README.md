@@ -4,6 +4,8 @@
 >
 > -- *Michael Gambon - Layer Cake (2004)*
 
+[![PyPI version](https://badge.fury.io/py/layercake-model.svg)](https://badge.fury.io/py/layercake-model)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/layercake-model.svg)](https://pypi.org/project/layercake-model/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19789922.svg)](https://doi.org/10.5281/zenodo.19789922)
 [![Documentation Status](https://img.shields.io/badge/docs-passing-green.svg)](https://climdyn.github.io/LayerCake/)
 
