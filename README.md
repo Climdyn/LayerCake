@@ -8,6 +8,7 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/layercake-model.svg)](https://pypi.org/project/layercake-model/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19789922.svg)](https://doi.org/10.5281/zenodo.19789922)
 [![Documentation Status](https://img.shields.io/badge/docs-passing-green.svg)](https://climdyn.github.io/LayerCake/)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 ## General Information
 
