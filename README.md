@@ -4,6 +4,7 @@
 >
 > -- *Michael Gambon - Layer Cake (2004)*
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19789922.svg)](https://doi.org/10.5281/zenodo.19789922)
 [![Documentation Status](https://img.shields.io/badge/docs-passing-green.svg)](https://climdyn.github.io/LayerCake/)
 
 ## General Information

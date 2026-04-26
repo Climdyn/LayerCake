@@ -37,7 +37,7 @@ LayerCake is licensed under the `BSD 3-Clause`_ license:
 
 .. code-block:: none
 
-   Copyright 2025 Jonathan Demaeyer
+   Copyright 2025-2026 Jonathan Demaeyer and Oisín Hamilton
 
    Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
