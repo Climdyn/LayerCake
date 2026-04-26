@@ -152,7 +152,7 @@ variables:
 
   If this environment variable is not defined, then LayerCake default behavior is to use threads.
 * The :code:`LAYERCAKE_PARALLEL_INTEGRATION` environment variable controls the Sympy symbolic integration parallelization. If set to :code:`none`, the parallelization will be deactivated.
-  Otherwise, it will parallelized using processes.
+  Otherwise, it will be parallelized using processes.
   If this environment variable is not defined, then LayerCake default behavior is to parallelize using processes.
 
 For example,
