@@ -229,7 +229,7 @@ We can finally define the non-dimensional fields :math:`\psi_1` and :math:`\psi_
 
 This object creation needs a name, a |Sympy| symbol, a basis of functions (:class:`~layercake.basis.base.SymbolicBasis` object)
 and an inner product definition object (:class:`~layercake.inner_products.definition.InnerProductDefinition` object). Optionally,
-one can provide units and a latex representation string (more on than below).
+one can also provide units and a latex representation string (more on than below).
 
 .. note::
 
@@ -259,7 +259,7 @@ We are now ready to specify the partial differential equations and build the cak
 --------------------
 
 To build a `cake`, one has to first specify equations (PDEs) with the :class:`~layercake.arithmetic.equation.Equation` object, then group them
-into layers with the :class:`~layercake.bakery.layer.Layer` object, and finally add the layers to a :class:`~layercake.bakery.cake.Cake` object.
+into layers with the :class:`~layercake.bakery.layers.Layer` object, and finally add the layers to a :class:`~layercake.bakery.cake.Cake` object.
 
 Let's first start by creating the equation for :math:`\psi_1`.
 
@@ -410,7 +410,7 @@ We can now move to the next step, which is to compose the layers and the cake of
 The remaining steps are quite easy, one needs to group the equations in subsets called layers, and then add each layer
 to the `cake`.
 
-To create a Layer, simply instantiate a :class:`~layercake.bakery.layer.Layer` object. You can optionally provide it a
+To create a Layer, simply instantiate a :class:`~layercake.bakery.layers.Layer` object. You can optionally provide it a
 name. Then you can start adding :class:`~layercake.arithmetic.equation.Equation` objects to it:
 
 .. code:: ipython3
@@ -455,7 +455,7 @@ will use |Matplotlib| to show the partial differential equations in the :math:`\
     :scale: 100%
     :align: center
 
-3.3 computing the tensorial representation of the model
+3.3 Computing the tensorial representation of the model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The cake regroups the layers, but also provide functions to create the tendencies of the model that the user is ultimately
@@ -586,7 +586,7 @@ where one can see the symbolic entries of the rank-3 tensor of the model for :ma
 them being a |Sympy| analytic expression.
 
 Now that we have computed the tensorial representation of the tendencies, we can move to the last remaining task:
-Actually obtaining the tendencies of the model.
+actually obtaining the tendencies of the model.
 
 
 3.4 Getting the tendencies of the model
