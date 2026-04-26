@@ -17,7 +17,7 @@ LayerCake has been designed with geophysics in mind, although it may be useful f
 About
 -----
 
-(c) 2025-2026 Jonathan Demaeyer and Oisín Hamilton
+© 2025-2026 Jonathan Demaeyer and Oisín Hamilton
 
 See `LICENSE.txt <https://github.com/Climdyn/LayerCake/blob/main/LICENSE.txt>`_ for license information.
 
@@ -28,7 +28,7 @@ With pip
 ~~~~~~~~
 
 The easiest way to install and run LayerCake is to use `pip <https://pypi.org/>`_.
-Type in a terminal
+Type in a terminal ::
 
     pip install layercake-model
 
