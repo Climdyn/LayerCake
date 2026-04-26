@@ -1,0 +1,61 @@
+
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+requires-python = ">=3.10"
+name = "layercake_model"
+version = "1.0.2-alpha"
+description = "A framework to design systems of partial differential equations (PDEs), and convert them to ordinary differential equations (ODEs) via Galerkin-type expansions. "
+readme = "README.md"
+authors = [
+    { name = "Jonathan Demaeyer", email = "jodemaey@meteo.be" },
+    { name = "Oisín Hamilton", email = "ush.hamilton@gmail.com" },
+]
+license = "BSD-3-Clause"
+license-files = [ "LICENSE.txt" ]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+#    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+
+]
+keywords = ["pde", "symbolic-computation", "ode-model"]
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "numba",
+    "scipy",
+    "sympy",
+    "sparse",
+    "pebble",
+]
+
+[project.urls]
+homepage = "https://github.com/Climdyn/LayerCake"
+documentation = "https://climdyn.github.io/LayerCake/"
+
+[tool.setuptools]
+packages = ["layercake",
+            "layercake.arithmetic",
+            "layercake.arithmetic.symbolic",
+            "layercake.arithmetic.terms",
+            "layercake.bakery",
+            "layercake.basis",
+            "layercake.formatters",
+            "layercake.inner_products",
+            "layercake.utils",
+            "layercake.variables",
+            ]

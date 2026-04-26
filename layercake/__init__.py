@@ -12,3 +12,5 @@ from .bakery.cake import Cake
 __all__ = ['Parameter', 'ParameterField', 'FunctionField', 'Field', 'Expression', 'SymbolicBasis', 'vorticity_advection', 'Jacobian',
            'OperatorTerm', 'ProductOfTerms', 'AdditionOfTerms', 'LinearTerm', 'ConstantTerm', 'Equation', 'Laplacian', 'D',
            'Layer', 'Cake']
+
+__version__ = '1.0.2a0'
