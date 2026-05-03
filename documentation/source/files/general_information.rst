@@ -40,7 +40,7 @@ Additionally, you can clone the repository ::
 
 and perform a test by running the script ::
 
-    python examples/atmospheric/barotropic_one_layer.py
+    python LayerCake/examples/atmospheric/barotropic_one_layer.py
 
 to see if everything runs smoothly (this should take less than 5 minutes).
 
@@ -95,7 +95,7 @@ LayerCake needs mainly:
 * `Numpy`_ for numeric support
 * `sparse`_ for sparse multidimensional arrays support
 * `Numba`_ for code acceleration
-* `Sympy`_ for symbolic manipulation of inner products
+* `Sympy`_ for symbolic computations
 
 Check the YAML file `environment.yml <https://raw.githubusercontent.com/Climdyn/LayerCake/main/environment.yml>`_ for the dependencies.
 
