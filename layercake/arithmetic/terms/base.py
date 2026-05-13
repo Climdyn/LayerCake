@@ -644,7 +644,7 @@ class OperationOnTerms(ArithmeticTerms):
     @property
     def terms(self):
         """list(ArithmeticTerms): List of the terms on which the operation acts."""
-        return self._terms
+        return list(self._terms)
 
     @property
     def parameters(self):
@@ -891,3 +891,9 @@ class OperationOnTerms(ArithmeticTerms):
         basis_list = self._create_inner_products_basis_list(basis)
         self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
         self.inner_products = self.sign * self.inner_products
+
+    def __neg__(self):
+        neg = super().__neg__()
+        for term, sterm in zip(neg.terms, self.terms):
+            term.field = sterm.field
+        return neg
