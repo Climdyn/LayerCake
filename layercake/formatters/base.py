@@ -27,6 +27,9 @@ class EquationFormatter(ABC):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the target language.
+    split_lines: bool, optional
+        Split the lines if needed, using the `splitter` static function.
+        Default to `False`.
 
     Attributes
     ----------
@@ -35,12 +38,15 @@ class EquationFormatter(ABC):
         Sympy symbolic output strings to the target language.
     index_offset: int
         Number that accesses the first element in an array. Defaults to 0.
+    split_lines: bool
+        If `True`, split the lines if needed, using the `splitter` static function.
     """
 
-    def __init__(self, lang_translation=None):
+    def __init__(self, lang_translation=None, split_lines=False):
 
         self.lang_translation = dict()
         self.index_offset = 0
+        self.split_lines = split_lines
 
         if lang_translation is not None:
             self.lang_translation.update(lang_translation)
@@ -53,12 +59,12 @@ class EquationFormatter(ABC):
         ----------
         tensor: ~sympy.tensor.array.ImmutableSparseNDimArray
             Symbolic tendencies terms tensor to convert.
-        variable: str
+        variable: str, optional
             Name of the state variable to use for the output equations strings.
             Default to `'U'`.
-        tendencies: str
+        tendencies: str, optional
             Name of the tendencies variable to use for the output equations strings.
-            Default to `'F`.
+            Default to `'F'`.
         """
         if not isinstance(tensor, ImmutableSparseNDimArray):
             raise ValueError('Only symbolic tensor can be converted to symbolic equations.')
@@ -85,10 +91,13 @@ class EquationFormatter(ABC):
             for code, new_code in self.lang_translation.items():
                 equations_list[i] = equations_list[i].replace(code, new_code)
 
-        return equations_list[1:]
+        if self.split_lines:
+            return list(map(self.splitter, equations_list[1:]))
+        else:
+            return equations_list[1:]
 
     def _format_components(self, s, idx):
-        # Index offset included to allow for differnet language index bases
+        # Index offset included to allow for different language index bases
         return f'{s}{self.opening_character}{idx + self.index_offset - 1}{self.closing_character}'
 
     @property
@@ -105,6 +114,23 @@ class EquationFormatter(ABC):
         Must be defined in the subclasses."""
         pass
 
+    @staticmethod
+    def splitter(line, **kwargs):
+        """Function to split a line of code that is too long.
+
+        Parameters
+        ----------
+        line: str
+            Line to be split.
+        **kwargs: dict
+            Additional keyword arguments to be passed to the splitter function.
+
+        Returns
+        -------
+        str
+           The split line.
+        """
+        return line
 
 class JacobianEquationFormatter(EquationFormatter):
     """Base class for symbolic Jacobian equations formatting.
@@ -114,6 +140,9 @@ class JacobianEquationFormatter(EquationFormatter):
     lang_translation: dict(str)
         Language translation mapping dictionary, mapping replacements for converting
         Sympy symbolic output strings to the target language.
+    split_lines: bool, optional
+        Split the lines if needed, using the `splitter` static function.
+        Default to `False`.
 
     Attributes
     ----------
@@ -122,12 +151,14 @@ class JacobianEquationFormatter(EquationFormatter):
         Sympy symbolic output strings to the target language.
     index_offset: int
         Number that accesses the first element in an array. Defaults to 0.
+    split_lines: bool
+        If `True`, split the lines if needed, using the `splitter` static function.
     """
 
-    def __init__(self, lang_translation=None):
-        EquationFormatter.__init__(self, lang_translation=lang_translation)
+    def __init__(self, lang_translation=None, split_lines=False):
+        EquationFormatter.__init__(self, lang_translation=lang_translation, split_lines=split_lines)
 
-    def __call__(self, tensor, variable='U', tendencies='J'):
+    def __call__(self, tensor, variable='U', tendencies='J', split_lines=False):
         """Convert a model Jacobian symbolic tendencies terms tensor to a list of symbolic equations in
         string format.
 
@@ -140,7 +171,10 @@ class JacobianEquationFormatter(EquationFormatter):
             Default to `'U'`.
         tendencies: str
             Name of the tendencies variable to use for the output equations strings.
-            Default to `'F`.
+            Default to `'F'`.
+        split_lines: bool, optional
+            Split the lines if needed.
+            Default to `False`.
         """
         if not isinstance(tensor, ImmutableSparseNDimArray):
             raise ValueError('Only symbolic tensor can be converted to symbolic equations.')
@@ -180,4 +214,7 @@ class JacobianEquationFormatter(EquationFormatter):
 
                     equations_list.append(eq)
 
-        return equations_list
+        if self.split_lines:
+            return list(map(self.splitter, equations_list))
+        else:
+            return equations_list
