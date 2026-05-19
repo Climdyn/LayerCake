@@ -343,6 +343,10 @@ class ArithmeticTerms(ABC):
     def __neg__(self):
         neg = self.copy()
         neg.sign *= -1
+        if self.inner_products is not None:
+            neg.inner_products = - self.inner_products
+        if self.name:
+            neg.name = '- ' + self.name
         return neg
 
 
@@ -403,6 +407,11 @@ class SingleArithmeticTerm(ArithmeticTerms):
             self.inner_product_definition = inner_product_definition
         else:
             self.inner_product_definition = field.inner_product_definition
+
+    def __neg__(self):
+        neg = super().__neg__()
+        neg.field = self.field
+        return neg
 
     @property
     def terms(self):
@@ -635,7 +644,7 @@ class OperationOnTerms(ArithmeticTerms):
     @property
     def terms(self):
         """list(ArithmeticTerms): List of the terms on which the operation acts."""
-        return self._terms
+        return list(self._terms)
 
     @property
     def parameters(self):
@@ -882,3 +891,9 @@ class OperationOnTerms(ArithmeticTerms):
         basis_list = self._create_inner_products_basis_list(basis)
         self._compute_inner_products(*basis_list, numerical=numerical, timeout=timeout, num_threads=num_threads, permute=permute)
         self.inner_products = self.sign * self.inner_products
+
+    def __neg__(self):
+        neg = super().__neg__()
+        for term, sterm in zip(neg.terms, self.terms):
+            term.field = sterm.field
+        return neg

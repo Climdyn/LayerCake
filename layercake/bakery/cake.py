@@ -252,7 +252,7 @@ class Cake(object):
             if numerical:
                 tensor[args] = tensor[args] + layer.tensor.todense()[1:]
                 if not self._lhs_inversion_in_layer:
-                    lhs_mat[args[:2]] = lhs_mat[args[:1]] + layer._lhs_mat.todense()[1:]
+                    lhs_mat[args[:2]] = lhs_mat[args[:2]] + layer._lhs_mat.todense()[1:]
             else:
                 tensor[args] = tensor[args] + layer.tensor[1:]
                 if not self._lhs_inversion_in_layer:

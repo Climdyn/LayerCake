@@ -17,9 +17,9 @@ sys.path.insert(0, os.path.abspath('../..'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'LayerCake'
-copyright = '2025, Jonathan Demaeyer and Oisín Hamilton'
+copyright = '2025-2026, Jonathan Demaeyer and Oisín Hamilton'
 author = 'Jonathan Demaeyer and Oisín Hamilton'
-release = 'v1.0.2-alpha'
+release = 'v1.0.3-alpha'
 version = release
 
 # -- General configuration ---------------------------------------------------
