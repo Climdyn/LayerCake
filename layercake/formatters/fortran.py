@@ -126,5 +126,5 @@ def fortran_line_splitter(line, line_length=80):
     line_out.append(f'{line_chunks[0]}&')
     for chunk in line_chunks[1:-1]:
         line_out.append(f'\t&{chunk}&')
-    line_out.append(f'\t{line_chunks[-1]}')
+    line_out.append(f'\t&{line_chunks[-1]}')
     return "\n".join(line_out)
