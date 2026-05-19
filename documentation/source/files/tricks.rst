@@ -140,7 +140,7 @@ Free-threading
 Since Python 3.14, a `free-threaded version of Python is available <https://docs.python.org/3/howto/free-threading-python.html>`_.
 LayerCake has been tested for it and seems so far to run smoothly.
 
-This feature is particularly useful if you try to derive complicate, big models with a
+This feature is particularly useful if you try to derive complicated, big models with a
 large number of modes. LayerCake will then use multiple threads to perform |Sympy| symbolic evaluations,
 while the integration of the inner products will still be done using multiple processes.
 When being used in a free-threading environment, this is the default behavior, but this can be controlled by environment
@@ -162,11 +162,11 @@ For example,
     LAYERCAKE_PARALLEL_METHOD=processes python examples/atmospheric/barotropic_one_layer.py
 
 will launch the `barotropic one layer <https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/barotropic_one_layer.py>`_
-script with Sympy symbolic evaluation being done using processes.
+script with Sympy symbolic evaluations being done using processes.
 
 .. warning::
 
-    Launching the previous line with symbolic evaluation being done in processes with a free-threaded Python will result in
+    Launching the previous line with symbolic evaluations being done in processes with a free-threaded Python will result in
     a crash. Use the free-threaded Python only if :code:`LAYERCAKE_PARALLEL_METHOD` is set to :code:`threads`.
 
 Installing the free-threaded version of Python can be done using Anaconda, by typing:

@@ -8,6 +8,7 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/layercake-model.svg)](https://pypi.org/project/layercake-model/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19789922.svg)](https://doi.org/10.5281/zenodo.19789922)
 [![Documentation Status](https://img.shields.io/badge/docs-passing-green.svg)](https://climdyn.github.io/LayerCake/)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 ## General Information
 
@@ -47,7 +48,7 @@ Additionally, you can clone the repository
 
 and perform a test by running the script
 
-    python examples/atmospheric/barotropic_one_layer.py
+    python LayerCake/examples/atmospheric/barotropic_one_layer.py
 
 to see if everything runs smoothly (this should take less than 5 minutes).
 
@@ -97,7 +98,7 @@ LayerCake needs mainly:
 * [Numpy](https://numpy.org/) for numeric support
 * [sparse](https://sparse.pydata.org/) for sparse multidimensional arrays support
 * [Numba](https://numba.pydata.org/) for code acceleration
-* [Sympy](https://www.sympy.org/) for symbolic manipulation of inner products
+* [Sympy](https://www.sympy.org/) for symbolic computations 
 
 Check the YAML file [environment.yml](https://raw.githubusercontent.com/Climdyn/LayerCake/main/environment.yml) for the dependencies.
 
