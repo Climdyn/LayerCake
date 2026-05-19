@@ -12,6 +12,10 @@ This module contains the code related to the definition of basis of functions in
     :show-inheritance:
     :members:
 
+.. automodule:: layercake.basis.centered_planar_fourier
+    :show-inheritance:
+    :members:
+
 .. automodule:: layercake.basis.spherical_harmonics
     :show-inheritance:
     :members:
