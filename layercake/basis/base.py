@@ -227,18 +227,21 @@ if __name__ == "__main__":
     from sympy import symbols, sin, exp
     from layercake.variables.coordinate import Coordinate
     from layercake.variables.systems import CoordinateSystem
+    from layercake.variables.parameter import Parameter
 
     xs, ys = symbols('x y')  # x and y coordinates on the model's spatial domain
     x = Coordinate("x", xs, extent=[0., 2 * np.pi])
     y = Coordinate("y", ys, extent=[0., np.pi])
     coord_sys = CoordinateSystem([x, y])
-    basis = SymbolicBasis(coord_sys)
     al = symbols('al')  # aspect ratio and alpha coefficients
+    alp = Parameter(0.1, symbol=al)
     n = Symbol('n', positive=True)
+    np = Parameter(1.3, symbol=n)
+    basis = SymbolicBasis(coord_sys, [np, alp])
     for i in range(1, 3):
         for j in range(1, 3):
             basis.append(2 * exp(- al * xs) * sin(j * n * xs / 2) * sin(i * ys))
 
-    basis.substitutions.append(('n', 1.))
-    basis.substitutions.append(('al', 1.))
+    # basis.substitutions.append(('n', 1.))
+    # basis.substitutions.append(('al', 1.))
   
