@@ -176,7 +176,7 @@ class SymbolicBasis(Basis):
         """
 
         dfunc = list(map(lambda func: diff(func, symbol, order), self.functions))
-        dbasis = SymbolicBasis(self.coordinate_system)
+        dbasis = SymbolicBasis(self.coordinate_system, self.parameters)
         dbasis.functions = dfunc
         dbasis.substitutions = self.substitutions
 
