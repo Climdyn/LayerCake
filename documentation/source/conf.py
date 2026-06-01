@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'LayerCake'
 copyright = '2025-2026, Jonathan Demaeyer and Oisín Hamilton'
 author = 'Jonathan Demaeyer and Oisín Hamilton'
-release = 'v1.0.4-beta'
+release = 'v1.0.5-beta'
 version = release
 
 # -- General configuration ---------------------------------------------------

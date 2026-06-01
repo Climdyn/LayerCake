@@ -13,4 +13,4 @@ __all__ = ['Parameter', 'ParameterField', 'FunctionField', 'Field', 'Expression'
            'OperatorTerm', 'ProductOfTerms', 'AdditionOfTerms', 'LinearTerm', 'ConstantTerm', 'Equation', 'Laplacian', 'D',
            'Layer', 'Cake']
 
-__version__ = '1.0.4b0'
+__version__ = '1.0.5b0'
