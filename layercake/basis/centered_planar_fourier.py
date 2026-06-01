@@ -102,6 +102,7 @@ class PlanarChannelFourierBasis(SymbolicBasis):
         else:
             raise ValueError("Parameter 'n' (model aspect ratio) should be present in the provided parameters")
 
+        self.parameters = parameters
         aspect_ratio = float(param)
 
         if self.length is None:
