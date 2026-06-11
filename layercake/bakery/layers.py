@@ -63,6 +63,7 @@ class Layer(object):
         self._lhs_inverted = False
         self._lhs_mat = None
         self._simplify_after_LHS_inversion = True
+        self._matrix_inv = np.linalg.inv
 
     @property
     def _cake_first_index(self):
@@ -298,7 +299,7 @@ class Layer(object):
                                 self._lhs_mat[lhs_order:lhs_order + ndim, ofield_order:ofield_order + ondim] + lhs_term.inner_products.todense()
                 else:
                     try:
-                        lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = np.linalg.inv(eq.lhs_inner_products_addition.todense())
+                        lhs_mat_inverted[lhs_order:lhs_order + ndim, lhs_order:lhs_order + ndim] = self._matrix_inv(eq.lhs_inner_products_addition.todense())
                         self._lhs_inverted = True
                     except LinAlgError:
                         raise LinAlgError(f'The left-hand side of the equation {eq} is not invertible with the provided basis.')
@@ -345,7 +346,7 @@ class Layer(object):
                 lhs_order += ndim
             if self._lhs_inversion and not self._lhs_inverted:
                 try:
-                    lhs_mat_inverted[1:, 1:] = np.linalg.inv(self._lhs_mat.todense()[1:, 1:])
+                    lhs_mat_inverted[1:, 1:] = self._matrix_inv(self._lhs_mat.todense()[1:, 1:])
                     self._lhs_inverted = True
                 except LinAlgError:
                     raise LinAlgError(f'The left-hand side of the layer {self} is not invertible with the provided basis.')

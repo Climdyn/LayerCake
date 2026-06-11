@@ -55,6 +55,7 @@ class Cake(object):
         self.layers = list()
         self._lhs_inversion_in_layer = True
         self._simplify_after_LHS_inversion = True
+        self._matrix_inv = np.linalg.inv
 
     def add_layer(self, layer):
         """Add a layer object to the cake.
@@ -65,6 +66,7 @@ class Cake(object):
             Layer object to add to the cake.
         """
         layer._cake_order = len(self.layers)
+        layer._matrix_inv = self._matrix_inv
         self.layers.append(layer)
         layer._cake = self
         for equation in layer.equations:
@@ -262,7 +264,7 @@ class Cake(object):
             if not self._lhs_inversion_in_layer:
                 try:
                     lhs_mat_inverted = np.zeros((self.ndim + 1, self.ndim + 1))
-                    lhs_mat_inverted[1:, 1:] = np.linalg.inv(lhs_mat.todense()[1:, 1:])
+                    lhs_mat_inverted[1:, 1:] = self._matrix_inv(lhs_mat.todense()[1:, 1:])
                     tensor = sp.COO(np.tensordot(lhs_mat_inverted, tensor.to_coo(), 1))
                 except LinAlgError:
                     raise LinAlgError(f'The left-hand side of the cake is not invertible with the provided basis.')
