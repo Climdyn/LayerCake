@@ -561,7 +561,7 @@ class OperationOnTerms(ArithmeticTerms):
     .. math:: \\mathcal{T}_{j, k_{1,1}, \\ldots, k_{1,j_1}, \\ldots, k_{l,1}, \\ldots, k_{l,{j_l}}} = \\left\\langle \\phi_{j} , \\pm \\, \\bigwedge_{i=1}^l T_i\\left[\\left(\\eta^i_1\\right)_{k_{i,1}}, \\ldots, \\left(\\eta^i_{j_i}\\right)_{k_{i,j_i}}\\right] \\right\\rangle
 
     where the :math:`\\phi_j`'s are basis functions provided by the user, and the :math:`\\left(\\eta^i_j\\right)_k`'s are basis functions on which
-    the fields :math:`\\psi^i_j`'s are decomposed. :math:`\\langle \\, , \\rangle` is the inner provided by the user.
+    the fields :math:`\\psi^i_j`'s are decomposed. :math:`\\langle \\, , \\rangle` is the inner product provided by the user.
     The rank :math:`r` of this kind of term (and its tensor rank) is thus :math:`1+\\sum_{i=1}^l j_i`.
 
     Parameters

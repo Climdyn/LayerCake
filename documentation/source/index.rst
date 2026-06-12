@@ -31,7 +31,7 @@ Indices and tables
 About
 =====
 
-Please consult the LayerCake `code repository <http://www.github.com/jodemaey/LayerCake>`_ for updates.
+Please consult the LayerCake `code repository <http://www.github.com/Climdyn/LayerCake>`_ for updates.
 
 LayerCake is licensed under the `BSD 3-Clause`_ license:
 
