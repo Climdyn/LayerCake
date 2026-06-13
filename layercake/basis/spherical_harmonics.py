@@ -68,6 +68,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
         self._R = param.symbol
         self._map_mn = dict()
+        self._map_i = dict()
         coordinate_system = SphericalCoordinateSystem(param)
         SymbolicBasis.__init__(self, coordinate_system, parameters)
 
@@ -103,10 +104,12 @@ class SphericalHarmonicsBasis(SymbolicBasis):
 
                     if mode_eq is not None:
                         self.functions.append(mode_eq)
+                        idx = len(self.functions) - 1
                         if n not in self._map_mn:
                             self._map_mn[n] = dict()
                         if m not in self._map_mn[n]:
-                            self._map_mn[n][m] = len(self.functions) - 1
+                            self._map_mn[n][m] = idx
+                        self._map_i[idx] = (m, n)
 
         else:
             raise NotImplementedError("Only triangular ('T') truncation is implemented for the moment.")
