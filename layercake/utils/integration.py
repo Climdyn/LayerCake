@@ -13,15 +13,17 @@
 
 """
 
+import numpy as np
 from sympy.core.numbers import Zero
-from scipy.integrate import dblquad
+from scipy.integrate import dblquad, fixed_quad, simpson
 from sympy import lambdify
 from sympy.utilities.iterables import multiset_permutations
 
 small_number = 1.e-12
 
 
-def integration(args_list, substitutions, destination, permute=False, symbolic_int=False):
+def integration(args_list, substitutions, destination, permute=False, symbolic_int=False,
+                numerical_method='dblquad', **integration_kwargs):
     """Functions to integrate |Sympy| expressions, either symbolically or numerically.
 
     Parameters
@@ -46,6 +48,15 @@ def integration(args_list, substitutions, destination, permute=False, symbolic_i
     symbolic_int: bool, optional
         Force symbolic integration and do not substitute the substitutions at the end, making the output a list of |Sympy| expressions.
         Default to `False`.
+    numerical_method: str, optional
+        Numerical method to use to do the integration, can be `'dblquad'`, `'simpson'` or `'gauss'`.
+        Only valid if `symbolic_int`is set to False.
+        Default to `'dblquad'`.
+    integration_kwargs: dict, optional
+        Integration keyword arguments passed to the integration functions.
+        Only used if `symbolic_int`is set to False.
+        For `'simpson'`, the argument `'n'`indicate the number of points used to discretize the integrand (or set to
+        1000 if not specified).
 
     Returns
     -------
@@ -64,7 +75,7 @@ def integration(args_list, substitutions, destination, permute=False, symbolic_i
     if not symbolic_int:
         for args in args_list:
             new_args = tuple(list(args) + [substitutions])
-            res = numerical_integration(new_args)
+            res = numerical_integration(new_args, numerical_method=numerical_method, **integration_kwargs)
 
             if permute:
                 i = res[0][0]
@@ -131,7 +142,7 @@ def symbolic_integration(ls):
     return ls[0], res
 
 
-def numerical_integration(ls):
+def numerical_integration(ls, numerical_method='dblquad', **integration_kwargs):
     """Return the result of a numerical integration.
 
     Parameters
@@ -146,6 +157,14 @@ def numerical_integration(ls):
         * `substitutions`: List of 2-tuples containing symbolic substitutions to be made before numerically integrating.
           The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
 
+    numerical_method: str, optional
+        Numerical method to use to do the integration, can be `'dblquad'`, `'simpson'` or `'gauss'`.
+        Default to `'dblquad'`.
+    integration_kwargs: dict, optional
+        Integration keyword arguments passed to the integration functions.
+        For `'simpson'`, the argument `'n'`indicate the number of points used to discretize the integrand (or set to
+        1000 if not specified).
+
     Returns
     -------
     tuple(int):
@@ -157,7 +176,8 @@ def numerical_integration(ls):
     integrand = ls[1](*ls[2], integrand=True)
 
     num_integrand = integrand[0].subs(ls[3])
-    func = lambdify((integrand[1][0], integrand[2][0]), num_integrand, 'numpy')
+    func = lambdify((integrand[1][0], integrand[2][0]), num_integrand,
+                    'numpy', cse=True, docstring_limit=0)
 
     try:
         a = integrand[2][1].subs(ls[3])
@@ -192,9 +212,34 @@ def numerical_integration(ls):
     except:
         pass
 
-    res = dblquad(func, a, b, gfun, hfun)
+    if numerical_method == 'dblquad':
+        res = dblquad(func, a, b, gfun, hfun, **integration_kwargs)
 
-    if abs(res[0]) <= res[1]:
-        return ls[0], 0
+        if abs(res[0]) <= res[1]:
+            return ls[0], 0
+        else:
+            return ls[0], res[0]
+    elif numerical_method == 'gauss':
+        res = fixed_quad(lambda y: fixed_quad(lambda x: func(x, y), gfun, hfun, **integration_kwargs), a, b, **integration_kwargs)
+
+        if abs(res[0]) <= small_number:
+            return ls[0], 0
+        else:
+            return ls[0], res[0]
     else:
-        return ls[0], res[0]
+        if 'n' in integration_kwargs:
+            n = integration_kwargs.pop('n')
+        else:
+            n = 1000
+
+        X = np.linspace(gfun, hfun, n)
+        Y = np.linspace(a, b, n)
+        XX, YY = np.linspace(X, Y)
+
+        ff = func(XX, YY)
+        res = simpson(simpson(ff, X), Y)
+
+        if abs(res[0]) <= small_number:
+            return ls[0], 0
+        else:
+            return ls[0], res[0]
