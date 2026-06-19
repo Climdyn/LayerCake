@@ -20,10 +20,11 @@ from sympy import lambdify
 from sympy.utilities.iterables import multiset_permutations
 
 small_number = 1.e-12
+numerical_method = 'dblquad'
+integration_kwargs = dict()
 
 
-def integration(args_list, substitutions, destination, permute=False, symbolic_int=False,
-                numerical_method='dblquad', **integration_kwargs):
+def integration(args_list, substitutions, destination, permute=False, symbolic_int=False):
     """Functions to integrate |Sympy| expressions, either symbolically or numerically.
 
     Parameters
@@ -48,15 +49,6 @@ def integration(args_list, substitutions, destination, permute=False, symbolic_i
     symbolic_int: bool, optional
         Force symbolic integration and do not substitute the substitutions at the end, making the output a list of |Sympy| expressions.
         Default to `False`.
-    numerical_method: str, optional
-        Numerical method to use to do the integration, can be `'dblquad'`, `'simpson'` or `'gauss'`.
-        Only valid if `symbolic_int`is set to False.
-        Default to `'dblquad'`.
-    integration_kwargs: dict, optional
-        Integration keyword arguments passed to the integration functions.
-        Only used if `symbolic_int`is set to False.
-        For `'simpson'`, the argument `'n'`indicate the number of points used to discretize the integrand (or set to
-        1000 if not specified).
 
     Returns
     -------
@@ -142,7 +134,7 @@ def symbolic_integration(ls):
     return ls[0], res
 
 
-def numerical_integration(ls, numerical_method='dblquad', **integration_kwargs):
+def numerical_integration(ls):
     """Return the result of a numerical integration.
 
     Parameters
@@ -150,25 +142,17 @@ def numerical_integration(ls, numerical_method='dblquad', **integration_kwargs):
     ls: list or tuple
         A list or a tuple with the following arguments for the integration:
 
-        * `indices`: Tuple of integers labelling the integration.
+        * `indices`: Tuple of integers labeling the integration.
           Will be returned by the worker.
         * `integrals_definition`: A callable returning the integral(s) as a |Sympy| expression.
         * `integrals_arguments`: A tuple with the arguments to be provided to the `integrals_definition` callable.
         * `substitutions`: List of 2-tuples containing symbolic substitutions to be made before numerically integrating.
           The 2-tuples contain first a |Sympy|  expression and then the value to substitute.
 
-    numerical_method: str, optional
-        Numerical method to use to do the integration, can be `'dblquad'`, `'simpson'` or `'gauss'`.
-        Default to `'dblquad'`.
-    integration_kwargs: dict, optional
-        Integration keyword arguments passed to the integration functions.
-        For `'simpson'`, the argument `'n'`indicate the number of points used to discretize the integrand (or set to
-        1000 if not specified).
-
     Returns
     -------
     tuple(int):
-        The integers labelling the integration.
+        The integers labeling the integration.
     float:
         The outcome of the numerical integration.
 
@@ -220,26 +204,37 @@ def numerical_integration(ls, numerical_method='dblquad', **integration_kwargs):
         else:
             return ls[0], res[0]
     elif numerical_method == 'gauss':
-        res = fixed_quad(lambda y: fixed_quad(lambda x: func(x, y), gfun, hfun, **integration_kwargs), a, b, **integration_kwargs)
-
-        if abs(res[0]) <= small_number:
+        if num_integrand == 0:
             return ls[0], 0
         else:
-            return ls[0], res[0]
+            def integrand_y(y):
+                return fixed_quad(lambda x: func(x, y), float(gfun), float(hfun), **integration_kwargs)[0]
+            res = fixed_quad(integrand_y, float(a), float(b), **integration_kwargs)
+
+            if abs(res[0]) <= small_number:
+                return ls[0], 0
+            else:
+                return ls[0], res[0]
     else:
         if 'n' in integration_kwargs:
             n = integration_kwargs.pop('n')
         else:
             n = 1000
 
-        X = np.linspace(gfun, hfun, n)
-        Y = np.linspace(a, b, n)
-        XX, YY = np.linspace(X, Y)
+        X = np.linspace(float(gfun), float(hfun), n)
+        Y = np.linspace(float(a), float(b), n)
+        XX, YY = np.meshgrid(X, Y)
 
         ff = func(XX, YY)
-        res = simpson(simpson(ff, X), Y)
+        if isinstance(ff, (int, float)):
+            if ff == 0:
+                res = 0
+            else:
+                res = (hfun - gfun) * (b - a) * ff
+        else:
+            res = simpson(simpson(ff, X), Y)
 
-        if abs(res[0]) <= small_number:
+        if abs(res) <= small_number:
             return ls[0], 0
         else:
-            return ls[0], res[0]
+            return ls[0], res
