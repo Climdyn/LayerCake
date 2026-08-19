@@ -84,7 +84,7 @@ barotropic_equation.add_rhs_terms(advection_term)
 # adding an orographic term
 gamma = Parameter(0.2, symbol=symbols(u'γ'), latex=r'\gamma')
 hh = np.zeros(len(basis))
-hh[1] = 1.
+hh[1] = 0.5
 h = ParameterField('h', u'h', hh, basis, inner_products_definition)
 
 orographic_term = Jacobian(psi, h, basis.coordinate_system, sign=-1, prefactors=(gamma, gamma))
@@ -102,11 +102,10 @@ C_param = Parameter(0.1, symbol=symbols('C'))
 newtonian_cooling1 = OperatorTerm(psi, Laplacian, basis.coordinate_system, prefactor=C_param, sign=-1)
 
 psi_ast_array = np.zeros(len(basis))
-r = -0.771
-psi_ast_array[0] = 0.95
+r = -0.801
+psi_ast_array[0] = 0.95 * b_param
 psi_ast_array[3] = r * psi_ast_array[0]
 psi_ast = ParameterField('psi_ast', p+u'*', psi_ast_array, basis, inner_products_definition, latex=r'\psi^\ast')
-LinearTerm(psi_ast, inner_products_definition, prefactor=C_param)
 newtonian_cooling2 = OperatorTerm(psi_ast, Laplacian, basis.coordinate_system, prefactor=C_param)
 
 barotropic_equation.add_rhs_terms((newtonian_cooling1, newtonian_cooling2))
