@@ -82,17 +82,16 @@ barotropic_equation.add_rhs_term(beta_term)
 C_param = Parameter(0.00294, symbol=symbols('C'))  # corresponds roughly to a 27 days timescale
 newtonian_cooling1 = OperatorTerm(psi, Laplacian, basis.coordinate_system, prefactor=C_param, sign=-1)
 
-# roughly realistic forcing at 500hPa
-psi_ast_array = np.array([0.00537415,  0.00100627,  0.00158805, -0.00437707, -0.00563329,
-                          -0.00749909, -0.01298291, -0.02065268, -0.00633784, -0.00088284,
-                          0.01938229,  0.00521208,  0.01456594,  0.00077128, -0.00166069,
-                          -0.00638115,  0.00681739,  0.00526438, -0.01511177, -0.01481776,
-                          -0.01816274, -0.01217594, -0.0121209,  0.00287957])
+# somewhat exaggerated forcing (~10 times) to generate chaos in this T4 model
+psi_ast_array = np.array([ 0.00144388,  0.00092015, -0.00364928, -0.01180132, -0.02419153,
+       -0.0184391 , -0.02481095, -0.04143466, -0.01375496,  0.01036605,
+       -0.06866103, -0.00700027,  0.00255661,  0.00643457, -0.00858923,
+       -0.00973486,  0.01376331, -0.00086079, -0.02540955, -0.02291994,
+       -0.02918463, -0.02469974, -0.01380329,  0.00674556])
 
 
 psi_ast = ParameterField('psi_ast', p+u'*', psi_ast_array, basis, inner_products_definition, latex=r'\psi^\ast')
-newtonian_cooling2 = LinearTerm(psi_ast, inner_products_definition, prefactor=C_param)
-# newtonian_cooling2 = OperatorTerm(psi_ast, Laplacian, basis.coordinate_system, prefactor=C_param)
+newtonian_cooling2 = OperatorTerm(psi_ast, Laplacian, basis.coordinate_system, prefactor=C_param)
 
 barotropic_equation.add_rhs_terms((newtonian_cooling1, newtonian_cooling2))
 
