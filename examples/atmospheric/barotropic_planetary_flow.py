@@ -18,6 +18,16 @@ from layercake import *
 from layercake.basis import SphericalHarmonicsBasis
 from layercake.inner_products.definition import StandardSymbolicInnerProductDefinition
 
+##############################################################################################
+#
+# This script defines the barotropic equation over a rotating sphere
+# in numerical mode and then integrates (run) it, and plots the resulting trajectory.
+#
+# It is a very simplified, highly-truncated model (T4 truncation) for the 300hPa atmosphere.
+# This model can resolve planetary waves 1-4 and a broad zonal-mean jet structure,
+# but nothing smaller.
+#
+##############################################################################################
 
 # Defining the domain
 ######################
@@ -55,7 +65,7 @@ barotropic_equation = Equation(psi, lhs_terms=vorticity)
 advection_term = vorticity_advection(psi, psi, basis.coordinate_system, sign=-1)
 barotropic_equation.add_rhs_terms(advection_term)
 
-# adding an orographic term (sin theta * h)
+# adding an roughly realistic orographic term (sin theta * h)
 sin_th_h = np.array([-0.001711890606304873, 0.0022332703338084825,
                      0.001014260540193253, 0.002428461633157703,
                      0.0016877961736783316, 0.0015782594096663554,
