@@ -123,20 +123,21 @@ cake.add_layer(layer)
 # Computing the tendencies and integrating
 ###########################################
 
-# computing the tensor
-cake.compute_tensor(True, True)
+if __name__ == '__main__':
+    # computing the tensor
+    cake.compute_tensor(True, True)
 
-# computing the tendencies
-f, Df = cake.compute_tendencies()
+    # computing the tendencies
+    f, Df = cake.compute_tendencies()
 
-# integrating
-ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 1000.), ic)
-res = solve_ivp(f, (0., 1000.), res.y[:, -1])
+    # integrating
+    ic = np.random.rand(cake.ndim) * 0.1
+    res = solve_ivp(f, (0., 1000.), ic)
+    res = solve_ivp(f, (0., 1000.), res.y[:, -1])
 
-# plotting
-plt.figure()
-plt.plot(res.y.T)
-plt.figure()
-plt.plot(res.y[0], res.y[3])
-plt.show()
+    # plotting
+    plt.figure()
+    plt.plot(res.y.T)
+    plt.figure()
+    plt.plot(res.y[0], res.y[3])
+    plt.show()

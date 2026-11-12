@@ -1,6 +1,6 @@
 # LayerCake
 
-> “Welcome to the layer cake son.”
+> “Welcome to the layer cake...”
 >
 > -- *Michael Gambon - Layer Cake (2004)*
 
