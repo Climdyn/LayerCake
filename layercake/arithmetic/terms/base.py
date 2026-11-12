@@ -355,7 +355,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
     Holds the symbolic representation of the term and his decomposition on given function basis.
 
     More precisely, models a term in the partial differential equation as a linear functional :math:`\\pm \\, T[\\psi](u_1, u_2)`,
-    where :math:`\\psi` is the field solution of the equation, and the :math:`u_1, u_2` are the coordinates of the model.
+    where :math:`\\psi` is a given field, and the :math:`u_1, u_2` are the coordinates of the model.
     Upon decomposition on function basis, it can be represented as a tensor
 
     .. math:: \\mathcal{T}_{i_1, i_2} = \\left\\langle \\phi_{i_1} , \\pm \\, T[\\eta_{i_2}] \\right\\rangle
@@ -367,7 +367,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
     Parameters
     ----------
     field: ~field.Field or ~field.ParameterField
-        A field appearing in the partial differential equation.
+        The field on which the term is acting.
     inner_product_definition: InnerProductDefinition, optional
         Object defining the integral representation of the inner product that is used to compute the term representation on a given function basis.
         If not provided, it will use the inner product definition found in the `field` object.
@@ -384,7 +384,7 @@ class SingleArithmeticTerm(ArithmeticTerms):
     Attributes
     ----------
     field: ~field.Field or ~field.ParameterField
-        The field appearing in the partial differential equation.
+        The field on which the term is acting.
     name: str
         Name of the term. Must be defined in subclasses.
     sign: int

@@ -497,6 +497,11 @@ must still be computed.
 
 .. warning::
 
+    Since at least Python 3.12, in scripts, the line of code calling the :class:`~layercake.bakery.cake.Cake.compute_tensor` method (and the lines of code thereafter as well) must be guarded by
+    a :code:`if __name__ == "__main__":` statement, due to the new Python default mechanism to start processes. This is displayed in the code examples scripts.
+
+.. warning::
+
     Whether you select `numerical` or `symbolic` output, by far this is the most computationally intensive task performed by LayerCake.
     Therefore, even if the code is parallelized, depending on the model you are computing, expect this call to last a long time, between
     minutes and hours.
@@ -549,6 +554,11 @@ Alternatively, the tensor can be computed in `symbolic` mode:
     `numerical` ones. To optimize these integrations and reduce the computation time, one needs to carefully
     choose an `optimizer` for their :class:`~layercake.inner_products.definition.StandardSymbolicInnerProductDefinition`
     inner product definition. Some testing might be needed there to obtain the best solution.
+
+.. warning::
+
+    Since at least Python 3.12, in scripts, the line of code calling the :code:`compute_tensor` method (and the lines of code thereafter as well) must be guarded by
+    a :code:`if __name__ == "__main__":` statement, due to the new Python default mechanism to start processes. This is displayed in the code examples scripts.
 
 Again, once the tensor is computed, one can visualize it by calling the :class:`~layercake.bakery.cake.Cake.print_tensor` method:
 

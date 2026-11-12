@@ -34,7 +34,7 @@ class SphericalHarmonicsBasis(SymbolicBasis):
         Type of truncation to use.
         Default to `"T"` for a triangular truncature.
     exclude_constant_term: bool, optional
-        Whether the spherical harmonics corresponding to a constant should be discarded.
+        Whether the spherical harmonics corresponding to a constant field should be discarded.
         Default to `True`.
     use_num_factorial: bool, optional
         Use a numerical factorial instead of a symbolic one. Might speed up computations in certain cases.
