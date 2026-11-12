@@ -116,33 +116,35 @@ cake = Cake()
 cake.add_layer(layer)
 
 
-# computing the tensor
-######################
-cake.compute_tensor(True, True
-                    )
+if __name__ == '__main__':
 
-# computing the tendencies
-##########################
-f, Df = cake.compute_tendencies()
+    # computing the tensor
+    ######################
+    cake.compute_tensor(True, True
+                        )
 
-
-# integrating
-#############
-ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 20000.), ic, method='DOP853')
+    # computing the tendencies
+    ##########################
+    f, Df = cake.compute_tendencies()
 
 
-# plotting
-###########
+    # integrating
+    #############
+    ic = np.random.rand(cake.ndim) * 0.1
+    res = solve_ivp(f, (0., 20000.), ic, method='DOP853')
 
-# time in days
-time = res.t * T / (24 * 3600)
 
-# plotting the full time span
-plt.figure()
-plt.plot(time, res.y.T)
+    # plotting
+    ###########
 
-# plotting the last 100 time steps
-# plotting
-plt.plot(time[-100:], res.y.T[-100:])
-plt.show()
+    # time in days
+    time = res.t * T / (24 * 3600)
+
+    # plotting the full time span
+    plt.figure()
+    plt.plot(time, res.y.T)
+
+    # plotting the last 100 time steps
+    # plotting
+    plt.plot(time[-100:], res.y.T[-100:])
+    plt.show()

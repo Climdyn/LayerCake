@@ -182,19 +182,21 @@ cake.add_layer(layer2)
 #
 # --------------------------------
 
-# computing the tensor
-cake.compute_tensor(True, True)
+if __name__ == '__main__':
 
-# computing the tendencies
-f, Df = cake.compute_tendencies()
+    # computing the tensor
+    cake.compute_tensor(True, True)
 
-# integrating
-ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 20000.), ic, method='DOP853')
+    # computing the tendencies
+    f, Df = cake.compute_tendencies()
 
-ic = res.y[:, -1]
-res = solve_ivp(f, (0., 20000.), ic, method='DOP853')
+    # integrating
+    ic = np.random.rand(cake.ndim) * 0.1
+    res = solve_ivp(f, (0., 20000.), ic, method='DOP853')
 
-# plotting
-plt.plot(res.y.T)
-plt.show()
+    ic = res.y[:, -1]
+    res = solve_ivp(f, (0., 20000.), ic, method='DOP853')
+
+    # plotting
+    plt.plot(res.y.T)
+    plt.show()
