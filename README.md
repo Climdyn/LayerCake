@@ -104,7 +104,7 @@ Check the YAML file [environment.yml](https://raw.githubusercontent.com/Climdyn/
 
 ## Contributing
 
-LayerCake is in beta development phase, bug reports and tests of the features are welcome.
+Bug reports and tests of the features of LayerCake are welcome.
 Please simply raise an issue on [Github](https://github.com/Climdyn/LayerCake/issues).
 
 If you want to contribute actively to the development, please contact the main authors.
