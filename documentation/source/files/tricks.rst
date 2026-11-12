@@ -147,7 +147,7 @@ When being used in a free-threading environment, this is the default behavior, b
 variables:
 
 * The :code:`LAYERCAKE_PARALLEL_METHOD` environment variable defines how the Sympy symbolic evaluations are done. It can take two different values:
-    + :code:`threads`: the evaluations will be done using threads
+    + :code:`threads`: the evaluations will be done using threads.
     + :code:`processes`: the evaluations will be done using processes. In some complicate cases, it might lead to wrong answers or even crash. This mode is thus not recommended unless you know what you are doing.
 
   If this environment variable is not defined, then LayerCake default behavior is to use threads.
@@ -163,11 +163,6 @@ For example,
 
 will launch the `barotropic one layer <https://github.com/Climdyn/LayerCake/blob/main/examples/atmospheric/barotropic_one_layer.py>`_
 script with Sympy symbolic evaluations being done using processes.
-
-.. warning::
-
-    Launching the previous line with symbolic evaluations being done in processes with a free-threaded Python will result in
-    a crash. Use the free-threaded Python only if :code:`LAYERCAKE_PARALLEL_METHOD` is set to :code:`threads`.
 
 Installing the free-threaded version of Python can be done using Anaconda, by typing:
 
