@@ -356,11 +356,11 @@ class Cake(object):
         .. math:: \\dot{\\boldsymbol{x}} = \\boldsymbol{f}(\\boldsymbol{x})
 
         It returns also the linearized tendencies
-        :math:`\\boldsymbol{\\mathrm{J}} \\equiv \\boldsymbol{\\mathrm{D}f} = \\frac{\\partial \\boldsymbol{f}}{\\partial \\boldsymbol{x}}`
+        :math:`\\boldsymbol{\\mathrm{D}f} = \\frac{\\partial \\boldsymbol{f}}{\\partial \\boldsymbol{x}}`
         (Jacobian matrix).
 
         Depending on whether the tendencies tensor is symbolic or numerical, it will return either
-        `Numbafied <https://numba.pydata.org/>`_ callable for the functions :math:`\\boldsymbol{f}` and :math:`J`,
+        `Numba-accelerated <https://numba.pydata.org/>`_ callable for the functions :math:`\\boldsymbol{f}` and :math:`\\boldsymbol{\\mathrm{D}f}`,
         or list of strings defining each tendency in a computing language selected by the user.
 
         Parameters
