@@ -337,21 +337,23 @@ cake.add_layer(oceanic_layer)
 #
 # --------------------------------
 
-# computing the tensor
-cake.compute_tensor(True, True)
+if __name__ == '__main__':
 
-# computing the tendencies
-f, Df = cake.compute_tendencies()
+    # computing the tensor
+    cake.compute_tensor(True, True)
 
-# integrating
-ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 10000000.), ic)
+    # computing the tendencies
+    f, Df = cake.compute_tendencies()
 
-ic = res.y[:, -1]
-res = solve_ivp(f, (0., 1000000.), ic)
+    # integrating
+    ic = np.random.rand(cake.ndim) * 0.1
+    res = solve_ivp(f, (0., 10000000.), ic)
 
-# plotting
-plt.plot(res.y[21], res.y[29])
-plt.xlabel(r'$\psi_{{\rm o}, 2}$')
-plt.xlabel(r'$\delta T_{{\rm o}, 2}$')
-plt.show()
+    ic = res.y[:, -1]
+    res = solve_ivp(f, (0., 1000000.), ic)
+
+    # plotting
+    plt.plot(res.y[21], res.y[29])
+    plt.xlabel(r'$\psi_{{\rm o}, 2}$')
+    plt.xlabel(r'$\delta T_{{\rm o}, 2}$')
+    plt.show()

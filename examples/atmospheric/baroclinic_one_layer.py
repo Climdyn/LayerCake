@@ -235,22 +235,24 @@ cake.add_layer(layer)
 #
 # --------------------------------
 
-# computing the tensor
-cake.compute_tensor(True, True)
+if __name__ == '__main__':
 
-# computing the tendencies
-f, Df = cake.compute_tendencies()
+    # computing the tensor
+    cake.compute_tensor(True, True)
 
-# integrating
-ic = np.random.rand(cake.ndim) * 0.1
-res = solve_ivp(f, (0., 20000.), ic)
+    # computing the tendencies
+    f, Df = cake.compute_tendencies()
 
-ic = res.y[:, -1]
-res = solve_ivp(f, (0., 20000.), ic)
+    # integrating
+    ic = np.random.rand(cake.ndim) * 0.1
+    res = solve_ivp(f, (0., 20000.), ic)
 
-# plotting
-plt.plot(res.y[2], res.y[1])
-plt.xlabel(r'$\psi_3$')
-plt.ylabel(r'$\psi_2$')
+    ic = res.y[:, -1]
+    res = solve_ivp(f, (0., 20000.), ic)
 
-plt.show()
+    # plotting
+    plt.plot(res.y[2], res.y[1])
+    plt.xlabel(r'$\psi_3$')
+    plt.ylabel(r'$\psi_2$')
+
+    plt.show()
